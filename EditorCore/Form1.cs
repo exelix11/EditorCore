@@ -421,8 +421,9 @@ namespace EditorCore
             string name = "";
             InputDialog.Show("", "Enter a name for the object", ref name);
             if (name.Trim() == "") return;
-            var o = GameModule.NewObject(LoadedLevel.HighestID++);
-            o.Name = name;
+            var o = GameModule.NewObject();
+			o.ID_int = LoadedLevel.HighestID++;
+			o.Name = name;
             o.ModelView_Pos = render.GetPositionInView();
             AddObj(o, CurList);
             render.LookAt(o.ModelView_Pos);

@@ -31,7 +31,7 @@ namespace EditorCore.Interfaces
 		ILevel NewLevel(string file);
 		bool GetModelFile(string ObjName, string path);
 		IObjList CreateObjList(string name, IList<dynamic> baseList);
-		ILevelObj NewObject(int ID);
+		ILevelObj NewObject();
 		void OpenLevelFile(string name, Stream file);
 		string AddType(ILevel level);
 		void EditChildrenNode(ILevelObj obj);
