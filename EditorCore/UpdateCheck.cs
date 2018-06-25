@@ -13,6 +13,7 @@ namespace EditorCore
 
         public static async Task CheckForUpdates()
         {
+			return;
             var githubClient = new Octokit.GitHubClient(new Octokit.ProductHeaderValue("OdysseyEditor"));
             var ver = await githubClient.Repository.Release.GetAll("exelix11", "OdysseyEditor");
             if (ver.Count > ReleaseID)
@@ -24,6 +25,7 @@ namespace EditorCore
 
         public static void CheckForUpdatesAsync()
         {
+			return;
             Task.Run(async () => await CheckForUpdates());
         }
     }
