@@ -1,15 +1,16 @@
 # EditorCore
 This is a generic 3D level editor, it can be extended to support different games, right now it's only
 a proof of concept, it requires more developement to adapt to different game engines.
-The only projects needed are EditorCore and ModelViewerCore, the others are related to OdysseyExt.
+The only projects needed are EditorCore and ModelViewerCore, the others are related to the extensions.
 
-BfresLib,BnTxx,ByamlLib and SarcLib can be reused for other Switch games as they handle common file formats.
+BfresLib,BnTxx,ByamlExt and SarcExt can be reused for other Switch games as they handle common file formats.
 
 ## What's done
   - 3D level editor, with search, drag, raycast, and undo
   - Interfaces for level files and objects
   - Plugin structure to load different extensions at once (but only one GameExtension)
-  - Super mario odyssey plugin to open and edit super mario odyssey files.
+  - Super mario odyssey plugin to edit levels.
+  - Mario Kart 8 Deluxe plugin to edit courses.
 
 ## What's missing
   - A native/GPU-accelerated 3D renderer, the current one uses WPF and is kinda laggy
