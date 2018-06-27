@@ -12,6 +12,7 @@ namespace EditorCore.Interfaces
 	public interface IGameModule
 	{
 		string ModuleName {get;}
+		string ModelsFolder { get; }
 
 		Tuple<Type, Type>[] GetClassConverters { get; }
 

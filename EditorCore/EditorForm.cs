@@ -16,6 +16,7 @@ using System.IO.Compression;
 using EditorCore.EditorFroms;
 using System.Diagnostics;
 using EditorCore.Interfaces;
+using ExtensionMethods;
 
 namespace EditorCore
 {
@@ -37,12 +38,8 @@ namespace EditorCore
 			}
 		}
 		
-#if RELEASE
-        public static string GameFolder = "";
-#else
-		public static string GameFolder = ""; //Set the correct path on your pc
-#endif
-        public const string ModelsFolder = "ModelsMK8";
+        public string GameFolder = "";
+        string ModelsFolder = null;
 
         public RendererControl render  = new RendererControl();
 
@@ -119,7 +116,6 @@ namespace EditorCore
 			render.CamMode = Properties.Settings.Default.CameraMode == 0 ? HelixToolkit.Wpf.CameraMode.Inspect : HelixToolkit.Wpf.CameraMode.WalkAround;
 			render.ZoomSensitivity = Properties.Settings.Default.ZoomSen;
 			render.RotationSensitivity = Properties.Settings.Default.RotSen;
-			GameFolder = Properties.Settings.Default.GamePath;
 
 #if DEBUG
 			if (Debugger.IsAttached) this.Text += " - Debugger.IsAttached";
@@ -158,6 +154,10 @@ namespace EditorCore
 			if (GameModule == null) return;
 
 			GameModule.InitModule(this);
+			ModelsFolder = GameModule.ModelsFolder;
+			Properties.Settings.Default.Add<string>($"{GameModule.ModuleName}_GamePath","");
+			GameFolder = (string)Properties.Settings.Default[$"{GameModule.ModuleName}_GamePath"];
+
 			IsAddListSupported = GameModule.IsAddListSupported;
 			IsPropertyEditingSupported = GameModule.IsPropertyEditingSupported;
 			PropertyGridTypes.CustomClassConverter.Clear();
@@ -579,13 +579,13 @@ namespace EditorCore
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
 #if DEBUG
-            saveAsSZSToolStripMenuItem_Click(sender, e); //Let's not risk modifing our precious dump
+			saveAsToolStripMenuItem_Click(sender, e); //Let's not risk modifing our precious dump
 #else
             File.WriteAllBytes(LoadedLevel.FilePath, LoadedLevel.SaveSzs());
 #endif
         }
 
-        private void saveAsSZSToolStripMenuItem_Click(object sender, EventArgs e)
+		private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (LoadedLevel == null) return;
             SaveFileDialog sav = new SaveFileDialog();
@@ -611,7 +611,7 @@ namespace EditorCore
             {
                 GameFolder = dlg.SelectedPath;
                 if (!GameFolder.EndsWith("\\")) GameFolder += "\\";
-                Properties.Settings.Default.GamePath = GameFolder;
+				Properties.Settings.Default[$"{GameModule.ModuleName}_GamePath"] = GameFolder;
                 Properties.Settings.Default.Save();
                 gamePathToolStripItem.Text = "Game path: " + GameFolder;
 				GameModule.FormLoaded();
@@ -1029,6 +1029,6 @@ namespace EditorCore
                 new Settings(render).ShowDialog();
                 this.Focus();
             }
-        }		
+        }
 	}
 }

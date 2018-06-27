@@ -55,8 +55,8 @@ namespace MK8DExt
 			return;
 		}
 
-		string ModelsFolder => EditorForm.ModelsFolder;
-		public string GameFolder => EditorForm.GameFolder;
+		public string ModelsFolder => "MK8Models";
+		string GameFolder => ViewForm.GameFolder;
 		public void FormLoaded()
 		{
 			if (!Directory.Exists(ModelsFolder))

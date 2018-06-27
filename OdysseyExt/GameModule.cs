@@ -34,7 +34,10 @@ namespace OdysseyExt
 		public string[] AutoHideList => new string[] { "AreaList", "SkyList" };
 
 		public EditorForm ViewForm { get; set; } = null;
-		public string GameFolder => EditorForm.GameFolder;
+		public string GameFolder => ViewForm.GameFolder;
+
+		public string ModelsFolder => "OdysseyModels";
+
 		public bool GetModelFile(string ObjName, string path) => BfresConverter.Convert(BfresFromSzs(ObjName), path);
 
 		public void InitModule(EditorForm currentView)
@@ -102,8 +105,6 @@ namespace OdysseyExt
 				new EditorFroms.LinksEditor(obj[LevelObj.N_Links]).ShowDialog();
 			}
 		}
-
-		string ModelsFolder => EditorForm.ModelsFolder;
 
 		public void FormLoaded()
 		{
