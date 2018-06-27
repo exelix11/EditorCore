@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel;
 using Syroot.Maths;
 
 namespace Syroot.NintenTools.Byaml
@@ -24,18 +27,20 @@ namespace Syroot.NintenTools.Byaml
         {
             Normal = new Vector3F(0, 1, 0);
         }
-        
-        // ---- PROPERTIES ---------------------------------------------------------------------------------------------
 
-        /// <summary>
-        /// Gets or sets the location.
-        /// </summary>
-        public Vector3F Position { get; set; }
+		// ---- PROPERTIES ---------------------------------------------------------------------------------------------
 
-        /// <summary>
-        /// Gets or sets the normal.
-        /// </summary>
-        public Vector3F Normal { get; set; }
+		/// <summary>
+		/// Gets or sets the location.
+		/// </summary>
+		[TypeConverter(typeof(Vector3FConverter))]
+		public Vector3F Position { get; set; }
+
+		/// <summary>
+		/// Gets or sets the normal.
+		/// </summary>
+		[TypeConverter(typeof(Vector3FConverter))]
+		public Vector3F Normal { get; set; }
 
         /// <summary>
         /// Gets or sets an unknown value.
@@ -54,5 +59,34 @@ namespace Syroot.NintenTools.Byaml
         {
             return Position == other.Position && Normal == other.Normal && Unknown == other.Unknown;
         }
-    }
+
+		public override string ToString()
+		{
+			return $"ByamlPathPoint Pos:{Position} Norm:{Normal} Unk:{Unknown}";
+		}
+
+		class Vector3FConverter : System.ComponentModel.TypeConverter
+		{
+			public override bool CanConvertFrom(System.ComponentModel.ITypeDescriptorContext context, Type sourceType)
+			{
+				return sourceType == typeof(string);
+			}
+
+			public override object ConvertFrom(System.ComponentModel.ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+			{
+				Vector3F res;
+				string[] tokens = ((string)value).Split(';');
+				res.X = Single.Parse(tokens[0]);
+				res.Y = Single.Parse(tokens[1]);
+				res.Z = Single.Parse(tokens[2]);
+				return res;
+			}
+
+			public override object ConvertTo(System.ComponentModel.ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+			{
+				Vector3F val = (Vector3F)value;
+				return $"{val.X};{val.Y};{val.Z}";
+			}
+		}
+	}
 }

@@ -20,8 +20,9 @@ namespace SARCExt
 		public IMenuExtension MenuExt => _menuExt;
 
 		public IClipboardExtension ClipboardExt => null;
-		
-		public IGameSpecificModule GameModule => null;
+
+		public bool HasGameModule => false;
+		public IGameModule GameModule => null;
 	}
 
 	class MenuExt : IMenuExtension
@@ -48,7 +49,8 @@ namespace SARCExt
 			openFile.Filter = "every file | *.*";
 			if (openFile.ShowDialog() != DialogResult.OK) return;
 			System.IO.File.WriteAllBytes( openFile.FileName + ".yaz0",
-				EveryFileExplorer.YAZ0.Compress(System.IO.File.ReadAllBytes(openFile.FileName)));
+				EveryFileExplorer.YAZ0.Compress(openFile.FileName));
+			GC.Collect();
 		}
 
 		void Decompress(object sender, EventArgs e)
@@ -57,7 +59,8 @@ namespace SARCExt
 			openFile.Filter = "every file | *.*";
 			if (openFile.ShowDialog() != DialogResult.OK) return;
 			System.IO.File.WriteAllBytes(openFile.FileName + ".bin",
-				EveryFileExplorer.YAZ0.Compress(System.IO.File.ReadAllBytes(openFile.FileName)));
+				EveryFileExplorer.YAZ0.Decompress(openFile.FileName));
+			GC.Collect();
 		}
 
 	}

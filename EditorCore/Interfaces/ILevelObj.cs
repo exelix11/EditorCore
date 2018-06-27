@@ -16,6 +16,9 @@ namespace EditorCore.Interfaces
 
 	public interface ILevelObj : ICloneable
 	{
+		[Browsable(false)]
+		bool CanDrag { get; set; }
+
 		Dictionary<string, dynamic> Prop { get; set; }
 
 		dynamic this[string name] { get; set; }

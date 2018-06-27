@@ -24,9 +24,10 @@ namespace BfresLib
             BFRES s = new BFRES();
             s.Read(bfres);
             Export(outPath, s);
+			bool res = s.models.Count != 0;
+			s = null;
             GC.Collect();
-            if (s.models.Count == 0) return false;
-            return true;
+			return res;
         }
 
         public static bool GetTextures(byte[] bfres, string Folder)
@@ -35,9 +36,10 @@ namespace BfresLib
             BFRES s = new BFRES();
             s.Read(bfres);
             ExportTextures(s, Folder);
-            GC.Collect();
-            if (s.textures.Count == 0) return false;
-            return true;
+			bool res = s.models.Count != 0;
+			s = null;
+			GC.Collect();
+			return res;
         }
 
         //OBJ

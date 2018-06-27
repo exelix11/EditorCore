@@ -19,6 +19,9 @@ namespace OdysseyExt
 {
     public class LevelObj : ILevelObj
     {
+		[Browsable(false)]
+		public bool CanDrag { get; set; } = true; //if the model is static and doesn't appear in the list (mk8 courses)
+		
         public const string N_Translate = "Translate";
         public const string N_Rotate = "Rotate";
         public const string N_Scale = "Scale";

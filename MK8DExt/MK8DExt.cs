@@ -4,30 +4,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 
-namespace OdysseyExt
+namespace MK8DExt
 {
-	class OdysseyExt : ExtensionManifest
+	class MK8DExt : ExtensionManifest
 	{
-		public string ModuleName => "OdysseyEditor";
+		public string ModuleName => "MK8DExt";
 		public string Author => "Exelix11";
-		public string ThanksTo => "KillzXGaming for the C# BFRES loader\r\ngdkchan for Bn" +
-								  "Txx\r\nEveryone from masterf0x/RedCarpet";
+		public string ThanksTo => "KillzXGaming for the C# BFRES loader\r\ngdkchan for Bntxx";
 
 		public Version TargetVersion => new Version(1, 0, 0, 0);
-		
+
 		public IMenuExtension MenuExt => null;
 
 		public IClipboardExtension ClipboardExt => null;
 
 		public bool HasGameModule => true;
-		OdysseyModule _module = null;
+		MK8DModule _module = null;
 		public IGameModule GameModule
 		{
 			get
 			{
-				if (_module == null) _module = new OdysseyModule();
+				if (_module == null) _module = new MK8DModule();
 				return _module;
 			}
 		}

@@ -342,7 +342,7 @@ namespace ModelViewer
                 BoundingBoxVisual3D box = new BoundingBoxVisual3D();
                 selectionBoxes.Add(o,box);
                 box.BoundingBox = ((ModelVisual3D)Models[o]).FindBounds(Transform3D.Identity);
-                box.Diameter = 10;
+                box.Diameter = box.BoundingBox.SizeX / 20;
                 ModelViewer.Children.Add(selectionBoxes[o]);
             }
             ModelView.UpdateLayout();

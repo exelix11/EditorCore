@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // Le informazioni generali relative a un assembly sono controllate dal seguente 
 // set di attributi. Modificare i valori di questi attributi per modificare le informazioni
 // associate a un assembly.
-[assembly: AssemblyTitle("ByamlExt")]
+[assembly: AssemblyTitle("MK8DExt")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("ByamlExt")]
+[assembly: AssemblyProduct("MK8DExt")]
 [assembly: AssemblyCopyright("Copyright ©  2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // Se il progetto viene esposto a COM, il GUID seguente verrà utilizzato come ID della libreria dei tipi
-[assembly: Guid("6d1801b8-7b24-49d6-83a1-e21ccc280d8e")]
+[assembly: Guid("b1b0eafa-b9cf-4272-83a8-6ccd1b346d3e")]
 
 // Le informazioni sulla versione di un assembly sono costituite dai seguenti quattro valori:
 //

@@ -1,4 +1,5 @@
 ﻿using BfresLib;
+using ByamlExt;
 using EditorCore;
 using EditorCore.EditorFroms;
 using EditorCore.Interfaces;
@@ -16,7 +17,7 @@ using System.Windows.Forms;
 
 namespace OdysseyExt
 {
-	public class OdysseyModule : IGameSpecificModule
+	public class OdysseyModule : IGameModule
 	{
 		public string ModuleName => "Odyssey level";
 
@@ -76,7 +77,7 @@ namespace OdysseyExt
 			new ByamlViewer(byml, file).Show();
 		}
 
-		public string AddType(ILevel level)
+		public string AddObjList(ILevel level)
 		{
 			var f = new EditorFroms.AddObjList();
 			f.ShowDialog();

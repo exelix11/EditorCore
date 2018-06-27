@@ -11,9 +11,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Syroot.BinaryData;
+using EditorCore;
 using EditorCore.EditorFroms;
 
-namespace EditorCore
+namespace ByamlExt
 {
     public partial class ByamlViewer : Form
     {
@@ -33,6 +34,10 @@ namespace EditorCore
 			else if (byml is List<dynamic>)
 			{
 				parseArrayNode(byml, treeView1.Nodes);
+			}
+			else if (byml is List<ByamlPathPoint>)
+			{
+
 			}
 			else throw new Exception($"Unsupported root node type {by.GetType()}");
         }
@@ -84,14 +89,31 @@ namespace EditorCore
                     current.Text += " : <Array>";
                     current.Tag = ((IList<dynamic>)node[k]).ToList();
                     current.Nodes.Add("✯✯dummy✯✯");
-                }
-                else
+				}
+				else if (node[k] is IList<ByamlPathPoint>)
+				{
+					current.Text += " : <PathPointArray>";
+					current.Tag = ((IList<ByamlPathPoint>)node[k]).ToList();
+					parsePathPointArray(node[k], current.Nodes);
+				}
+				else
                 {
                     current.Text = current.Text + " : " + (node[k] == null  ? "<NULL>" : node[k].ToString());
 					if (node[k] != null) current.Tag = new EditableNode(node,k);
 				}
             }
         }
+
+		void parsePathPointArray(IList<ByamlPathPoint> list, TreeNodeCollection addto)
+		{
+			int index = 0;
+			foreach (var k in list)
+			{
+				index++;
+				var n = addto.Add(k == null ? "<NULL>" : k.ToString());
+				if (k != null) n.Tag = new EditableNode(list, index);
+			}
+		}
 
         void parseArrayNode(IList<dynamic> list, TreeNodeCollection addto)
         {
@@ -110,8 +132,14 @@ namespace EditorCore
                     TreeNode current = addto.Add("<Array>");
                     current.Tag = ((IList<dynamic>)k).ToList();
                     current.Nodes.Add("✯✯dummy✯✯");
-                }
-                else
+				}
+				else if (k is IList<ByamlPathPoint>)
+				{
+					TreeNode current = addto.Add("<PathPointArray>");
+					current.Tag = ((IList<ByamlPathPoint>)k).ToList();
+					parsePathPointArray(k, current.Nodes);
+				}
+				else
                 {
 					var n = addto.Add(k == null ? "<NULL>" : k.ToString());
 					if (k != null) n.Tag = new EditableNode(list, index);
@@ -173,7 +201,7 @@ namespace EditorCore
 
         public static void OpenByml(string Filename)
         {
-            var byml = ByamlFile.Load(Filename);
+            var byml = ByamlFile.Load(Filename,true);
             new ByamlViewer(byml).Show();
         }
 
@@ -183,7 +211,7 @@ namespace EditorCore
             sav.Filter = "byml file | *.byml";
             if (sav.ShowDialog() == DialogResult.OK)
             {
-                ByamlFile.Save(sav.FileName, byml, false, byteOrder);
+                ByamlFile.Save(sav.FileName, byml, true, byteOrder);
             }
         }
 
@@ -191,11 +219,19 @@ namespace EditorCore
 		{
 			var node = treeView1.SelectedNode.Tag as EditableNode;
 			if (node == null) return;
-			string value = node.Get().ToString();
-			var dRes = InputDialog.Show("Enter value", $"Enter new value for the node, the value must be of type {node.type}", ref value);
-			if (dRes != DialogResult.OK) return;
-			if (value.Trim() == "") return;
-			node.Set(ByamlTypeHelper.ConvertValue(node.type,value));
+
+			if (node.Get() is ByamlPathPoint)
+			{
+				new BymlPathPointEditor(node.Get()).ShowDialog(); //ByamlPathPoint is a reference type
+			}
+			else
+			{
+				string value = node.Get().ToString();
+				var dRes = InputDialog.Show("Enter value", $"Enter new value for the node, the value must be of type {node.type}", ref value);
+				if (dRes != DialogResult.OK) return;
+				if (value.Trim() == "") return;
+				node.Set(ByamlTypeHelper.ConvertValue(node.type, value));
+			}
 			treeView1.SelectedNode.Text = node.GetTreeViewString();
 		}
 
@@ -278,7 +314,7 @@ namespace EditorCore
 		{
 			saveStream.Position = 0;
 			saveStream.SetLength(0);
-			ByamlFile.Save(saveStream, byml, false, byteOrder);
+			ByamlFile.Save(saveStream, byml, true, byteOrder);
 		}
 	}
 }

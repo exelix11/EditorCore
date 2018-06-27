@@ -1,4 +1,5 @@
-﻿using EditorCore;
+﻿using ByamlExt;
+using EditorCore;
 using EditorCore.Interfaces;
 using EveryFileExplorer;
 using SARCExt;
@@ -125,7 +126,7 @@ namespace OdysseyExt
 
         public void OpenBymlViewer()
         {
-            EditorCore.ByamlViewer v = new EditorCore.ByamlViewer(LoadedLevelData);
+            ByamlViewer v = new ByamlViewer(LoadedLevelData);
             v.Show();
         }
 
@@ -166,28 +167,28 @@ namespace OdysseyExt
 
         public bool HasList(string name) { return objs.ContainsKey(name); }
 		
-        public SearchResult FindObjById(string ID)
-        {
-            foreach (string k in objs.Keys)
-            {
-                for (int i = 0; i < objs[k].Count; i++)
-                {
-                    if (objs[k][i].ID == ID)
-                        return new SearchResult
-                        {
-                            obj = objs[k][i],
-                            Index = i,
-                            ListName = k
-                        };
-                }
-            }
-            return new SearchResult
-            {
-                obj = null,
-                Index = -1,
-                ListName = ""
-            };
-        }
+        //public SearchResult FindObjById(string ID)
+        //{
+        //    foreach (string k in objs.Keys)
+        //    {
+        //        for (int i = 0; i < objs[k].Count; i++)
+        //        {
+        //            if (objs[k][i].ID == ID)
+        //                return new SearchResult
+        //                {
+        //                    obj = objs[k][i],
+        //                    Index = i,
+        //                    ListName = k
+        //                };
+        //        }
+        //    }
+        //    return new SearchResult
+        //    {
+        //        obj = null,
+        //        Index = -1,
+        //        ListName = ""
+        //    };
+        //}
 
         public IObjList FindListByObj(ILevelObj o)
         {

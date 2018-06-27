@@ -25,7 +25,6 @@ namespace EditorCore.Interfaces
 		byte[] Save(string newPath = null);
 
 		bool HasList(string name);
-		SearchResult FindObjById(string ID);
 		IObjList FindListByObj(ILevelObj o);
 	}
 

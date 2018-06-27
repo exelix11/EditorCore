@@ -13,7 +13,7 @@ namespace EditorCore
 {
     public partial class FrmCredits : Form
     {
-        public FrmCredits(IGameSpecificModule module, ExtensionManifest[] extensions)
+        public FrmCredits(IGameModule module, ExtensionManifest[] extensions)
         {
             InitializeComponent();
 			textBox1.Text = $"Loaded extensions:\r\nGame module : {module.ModuleName}\r\n";

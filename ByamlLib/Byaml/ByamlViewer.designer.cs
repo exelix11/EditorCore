@@ -1,4 +1,4 @@
-﻿namespace EditorCore
+﻿namespace ByamlExt
 {
     partial class ByamlViewer
     {

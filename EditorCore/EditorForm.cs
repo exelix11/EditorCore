@@ -21,7 +21,7 @@ namespace EditorCore
 {
 	public partial class EditorForm : Form
 	{
-		IGameSpecificModule GameModule = null;
+		IGameModule GameModule = null;
 		ExtensionManifest[] LoadedModules = null;
 
 		public bool IsAddListSupported
@@ -40,9 +40,9 @@ namespace EditorCore
 #if RELEASE
         public static string GameFolder = "";
 #else
-		public static string GameFolder = @"D:\E\Desktop\HAX\Odyssey\"; //Set the correct path on your pc
+		public static string GameFolder = ""; //Set the correct path on your pc
 #endif
-        public const string ModelsFolder = "Models";
+        public const string ModelsFolder = "ModelsMK8";
 
         public RendererControl render  = new RendererControl();
 
@@ -101,34 +101,35 @@ namespace EditorCore
 
         bool EditingList { get { return ListEditingStack.Count != 0; } }
 
-        public EditorForm(string[] args, ExtensionManifest[] Modules)
-        {
-            InitializeComponent();
-            KeyPreview = true;
-            RenderingCanvas.Child = render;
-            render.MouseLeftButtonDown += render_LeftClick;
-            render.MouseMove += render_MouseMove;
-            render.MouseLeftButtonDown += render_MouseLeftButtonDown;
-            render.MouseLeftButtonUp += render_MouseLeftButtonUp;
-            render.KeyDown += render_KeyDown;
-            render.KeyUp += render_KeyUP;
-            render.CameraInertiaFactor = Properties.Settings.Default.CameraInertia;
-            render.ShowFps = Properties.Settings.Default.ShowFps;
-            render.ShowTriangleCount = Properties.Settings.Default.ShowTriCount;
-            render.ShowDebugInfo = Properties.Settings.Default.ShowDbgInfo;
-            render.CamMode = Properties.Settings.Default.CameraMode == 0 ? HelixToolkit.Wpf.CameraMode.Inspect : HelixToolkit.Wpf.CameraMode.WalkAround;
-            render.ZoomSensitivity = Properties.Settings.Default.ZoomSen;
-            render.RotationSensitivity = Properties.Settings.Default.RotSen;
-            GameFolder = Properties.Settings.Default.GamePath;
+		public EditorForm(string[] args, ExtensionManifest[] Modules)
+		{
+			InitializeComponent();
+			KeyPreview = true;
+			RenderingCanvas.Child = render;
+			render.MouseLeftButtonDown += render_LeftClick;
+			render.MouseMove += render_MouseMove;
+			render.MouseLeftButtonDown += render_MouseLeftButtonDown;
+			render.MouseLeftButtonUp += render_MouseLeftButtonUp;
+			render.KeyDown += render_KeyDown;
+			render.KeyUp += render_KeyUP;
+			render.CameraInertiaFactor = Properties.Settings.Default.CameraInertia;
+			render.ShowFps = Properties.Settings.Default.ShowFps;
+			render.ShowTriangleCount = Properties.Settings.Default.ShowTriCount;
+			render.ShowDebugInfo = Properties.Settings.Default.ShowDbgInfo;
+			render.CamMode = Properties.Settings.Default.CameraMode == 0 ? HelixToolkit.Wpf.CameraMode.Inspect : HelixToolkit.Wpf.CameraMode.WalkAround;
+			render.ZoomSensitivity = Properties.Settings.Default.ZoomSen;
+			render.RotationSensitivity = Properties.Settings.Default.RotSen;
+			GameFolder = Properties.Settings.Default.GamePath;
 
 #if DEBUG
-            if (Debugger.IsAttached) this.Text += " - Debugger.IsAttached";
-            else this.Text += " - DEBUG BUILD";
+			if (Debugger.IsAttached) this.Text += " - Debugger.IsAttached";
+			else this.Text += " - DEBUG BUILD";
 #endif
+			List<ExtensionManifest> ExtensionsWithGameModules = new List<ExtensionManifest>();
 			LoadedModules = Modules;
 			foreach (var module in Modules)
 			{
-				if (module.GameModule != null) GameModule = module.GameModule; //Todo handle multime gameModules
+				if (module.HasGameModule) ExtensionsWithGameModules.Add(module);
 				if (module.ClipboardExt != null)
 				{
 					if (module.ClipboardExt.PasteExtensions != null) RegisterMenuExt(ClipBoardMenu, module.ClipboardExt.PasteExtensions);
@@ -144,12 +145,24 @@ namespace EditorCore
 						RegisterMenuExtIndex(menuStrip1, module.MenuExt.TitleBarExtensions);
 				}
 			}
+
+			if (ExtensionsWithGameModules.Count == 0) return;
+			else if (ExtensionsWithGameModules.Count == 1) GameModule = ExtensionsWithGameModules[0].GameModule;
+			else
+			{
+				var dlg = new OtherForms.GameModuleSelect(ExtensionsWithGameModules);
+				dlg.ShowDialog();
+				if (dlg.result == null) return;
+				GameModule = dlg.result.GameModule;
+			}
 			if (GameModule == null) return;
 
 			GameModule.InitModule(this);
 			IsAddListSupported = GameModule.IsAddListSupported;
 			IsPropertyEditingSupported = GameModule.IsPropertyEditingSupported;
 			PropertyGridTypes.CustomClassConverter.Clear();
+
+			if (GameModule.GetClassConverters != null)
 			foreach (var t in GameModule.GetClassConverters)
 				PropertyGridTypes.CustomClassConverter.Add(t.Item1, t.Item2);
 
@@ -249,19 +262,22 @@ namespace EditorCore
 
 			LoadedLevel = GameModule.LoadLevel(path);
 
-            //Populate szs file list
-            int index = 0;
-            List<ToolStripMenuItem> Files = new List<ToolStripMenuItem>();
-            foreach (var f in LoadedLevel.LevelFiles)
-            {
-                ToolStripMenuItem btn = new ToolStripMenuItem();
-                btn.Name = "LoadFile" + index.ToString();
-                btn.Text = f.Key;
-                btn.Click += OpenSzsFile_click;
-                Files.Add(btn);
-                index++;
-            }
-            LevelFilesMenu.DropDownItems.AddRange(Files.ToArray());
+			if (LoadedLevel.LevelFiles != null)
+			{
+				//Populate szs file list
+				int index = 0;
+				List<ToolStripMenuItem> Files = new List<ToolStripMenuItem>();
+				foreach (var f in LoadedLevel.LevelFiles)
+				{
+					ToolStripMenuItem btn = new ToolStripMenuItem();
+					btn.Name = "LoadFile" + index.ToString();
+					btn.Text = f.Key;
+					btn.Click += OpenSzsFile_click;
+					Files.Add(btn);
+					index++;
+				}
+				LevelFilesMenu.DropDownItems.AddRange(Files.ToArray());
+			}
             //LoadedLevel.OpenBymlViewer();
             //Load models
             LoadingForm.ShowLoading(this, "Loading models...\r\nOpening a Level for the first time will take longer");
@@ -338,7 +354,10 @@ namespace EditorCore
             render.addModel(ModelFile, obj, obj.ModelView_Pos, obj.ModelView_Scale, obj.ModelView_Rot);
         }
 
-        public void UpdateModelPosition(ILevelObj o)
+		public void AddModelObj(string path, object reference, Vector3D Pos, Vector3D Scale, Vector3D Rot ) =>
+			render.addModel(path, reference, Pos, Scale, Rot);
+
+		public void UpdateModelPosition(ILevelObj o)
         {
 			render.ChangeTransform(o, o.ModelView_Pos, o.ModelView_Scale, o.ModelView_Rot);
         }
@@ -580,7 +599,7 @@ namespace EditorCore
 		
         private void Btn_addType_Click(object sender, EventArgs e)
         {
-			string res = GameModule.AddType(LoadedLevel);
+			string res = GameModule.AddObjList(LoadedLevel);
 			if (res == null) return;
             comboBox1.SelectedIndex = comboBox1.Items.Add(res);
         }
@@ -595,7 +614,8 @@ namespace EditorCore
                 Properties.Settings.Default.GamePath = GameFolder;
                 Properties.Settings.Default.Save();
                 gamePathToolStripItem.Text = "Game path: " + GameFolder;
-            }
+				GameModule.FormLoaded();
+			}
         }
 
         private void preferencesToolStripMenuItem_Click(object sender, EventArgs e) => new Settings(render).ShowDialog();
@@ -842,8 +862,8 @@ namespace EditorCore
         private void render_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if ((ModifierKeys & Keys.Control) != Keys.Control || RenderIsDragging) return;
-            var obj = render.GetOBJ(sender, e);
-            if (obj == null)
+            ILevelObj obj = render.GetOBJ(sender, e);
+            if (obj == null || !obj.CanDrag)
             {
                 return;
             }
@@ -1000,8 +1020,8 @@ namespace EditorCore
                 MessageBox.Show("You can change it from the tools menu later");
                 this.Focus();
             }
-			GameModule.FormLoaded();
-            if (Properties.Settings.Default.FirstStart)
+			else GameModule.FormLoaded(); //GameModule.FormLoaded is also called in changeToolStripMenuItem_Click
+			if (Properties.Settings.Default.FirstStart)
             {
                 Properties.Settings.Default.FirstStart = false;
                 Properties.Settings.Default.Save();

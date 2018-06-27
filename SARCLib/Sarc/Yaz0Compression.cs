@@ -7,8 +7,9 @@ namespace EveryFileExplorer
 {
     public unsafe class YAZ0
     {
-        //Compression could be optimized by using look-ahead.
-        public static unsafe byte[] Compress(byte[] Data)
+		//Compression could be optimized by using look-ahead.
+		public static unsafe byte[] Compress(string FileName) => Compress(File.ReadAllBytes(FileName));
+		public static unsafe byte[] Compress(byte[] Data)
         {
             byte* dataptr = (byte*)Marshal.UnsafeAddrOfPinnedArrayElement(Data, 0);
 
@@ -108,12 +109,11 @@ namespace EveryFileExplorer
             return realresult;
         }
 
-        public static byte[] Decompress(string Filename) { return Decompress(System.IO.File.ReadAllBytes(Filename)); }
-
+        public static byte[] Decompress(string Filename) => Decompress(System.IO.File.ReadAllBytes(Filename)); 
         public static byte[] Decompress(byte[] Data)
         {
             UInt32 leng = (uint)(Data[4] << 24 | Data[5] << 16 | Data[6] << 8 | Data[7]);
-            byte[] Result = new byte[leng];
+			byte[] Result = new byte[leng];
             int Offs = 16;
             int dstoffs = 0;
             while (true)

@@ -99,9 +99,9 @@
       <Project>{9313D751-0D97-4621-B6E2-783E6986A118}</Project>
       <Name>BfresLib</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ByamlLib\ByamlLib.csproj">
+    <ProjectReference Include="..\ByamlLib\ByamlExt.csproj">
       <Project>{6d1801b8-7b24-49d6-83a1-e21ccc280d8e}</Project>
-      <Name>ByamlLib</Name>
+      <Name>ByamlExt</Name>
     </ProjectReference>
     <ProjectReference Include="..\EditorCore\EditorCore.csproj">
       <Project>{df37f616-9cb6-4594-b30a-d5dd52ee1b3e}</Project>

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace EditorCore.Interfaces
 {
 	public delegate void HandleHotKeyExHandler(System.Windows.Input.KeyEventArgs e);
-	public interface IGameSpecificModule
+	public interface IGameModule
 	{
 		string ModuleName {get;}
 
@@ -33,7 +33,7 @@ namespace EditorCore.Interfaces
 		IObjList CreateObjList(string name, IList<dynamic> baseList);
 		ILevelObj NewObject();
 		void OpenLevelFile(string name, Stream file);
-		string AddType(ILevel level);
+		string AddObjList(ILevel level);
 		void EditChildrenNode(ILevelObj obj);
 		void FormLoaded(); //for startup checks
 	}
