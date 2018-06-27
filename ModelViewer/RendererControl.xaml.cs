@@ -30,8 +30,8 @@ namespace ModelViewer
     {
         public Dictionary<string, Model3D> ImportedModels = new Dictionary<string, Model3D>();
         Dictionary<dynamic, ModelVisual3D> Models = new Dictionary<dynamic, ModelVisual3D>(); //Can't use LevelObj because this project is referenced into OdysseyEditor
-        public Dictionary<dynamic, Vector3D> Positions = new Dictionary<dynamic, Vector3D>();
-        SortingVisual3D ModelViewer = new SortingVisual3D();
+		Dictionary<dynamic, ModelVisual3D> Paths = new Dictionary<dynamic, ModelVisual3D>();
+		SortingVisual3D ModelViewer = new SortingVisual3D();
         Vector3D CameraTarget = new Vector3D(0, 0, 0);
 
         readonly Material defaultMaterial = new DiffuseMaterial(new SolidColorBrush(Color.FromArgb(255,120, 120, 120)));
@@ -97,69 +97,15 @@ namespace ModelViewer
         {
             ImportedModels = null;
             Models = null;
-            Positions = null;
-            ModelView = null;
+			Paths = null;
+			ModelView = null;
         }
 
         public void SetSortFrequency(double t)
         {
             ModelViewer.SortingFrequency = t;
         }
-        /*
-        public void addRail(Point3D[] Points, int Thickness = 5, int at = -1)
-        {
-            string Type = "AllRailInfos";
-            LinesVisual3D l = new LinesVisual3D();
-            if (at == -1) Models[Type].Add(l); else Models[Type].Insert(at, l);
-            if (at == -1) Positions[Type].Add(Points[0].ToVector3D()); else Positions[Type].Insert(at, Points[0].ToVector3D());
-            if (at == -1) ModelViewer.Children.Add(Models[Type][Models[Type].Count - 1]); else ModelViewer.Children.Insert(at, Models[Type][at]);
-            if (Points.Length < 2) return;
-            l.Color = Color.FromRgb(255, 0, 0);
-            l.Thickness = Thickness;
-            AddRailpoints(l, Points, Thickness);
-        }
-
-        public void SelectRail(Point3D[] Points)
-        {
-            UnselectRail(); 
-            foreach (Point3D p in Points)
-            {
-                addModel(@"models\UnkRed.obj", "__SelectedRail", p.ToVector3D(), new Vector3D(.5f, .5f, .5f), new Vector3D(0,0,0));
-            }
-        }
-
-        public void UnselectRail()
-        {
-            ClearType("__SelectedRail");
-            ModelView.UpdateLayout();
-        }
-
-        public void AddRailpoints(LinesVisual3D l, Point3D[] Points, int Thickness)
-        {
-            Point3D oldPoint = Points[1];
-            l.Points.Add(Points[0]);
-            l.Points.Add(Points[1]);
-            for (int i = 2; i < Points.Length; i++)
-            {
-                int chidIndex = l.Children.Count;
-                l.Children.Add(new LinesVisual3D());
-                ((LinesVisual3D)l.Children[chidIndex]).Color = Color.FromRgb(255, 255, 255);
-                ((LinesVisual3D)l.Children[chidIndex]).Thickness = Thickness;
-                ((LinesVisual3D)l.Children[chidIndex]).Points.Add(oldPoint);
-                ((LinesVisual3D)l.Children[chidIndex]).Points.Add(Points[i]);
-                oldPoint = Points[i];
-            }
-        }
-
-        public void UpdateRailpos(int id, Point3D[] Points)
-        {
-            RemoveRailPoints(((LinesVisual3D)Models["AllRailInfos"][id]));
-            if (Points.Length < 2) return;
-            AddRailpoints((LinesVisual3D)Models["AllRailInfos"][id], Points, 5);
-            Positions["AllRailInfos"][id] = Points[0].ToVector3D();
-            ModelView.UpdateLayout();
-        }
-        */
+		
         bool HasModel(dynamic obj) => Models.ContainsKey(obj);
 
         public Model3DGroup ReadObj(string path)
@@ -168,9 +114,40 @@ namespace ModelViewer
             return r.Read(path);
         }
 
-        public void addModel(string path, dynamic obj, Vector3D pos, Vector3D scale, Vector3D rot)
+		bool HasPath(dynamic obj) => Paths.ContainsKey(obj);
+
+		public void AddPath(dynamic reference, Point3D[] Points, int Thickness = 5) =>
+			AddPath(reference, Points, Thickness, Colors.Red);
+
+		public void AddPath(dynamic reference, Point3D[] Points, int thickness, Color color)
+		{
+			if (Points.Length < 2) return;
+			LinesVisual3D l = null;
+			if (HasPath(reference))
+				l = Paths[reference];
+			else
+			{
+				l = new LinesVisual3D();
+				Paths.Add(reference, l);
+				ModelViewer.Children.Add(l);
+			}
+			l.Thickness = thickness;
+			l.Color = color;
+			l.Children.Clear();
+			for (int i = 0; i < Points.Length; i++)
+			{
+				l.Points.Add(Points[i]);
+			}
+			for (int i = 1; i < Points.Length; i++) //Fix for a weird glitch (?)
+			{
+				l.Points.Add(Points[i]);
+			}
+			ModelView.UpdateLayout();
+		}
+
+        public void AddModel(string path, dynamic obj, Vector3D pos, Vector3D scale, Vector3D rot)
         {
-            if (Models.ContainsKey(obj)) return;
+            if (HasModel(obj)) return;
             Models.Add(obj,new ModelVisual3D());
             ModelViewer.Children.Add(Models[obj]);
             Model3D Model;
@@ -188,26 +165,28 @@ namespace ModelViewer
             t.Children.Add(new RotateTransform3D(new AxisAngleRotation3D(new Vector3D(0, 0, 1), rot.Z)));
             t.Children.Add(new ScaleTransform3D(scale));
             t.Children.Add(new TranslateTransform3D(pos));
-            Positions.Add(obj, pos);
             Models[obj].Transform = t;
         }
 
         public void RemoveModel(dynamic obj)
         {
-            if (!Models.ContainsKey(obj)) return;
-            if (selectionBoxes.ContainsKey(obj))
-            {
-                ModelViewer.Children.Remove(selectionBoxes[obj]);
-                selectionBoxes.Remove(obj);
-            }
-            ModelViewer.Children.Remove(Models[obj]);
-            Models[obj].Content = null;
-            /*if (Type == "AllRailInfos")
-            {
-                RemoveRailPoints(((LinesVisual3D)Models[Type][index]));
-            }*/
-            Models.Remove(obj);
-            Positions.Remove(obj);
+			if (HasModel(obj))
+			{
+				if (selectionBoxes.ContainsKey(obj))
+				{
+					ModelViewer.Children.Remove(selectionBoxes[obj]);
+					selectionBoxes.Remove(obj);
+				}
+				ModelViewer.Children.Remove(Models[obj]);
+				Models[obj].Content = null;
+				Models.Remove(obj);
+			}
+			if (HasPath(obj))
+			{
+				ModelViewer.Children.Remove(Paths[obj]);
+				Paths.Remove(obj);
+				ModelView.UpdateLayout();
+			}
             ModelView.UpdateLayout();
         }
 
@@ -263,7 +242,6 @@ namespace ModelViewer
             t.Children.Add(new RotateTransform3D(new AxisAngleRotation3D(new Vector3D(0, 0, 1), Rot.Z)));
             t.Children.Add(new ScaleTransform3D(scale));
             t.Children.Add(new TranslateTransform3D(pos));
-            Positions[obj] = pos;
             Models[obj].Transform = t;
             if (selectionBoxes.ContainsKey(obj))
             {
@@ -324,7 +302,7 @@ namespace ModelViewer
             ModelViewer.Children.Clear();
             ImportedModels = new Dictionary<string, Model3D>();
             Models = new Dictionary<dynamic, ModelVisual3D>();
-            Positions = new Dictionary<dynamic, Vector3D>();
+			Paths = new Dictionary<dynamic, ModelVisual3D>();
             ModelViewer = new SortingVisual3D();
             ModelViewer.SortingFrequency = 0.5;
             ModelView.Children.Add(ModelViewer);

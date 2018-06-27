@@ -344,6 +344,12 @@ namespace EditorCore
 
         public void AddModel(ILevelObj obj, string listName)
         {
+			if (obj is IPathObj)
+			{
+				render.AddPath(obj, ((IPathObj)obj).Points);
+				return;
+			}
+
             string PlaceholderModel = $"{ModelsFolder}/UnkBlue.obj";
             if (listName == "AreaList") PlaceholderModel = $"{ModelsFolder}/UnkYellow.obj";
             else if (listName == "DebugList") PlaceholderModel = $"{ModelsFolder}/UnkRed.obj";
@@ -351,14 +357,16 @@ namespace EditorCore
 
             string ModelFile = GetModelName(obj.ModelName);
             if (ModelFile == null) ModelFile = PlaceholderModel;
-            render.addModel(ModelFile, obj, obj.ModelView_Pos, obj.ModelView_Scale, obj.ModelView_Rot);
+            render.AddModel(ModelFile, obj, obj.ModelView_Pos, obj.ModelView_Scale, obj.ModelView_Rot);
         }
 
 		public void AddModelObj(string path, object reference, Vector3D Pos, Vector3D Scale, Vector3D Rot ) =>
-			render.addModel(path, reference, Pos, Scale, Rot);
+			render.AddModel(path, reference, Pos, Scale, Rot);
 
 		public void UpdateModelPosition(ILevelObj o)
         {
+			if (CurList is IPathObj)
+				render.AddPath(CurList, ((IPathObj)CurList).Points);
 			render.ChangeTransform(o, o.ModelView_Pos, o.ModelView_Scale, o.ModelView_Rot);
         }
 
