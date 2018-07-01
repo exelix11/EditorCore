@@ -14,10 +14,13 @@ namespace OdysseyExt.EditorFroms
     public partial class LinksEditor : Form
     {
         IDictionary<string, dynamic> LinksNode;
-        public LinksEditor(dynamic node)
+		EditorForm ParentForm;
+
+		public LinksEditor(dynamic node, EditorForm _parent)
         {
             InitializeComponent();
-            LinksNode = node;
+			ParentForm = _parent;
+			LinksNode = node;
             UpdateTreeView();
         }
 
@@ -48,7 +51,7 @@ namespace OdysseyExt.EditorFroms
             if (treeView1.SelectedNode == null) return;
             if (treeView1.SelectedNode.Tag is string)
             {
-                ((EditorForm)Application.OpenForms[0]).EditList(LinksNode[(string)treeView1.SelectedNode.Tag]);
+				ParentForm.EditList(LinksNode[(string)treeView1.SelectedNode.Tag]);
                 this.Close();
             }
         }

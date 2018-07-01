@@ -256,16 +256,24 @@ namespace OdysseyExt
         }
         public override object EditValue(ITypeDescriptorContext context, System.IServiceProvider provider, object value)
         {
-            LinksNode node = value as LinksNode;
-            if (node != null)
-            {
-                using (var form = new EditorFroms.LinksEditor(node))
-                {
-                    form.ShowDialog();
-                }
-            }
-            return node; 
-        }
+			LinksNode node = value as LinksNode;
+			/*context should be of type System.Windows.Forms.PropertyGridInternal.PropertyDescriptorGridEntry
+			OwnerGrid is not a public property, we get it through reflection
+			A reference to the parent form is needed to add the ObjList to the ListEditingStack*/
+			Type t = context.GetType();
+			if (!(t.GetProperty("OwnerGrid").GetValue(context, null) is PropertyGrid targetGrid))
+				throw new Exception("context is not of the expected type");
+			if (!(targetGrid.ParentForm is EditorForm TargetForm))
+				throw new Exception("context is not of the expected type");
+			if (node != null)
+			{
+				using (var form = new EditorFroms.LinksEditor(node, TargetForm))
+				{
+					form.ShowDialog();
+				}
+			}
+			return node;
+		}
     }
 
     ///*

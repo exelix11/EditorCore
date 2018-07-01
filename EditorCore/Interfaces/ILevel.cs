@@ -11,7 +11,7 @@ namespace EditorCore.Interfaces
 		bool IsHidden { get; set; }
 		string name { get; set; }
 
-		void ApplyToNode();
+		void ApplyChanges();
 	}
 
 	public interface ILevel

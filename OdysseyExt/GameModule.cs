@@ -102,7 +102,7 @@ namespace OdysseyExt
 					$"Edited links of {obj.ToString()}",
 					new dynamic[] { obj, BakLinks });
 
-				new EditorFroms.LinksEditor(obj[LevelObj.N_Links]).ShowDialog();
+				new EditorFroms.LinksEditor(obj[LevelObj.N_Links],ViewForm).ShowDialog();
 			}
 		}
 

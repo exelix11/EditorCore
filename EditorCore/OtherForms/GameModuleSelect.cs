@@ -17,10 +17,13 @@ namespace EditorCore.OtherForms
 		{
 			InitializeComponent();
 			listBox1.Items.AddRange(Modules.ToArray());
+			if (listBox1.Items.Count > 0)
+				listBox1.SelectedIndex = 0;
 		}
 
 		private void button2_Click(object sender, EventArgs e)
 		{
+			if (listBox1.SelectedItem == null) return;
 			result = (Interfaces.ExtensionManifest)listBox1.SelectedItem;
 			this.Close();
 		}

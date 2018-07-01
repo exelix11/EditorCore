@@ -57,7 +57,7 @@ namespace EditorCore
             }
             set {
                 if (EditingList) return;
-                comboBox1.Text = value;
+				comboBox1.Text = value;
             }
         }
 
@@ -75,12 +75,27 @@ namespace EditorCore
             get { return ObjectsListBox.SelectedItems.Count; }
         }
 
-		public ILevelObj SelectedObj
-        {
-            get {
-                return SelectionCount == 0 ? null : CurList[ObjectsListBox.SelectedIndex];
-            }
-        }
+		ILevelObj SelectedObj
+		{
+			get
+			{
+				return SelectionCount == 0 ? null : CurList[ObjectsListBox.SelectedIndex];
+			}
+			set
+			{
+				ObjectsListBox.ClearSelected();
+				if (value == null)
+					return;
+				if (!CurList.Contains(value))
+				{
+					if (EditingList) return; //if edit links edit only current list
+					IObjList list = LoadedLevel.FindListByObj(value);
+					if (list != null)
+						CurListName = list.name;
+				}
+				ObjectsListBox.SelectedIndex = CurList.IndexOf(value);
+			}
+		}
 
 		public ILevelObj[] SelectedObjs
         {
@@ -101,9 +116,13 @@ namespace EditorCore
 		public EditorForm(string[] args, ExtensionManifest[] Modules)
 		{
 			InitializeComponent();
+#if DEBUG
+			splitContainer2.Enabled = Debugger.IsAttached;
+#else
+			splitContainer2.Enabled = false;
+#endif
 			KeyPreview = true;
 			RenderingCanvas.Child = render;
-			render.MouseLeftButtonDown += render_LeftClick;
 			render.MouseMove += render_MouseMove;
 			render.MouseLeftButtonDown += render_MouseLeftButtonDown;
 			render.MouseLeftButtonUp += render_MouseLeftButtonUp;
@@ -315,7 +334,7 @@ namespace EditorCore
             FindMenu.Visible = true;
         }
 
-        bool NoModels = false; //Debug only
+        bool NoModels = true; //Debug only
         List<string> SkipModels = null;
         string GetModelName(string ObjName) //convert bfres to obj and cache in models folder
         {
@@ -391,7 +410,7 @@ namespace EditorCore
         {
             if (!EditingList) return;
             foreach (var obj in CurList) render.RemoveModel(obj);
-            ListEditingStack.Pop().ApplyToNode();
+            ListEditingStack.Pop().ApplyChanges();
             PopulateListBox();
         }
 
@@ -456,7 +475,7 @@ namespace EditorCore
             render.LookAt(o.ModelView_Pos);
         }
         
-        #region ClipBoard
+#region ClipBoard
         private void ClipBoardMenu_Opening(object sender, CancelEventArgs e)
         {
             ClipBoardMenu_Paste.Enabled = StoredValue != null;
@@ -635,10 +654,10 @@ namespace EditorCore
             foreach (var o in list) DeleteObj(o, CurList);
         }
 
-		#endregion
+#endregion
 
 		//Property grid change, listbox, combobox, show/hide
-		#region EditorControlsEvents
+#region EditorControlsEvents
 
 		List<string> PropertyGridGetPath()
 		{
@@ -748,7 +767,6 @@ namespace EditorCore
             HideGroup_CB.Checked = CurList.IsHidden;
             HideGroup_CB.CheckedChanged += HideGroup_CB_CheckedChanged;
             foreach (var o in CurList) ObjectsListBox.Items.Add(o.ToString());
-            ObjectsListBox.SelectedIndex = 0;
         }
 
         private void SelectedObjectChanged(object sender, EventArgs e) //ObjectsListBox
@@ -767,7 +785,8 @@ namespace EditorCore
             if (ObjectsListBox.SelectedIndex == -1 || SelectedObj == null)
             {
                 propertyGrid1.SelectedObject = null;
-                return;
+				render.ClearSelection();
+				return;
             }
 
             propertyGrid1.SelectedObjects = SelectedObjs;
@@ -800,30 +819,7 @@ namespace EditorCore
             
         DragArgs DraggingArgs = null;
         bool RenderIsDragging { get { return DraggingArgs != null && Mouse.LeftButton == MouseButtonState.Pressed && (ModifierKeys & Keys.Control) == Keys.Control; } }        
-
-        private void render_LeftClick(object sender, MouseButtonEventArgs e)
-        {
-            if (RenderIsDragging) return;
-            var result = render.GetOBJ(sender, e);
-            if (result == null) return;
-            if ((ModifierKeys & Keys.Shift) == Keys.Shift && CurList.Contains(result))
-            {
-                ObjectsListBox.SelectedIndices.Add(CurList.IndexOf(result));
-            }
-            else
-            {
-                IObjList list = null;
-                if (EditingList) list = CurList.Contains(result) ? CurList : null;
-                else list = LoadedLevel.FindListByObj(result);
-                if (list != null)
-                {
-                    CurListName = list.name;
-                    ObjectsListBox.ClearSelected(); 
-                    ObjectsListBox.SelectedIndex = ((List<ILevelObj>)list).IndexOf(result);
-                }
-            }
-        }
-
+		
         private void render_KeyDown(object sender, System.Windows.Input.KeyEventArgs e) //Render hotkeys
         {
             if (RenderIsDragging) return;
@@ -869,17 +865,29 @@ namespace EditorCore
 
         private void render_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if ((ModifierKeys & Keys.Control) != Keys.Control || RenderIsDragging) return;
-            ILevelObj obj = render.GetOBJ(sender, e);
-            if (obj == null || !obj.CanDrag)
-            {
-                return;
-            }
-            DraggingArgs = new DragArgs();
-            DraggingArgs.obj = obj;
-            DraggingArgs.StartPos = ((ILevelObj)DraggingArgs.obj).ModelView_Pos;
-            DraggingArgs.position = DraggingArgs.StartPos;
-        }
+			if (RenderIsDragging) return;
+			var obj = render.GetOBJ(sender, e);
+			if (obj == null)
+			{
+				return;
+			}
+
+			if ((ModifierKeys & Keys.Shift) == Keys.Shift && CurList.Contains(obj))
+			{
+				ObjectsListBox.SelectedIndices.Add(CurList.IndexOf(obj));
+				return; // drag only a single object
+			}
+			else
+				SelectedObj = obj;
+
+			if (SelectedObj == obj && (ModifierKeys & Keys.Control) == Keys.Control) //User wants to drag
+			{
+				DraggingArgs = new DragArgs();
+				DraggingArgs.obj = obj;
+				DraggingArgs.StartPos = ((ILevelObj)DraggingArgs.obj).ModelView_Pos;
+				DraggingArgs.position = DraggingArgs.StartPos;
+			}
+		}
 
 #endregion
 
@@ -953,7 +961,7 @@ namespace EditorCore
         {
             if (o == null) return;
             var newobj = (ILevelObj)o.Clone();
-            newobj.ID = "obj" + LoadedLevel.HighestID++;
+            newobj.ID_int = LoadedLevel.HighestID++;
             AddObj(newobj, list);
         }
 

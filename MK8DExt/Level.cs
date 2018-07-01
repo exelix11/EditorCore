@@ -30,7 +30,7 @@ namespace MK8DExt
 			}
 		}
 
-		public void ApplyToNode()
+		public void ApplyChanges()
 		{
 			bymlNode.Clear();
 			foreach (var o in this) bymlNode.Add(o.Prop);
@@ -76,7 +76,7 @@ namespace MK8DExt
 			{
 				FilePath = newPath;
 			}
-			defList.ApplyToNode();
+			defList.ApplyChanges();
 			MemoryStream mem = new MemoryStream();
 			ByamlFile.Save(mem, LoadedLevelData, true, Syroot.BinaryData.ByteOrder.LittleEndian);
 			return mem.ToArray();

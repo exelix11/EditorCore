@@ -35,7 +35,7 @@ namespace OdysseyExt
             }
         }
 
-        public void ApplyToNode()
+        public void ApplyChanges()
         {
             bymlNode.Clear();
             foreach (var o in this) bymlNode.Add(o.Prop);
@@ -137,7 +137,7 @@ namespace OdysseyExt
             {
                 var values = objs.Values.ToArray();
                 if (values[i].Count == 0) objs.Remove(objs.Keys.ToArray()[i--]);
-                else values[i].ApplyToNode();
+                else values[i].ApplyChanges();
             }
         }
 
