@@ -97,6 +97,7 @@
     <Compile Include="EditorForm.Designer.cs">
       <DependentUpon>EditorForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Interfaces\EditorChild.cs" />
     <Compile Include="Interfaces\IPathObj.cs" />
     <Compile Include="OtherForms\FrmCredits.cs">
       <SubType>Form</SubType>

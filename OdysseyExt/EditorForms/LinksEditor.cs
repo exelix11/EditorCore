@@ -1,4 +1,5 @@
 ﻿using EditorCore;
+using EditorCore.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -11,15 +12,15 @@ using System.Windows.Forms;
 
 namespace OdysseyExt.EditorFroms
 {
-    public partial class LinksEditor : Form
+    public partial class LinksEditor : Form, IEditorChild
     {
         IDictionary<string, dynamic> LinksNode;
-		EditorForm ParentForm;
+		public EditorForm ParentEditor { get; set; }
 
 		public LinksEditor(dynamic node, EditorForm _parent)
         {
             InitializeComponent();
-			ParentForm = _parent;
+			ParentEditor = _parent;
 			LinksNode = node;
             UpdateTreeView();
         }
@@ -51,7 +52,7 @@ namespace OdysseyExt.EditorFroms
             if (treeView1.SelectedNode == null) return;
             if (treeView1.SelectedNode.Tag is string)
             {
-				ParentForm.EditList(LinksNode[(string)treeView1.SelectedNode.Tag]);
+				ParentEditor.EditList(LinksNode[(string)treeView1.SelectedNode.Tag]);
                 this.Close();
             }
         }
