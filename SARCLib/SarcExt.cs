@@ -74,7 +74,7 @@ namespace SARCExt
 			ToolsMenuExtensions[0].DropDownItems.Add(new ToolStripMenuItem() { Text = "Deompress" });
 			ToolsMenuExtensions[0].DropDownItems[0].Click += Compress;
 			ToolsMenuExtensions[0].DropDownItems[1].Click += Decompress;
-			ToolsMenuExtensions[0].Click += SarcEditor;
+			ToolsMenuExtensions[1].Click += SarcEditor;
 		}
 
 		public ToolStripMenuItem[] FileMenuExtensions { get; internal set; }

@@ -113,5 +113,13 @@ namespace SARCExt
 				EditorCore.OpenFileHandler.OpenFile(listBox1.SelectedItem.ToString(), 
 					new MemoryStream(loadedSarc[listBox1.SelectedItem.ToString()]));
 		}
+
+		private void replaceToolStripMenuItem1_Click(object sender, EventArgs e)
+		{
+			if (listBox1.SelectedItem == null) return;
+			var opn = new OpenFileDialog();
+			if (opn.ShowDialog() != DialogResult.OK) return;
+			loadedSarc[listBox1.SelectedItem.ToString()] = File.ReadAllBytes(opn.FileName);
+		}
 	}
 }
