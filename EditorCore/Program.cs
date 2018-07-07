@@ -45,11 +45,35 @@ namespace EditorCore
 					if (ext != null)
 					{
 						extensions.Add(ext);
+						if (ext.Handlers != null)
+							OpenFileHandler.handlers.AddRange(ext.Handlers);
 					}
 				}
 			}
-			Application.Run(new EditorForm(args, extensions.ToArray()));
-            
+			
+			if (Properties.Settings.Default.CheckUpdates)
+				foreach (var m in extensions) m.CheckForUpdates();
+
+			Application.Run(new EditorForm(args, extensions.ToArray()));            
         }
     }
+
+	public static class OpenFileHandler
+	{
+		internal static List<IFileHander> handlers = new List<IFileHander>();
+
+		public static void OpenFile(string filename, Stream FileStream, int BasePositionInStream = 0)
+		{
+			foreach (var h in handlers)
+			{
+				FileStream.Position = BasePositionInStream;
+				if (h.IsFormatSupported(filename, FileStream))
+				{
+					FileStream.Position = BasePositionInStream;
+					h.OpenFile(filename, FileStream);
+					break;
+				}
+			}
+		}
+	}
 }

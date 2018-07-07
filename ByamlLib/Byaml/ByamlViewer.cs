@@ -20,12 +20,18 @@ namespace ByamlExt
     {
 		public ByteOrder byteOrder;
 		public dynamic byml;
-        public ByamlViewer(System.Collections.IEnumerable by, ByteOrder defaultOrder = ByteOrder.LittleEndian)
+		public string FileName = "";
+		bool pathSupport;
+		public ByamlViewer(System.Collections.IEnumerable by, bool _pathSupport,
+			ByteOrder defaultOrder = ByteOrder.LittleEndian, string name = "")
         {
             InitializeComponent();
 			byteOrder = defaultOrder;
+			FileName = name;
 			byml = by;
-            if (byml == null) return;
+			pathSupport = _pathSupport;
+
+			if (byml == null) return;
 			//the first node should always be a dictionary node
 			if (byml is Dictionary<string, dynamic>)
 			{
@@ -37,13 +43,13 @@ namespace ByamlExt
 			}
 			else if (byml is List<ByamlPathPoint>)
 			{
-
+				MessageBox.Show("Unsupported root node");
 			}
 			else throw new Exception($"Unsupported root node type {by.GetType()}");
         }
 
 		Stream saveStream = null;
-		public ByamlViewer(System.Collections.IEnumerable by,Stream saveTo, ByteOrder defaultOrder = ByteOrder.LittleEndian) : this(by, defaultOrder)
+		public ByamlViewer(System.Collections.IEnumerable by, bool _pathSupport, Stream saveTo, ByteOrder defaultOrder = ByteOrder.LittleEndian) : this(by, _pathSupport,defaultOrder)
 		{
 			saveStream = saveTo;
 			saveToolStripMenuItem.Visible = true;
@@ -199,19 +205,33 @@ namespace ByamlExt
             }
         }
 
+		static bool SupportPaths()
+		{
+			return MessageBox.Show("Does this game support paths ?", "", MessageBoxButtons.YesNo) == DialogResult.Yes;
+		}
+
         public static void OpenByml(string Filename)
         {
-            var byml = ByamlFile.Load(Filename,true);
-            new ByamlViewer(byml).Show();
-        }
+			bool paths = SupportPaths();
 
-        private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
+			var byml = ByamlFile.LoadGetEndianness(new FileStream(Filename, FileMode.Open, FileAccess.Read), paths);
+            new ByamlViewer(byml.RootNode, paths, byml.byteOrder).Show();
+		}
+
+		public static void OpenByml(Stream file, string FileName = "")
+		{
+			bool paths = SupportPaths();
+
+			var byml = ByamlFile.LoadGetEndianness(file, paths);
+			new ByamlViewer(byml.RootNode, paths, byml.byteOrder, FileName).Show();
+		}
+
+		private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SaveFileDialog sav = new SaveFileDialog();
-            sav.Filter = "byml file | *.byml";
+            SaveFileDialog sav = new SaveFileDialog() { FileName = Name, Filter = "byml file | *.byml" };
             if (sav.ShowDialog() == DialogResult.OK)
             {
-                ByamlFile.Save(sav.FileName, byml, true, byteOrder);
+                ByamlFile.Save(sav.FileName, byml, pathSupport, byteOrder);
             }
         }
 
@@ -314,7 +334,7 @@ namespace ByamlExt
 		{
 			saveStream.Position = 0;
 			saveStream.SetLength(0);
-			ByamlFile.Save(saveStream, byml, true, byteOrder);
+			ByamlFile.Save(saveStream, byml, pathSupport, byteOrder);
 		}
 	}
 }

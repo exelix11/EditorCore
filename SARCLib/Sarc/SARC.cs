@@ -10,7 +10,7 @@ using Syroot.BinaryData;
 
 namespace SARCExt
 {
-    public class SARC
+    public static class SARC
     {
         static uint NameHash(string name)
         {
@@ -78,12 +78,12 @@ namespace SARCExt
             return o.ToArray();
         }
 
-        public Dictionary<string, byte[]> unpackRam(byte[] src)
+        public static Dictionary<string, byte[]> UnpackRam(byte[] src)
         {
-            return unpackRam(new MemoryStream(src));
+            return UnpackRam(new MemoryStream(src));
         }
 
-        public Dictionary<string, byte[]> unpackRam(Stream src)
+        public static Dictionary<string, byte[]> UnpackRam(Stream src)
         {
             Dictionary<string, byte[]> res = new Dictionary<string, byte[]>();
             BinaryDataReader br = new BinaryDataReader(src, false);
@@ -115,17 +115,17 @@ namespace SARCExt
                 }
                 res.Add(sfnt.fileNames[m], temp);
             }
-            new SARC();
+
             return res;
         }
 
-        public void unpack(string file)
+        public static void UnpackToDisk(string file)
         {
             try
             {
                 Stream src = new MemoryStream(File.ReadAllBytes(file + ".sarc"));
-                var files = unpackRam(src);
-                write(files.Keys.ToList(), files.Values.ToList(), file);
+                var files = UnpackRam(src);
+                Write(files.Keys.ToList(), files.Values.ToList(), file);
             }
             catch (Exception e)
             {
@@ -133,12 +133,12 @@ namespace SARCExt
             }
         }
 
-        public void readFiles(string dir, List<string> flist, List<byte[]> fdata)
+        static void readFiles(string dir, List<string> flist, List<byte[]> fdata)
         {
             processDirectory(dir, flist, fdata);
         }
 
-        public void processDirectory(string targetDirectory, List<string> flist, List<byte[]> fdata)
+		static void processDirectory(string targetDirectory, List<string> flist, List<byte[]> fdata)
         {
             string[] fileEntries = Directory.GetFiles(targetDirectory);
             foreach (string fileName in fileEntries)
@@ -163,13 +163,13 @@ namespace SARCExt
                 processDirectory(subdirectory, flist, fdata);
         }
 
-        public void processFile(string path, List<byte[]> fdata)
+		static void processFile(string path, List<byte[]> fdata)
         {
             byte[] temp = File.ReadAllBytes(path);
             fdata.Add(temp);
         }
 
-        public void write(List<string> fileNames, List<byte[]> files, string file)
+        static void Write(List<string> fileNames, List<byte[]> files, string file)
         {
             Directory.CreateDirectory(file);
             

@@ -114,12 +114,9 @@ namespace ModelViewer
             return r.Read(path);
         }
 
-		bool HasPath(dynamic obj) => Paths.ContainsKey(obj);
+		bool HasPath(dynamic obj) => Paths.ContainsKey(obj);		
 
-		public void AddPath(dynamic reference, Point3D[] Points, int Thickness = 5) =>
-			AddPath(reference, Points, Thickness, Colors.Red);
-
-		public void AddPath(dynamic reference, Point3D[] Points, int thickness, Color color)
+		public void AddPath(dynamic reference, Point3D[] Points, int thickness = 5)
 		{
 			if (Points.Length < 2) return;
 			LinesVisual3D l = null;
@@ -132,7 +129,7 @@ namespace ModelViewer
 				ModelViewer.Children.Add(l);
 			}
 			l.Thickness = thickness;
-			l.Color = color;
+			l.Color = Colors.Black;
 			l.Children.Clear();
 			for (int i = 0; i < Points.Length; i++)
 			{
@@ -145,7 +142,19 @@ namespace ModelViewer
 			ModelView.UpdateLayout();
 		}
 
-        public void AddModel(string path, dynamic obj, Vector3D pos, Vector3D scale, Vector3D rot)
+		void SelectPath(dynamic reference)
+		{
+			LinesVisual3D l = Paths[reference];
+			l.Color = Colors.Red;
+		}
+
+		void UnselectPath(dynamic reference)
+		{
+			LinesVisual3D l = Paths[reference];
+			l.Color = Colors.Black;
+		}
+
+		public void AddModel(string path, dynamic obj, Vector3D pos, Vector3D scale, Vector3D rot)
         {
             if (HasModel(obj)) return;
             Models.Add(obj,new ModelVisual3D());
@@ -285,20 +294,18 @@ namespace ModelViewer
             return null;
         }
 
-        public double TooCloseCheck() {return Math.Abs(CameraTarget.X) - Math.Abs(ModelView.Camera.Position.X) ; }
-
         public Vector3D GetPositionInView()
         {
             FrameworkElement pnlClient = this.Content as FrameworkElement;
             Point3D p = (Point3D)ModelView.Viewport.UnProject(new Point(pnlClient.ActualWidth / 2, pnlClient.ActualHeight / 2), ModelView.Camera.Position, ModelView.Camera.LookDirection);
             return new Vector3D(Math.Truncate(p.X), Math.Truncate(p.Y), Math.Truncate(p.Z));
-        }
-
-        public const string C0ListName = "__C0EditingListObjs";
+        }		
 
         public void UnloadLevel()
         {
-            ModelView.Children.Remove(ModelViewer);
+			ClearSelection();
+
+			ModelView.Children.Remove(ModelViewer);
             ModelViewer.Children.Clear();
             ImportedModels = new Dictionary<string, Model3D>();
             Models = new Dictionary<dynamic, ModelVisual3D>();
@@ -311,17 +318,25 @@ namespace ModelViewer
         }
 
         Dictionary<dynamic, ModelVisual3D> selectionBoxes = new Dictionary<dynamic, ModelVisual3D>();
+		List<dynamic> selectedPaths = new List<dynamic>();
         public void SelectObjs(IList<dynamic> Objs)
         {
             ClearSelection();
             foreach (dynamic o in Objs)
             {
-                if (!HasModel(o)) continue;
-                BoundingBoxVisual3D box = new BoundingBoxVisual3D();
-                selectionBoxes.Add(o,box);
-                box.BoundingBox = ((ModelVisual3D)Models[o]).FindBounds(Transform3D.Identity);
-                box.Diameter = box.BoundingBox.SizeX / 20;
-                ModelViewer.Children.Add(selectionBoxes[o]);
+				if (HasModel(o))
+				{
+					BoundingBoxVisual3D box = new BoundingBoxVisual3D();
+					selectionBoxes.Add(o, box);
+					box.BoundingBox = ((ModelVisual3D)Models[o]).FindBounds(Transform3D.Identity);
+					box.Diameter = box.BoundingBox.SizeX / 20;
+					ModelViewer.Children.Add(selectionBoxes[o]);
+				}
+				else if (HasPath(o))
+				{
+					selectedPaths.Add(o);
+					SelectPath(o);
+				}
             }
             ModelView.UpdateLayout();
         }
@@ -329,8 +344,10 @@ namespace ModelViewer
         public void ClearSelection()
         {
             foreach (var b in selectionBoxes.Values) ModelViewer.Children.Remove(b);
-            selectionBoxes.Clear();
-            ModelView.UpdateLayout();
+			foreach (var o in selectedPaths) UnselectPath(o);
+			selectionBoxes.Clear();
+			selectedPaths.Clear();
+			ModelView.UpdateLayout();
         }
     }
 }

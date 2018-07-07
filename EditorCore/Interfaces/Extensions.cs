@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,10 +15,13 @@ namespace EditorCore.Interfaces
 		string ThanksTo { get; }
 		Version TargetVersion { get; }
 
-		bool HasGameModule { get; }
+		bool HasGameModule { get; } 
 		IMenuExtension MenuExt { get; }
 		IClipboardExtension ClipboardExt { get; }
-		IGameModule GameModule { get; }
+		IGameModule GameModule { get; } //Don't instantiate the game module untill it's needed, use HasGameModule to check if it's supported
+		IFileHander[] Handlers { get; }
+
+		void CheckForUpdates();
 	}
 
 	public interface IMenuExtension
@@ -31,5 +35,12 @@ namespace EditorCore.Interfaces
 	{
 		ToolStripMenuItem[] CopyExtensions { get; }
 		ToolStripMenuItem[] PasteExtensions { get; }
+	}
+
+	public interface IFileHander
+	{
+		string HandlerName { get; }
+		bool IsFormatSupported(string filename, Stream file);
+		void OpenFile(string filename, Stream file);
 	}
 }

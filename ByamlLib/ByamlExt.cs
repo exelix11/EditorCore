@@ -1,6 +1,7 @@
 ﻿using EditorCore.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,17 +24,43 @@ namespace ByamlExt
 
 		public bool HasGameModule => false;
 		public IGameModule GameModule => null;
+		public IFileHander[] Handlers { get; } = new IFileHander[] { new BymlFileHandler() };
+
+		public void CheckForUpdates()
+		{
+			return;
+		}
+	}
+
+	class BymlFileHandler : IFileHander
+	{
+		public string HandlerName => "BymlFileHandler";
+
+		public bool IsFormatSupported(string filename, Stream file)
+		{
+			if (filename.EndsWith(".byml") || filename.EndsWith(".byaml"))
+			{
+				byte[] header = new byte[2] { (byte)file.ReadByte(), (byte)file.ReadByte() };
+				return (header[0] == 0x42 && header[1] == 0x59) || (header[1] == 0x42 && header[0] == 0x59);
+			}
+			return false;
+		}
+
+		public void OpenFile(string filename, Stream file)
+		{
+			ByamlViewer.OpenByml(file,filename);
+		}
 	}
 
 	class MenuExt : IMenuExtension
 	{
 		public MenuExt()
 		{
-			FileMenuExtensions = new ToolStripMenuItem[]
+			ToolsMenuExtensions = new ToolStripMenuItem[]
 			{
 				new ToolStripMenuItem(){ Text = "Byaml editor"}
 			};
-			FileMenuExtensions[0].Click += BymlEditor;
+			ToolsMenuExtensions[0].Click += BymlEditor;
 		}
 
 		void BymlEditor(object sender, EventArgs e)

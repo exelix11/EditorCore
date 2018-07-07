@@ -30,7 +30,6 @@ namespace OdysseyExt
 
 		public bool IsAddListSupported => true;
 		public bool IsPropertyEditingSupported => true;
-		public string LevelFormatFilter => "szs file | *.szs";
 		public string[] AutoHideList => new string[] { "AreaList", "SkyList" };
 
 		public EditorForm ViewForm { get; set; } = null;
@@ -38,7 +37,16 @@ namespace OdysseyExt
 
 		public string ModelsFolder => "OdysseyModels";
 
-		public bool GetModelFile(string ObjName, string path) => BfresConverter.Convert(BfresFromSzs(ObjName), path);
+		public bool ConvertModelFile(string ObjName, string path) => BfresConverter.Convert(BfresFromSzs(ObjName), path);
+
+		public string GetPlaceholderModel(string name, string listName)
+		{
+			string PlaceholderModel ="UnkBlue.obj";
+			if (listName == "AreaList") PlaceholderModel = "UnkYellow.obj";
+			else if (listName == "DebugList") PlaceholderModel = "UnkRed.obj";
+			else if (listName == "CameraAreaInfo") PlaceholderModel = "UnkGreen.obj";
+			return PlaceholderModel;
+		}
 
 		public void InitModule(EditorForm currentView)
 		{
@@ -63,22 +71,58 @@ namespace OdysseyExt
 				}
 			}
 		}
+
+		string LevelFormatFilter => "szs file | *.szs";
+		public ILevel LoadLevel(string file = null)
+		{
+			if (file == null)
+			{
+				var opn = new OpenFileDialog()
+				{
+					Filter = LevelFormatFilter,
+					Title = "Select a level"
+				};
+				if (opn.ShowDialog() != DialogResult.OK)
+					return null;
+				file = opn.FileName;
+			}
 #if DEBUG
-		public ILevel LoadLevel(string file) => new Level(file, 0);
-#else		
-		public ILevel LoadLevel(string file) => new Level(file, -1);
+			return new Level(file, 0);
+#else
+			return new Level(file, -1);
 #endif
-		public ILevel NewLevel(string file) => new Level(true, file);
+		}
+
+		public ILevel NewLevel(string file = null)
+		{
+			if (file == null)
+			{
+				var sav = new SaveFileDialog()
+				{
+					Filter = LevelFormatFilter
+				};
+				if (sav.ShowDialog() != DialogResult.OK)
+					return null;
+				file = sav.FileName;
+			}
+			return new Level(true, file);
+		}
+
+		public void SaveLevel(ILevel level) => File.WriteAllBytes(level.FilePath, ((Level)level).SaveSzs());
+		public void SaveLevelAs(ILevel level)
+		{
+			var sav = new SaveFileDialog() { Filter = LevelFormatFilter };
+			if (sav.ShowDialog() != DialogResult.OK)
+				return;
+			File.WriteAllBytes(level.FilePath, ((Level)level).SaveSzs(sav.FileName));
+		}
+
 		public IObjList CreateObjList(string name, IList<dynamic> baseList) =>
 			 new ObjList(name, baseList);
 
 		public ILevelObj NewObject() => new LevelObj();
 
-		public void OpenLevelFile(string name, Stream file)
-		{
-			var byml = ByamlFile.Load(file, false, Syroot.BinaryData.ByteOrder.LittleEndian);
-			new ByamlViewer(byml, file).Show();
-		}
+		public bool OpenLevelFile(string name, Stream file) => false;
 
 		public string AddObjList(ILevel level)
 		{
@@ -137,7 +181,7 @@ namespace OdysseyExt
 		{
 			if (File.Exists($"{GameFolder}ObjectData\\{fileName}.szs"))
 			{
-				var SzsFiles = new SARC().unpackRam(YAZ0.Decompress($"{GameFolder}ObjectData\\{fileName}.szs"));
+				var SzsFiles = SARC.UnpackRam(YAZ0.Decompress($"{GameFolder}ObjectData\\{fileName}.szs"));
 				if (SzsFiles.ContainsKey(fileName + ".bfres"))
 				{
 					return SzsFiles[fileName + ".bfres"];

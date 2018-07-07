@@ -46,13 +46,14 @@ namespace EditorCore
         public ILevel LoadedLevel { get; set; }
         public CustomStack<IObjList> ListEditingStack { get; set; } = new CustomStack<IObjList>();
 
-        public ClipBoardItem StoredValue = null;
+        public static ClipBoardItem StoredValue = null;
         public CustomStack<UndoAction> UndoList = new CustomStack<UndoAction>();
 
+		const string LinkedListName = "____EditorInternalList___";
         public string CurListName
         {
             get {
-                if (EditingList) return RendererControl.C0ListName;
+                if (EditingList) return LinkedListName;
                 return comboBox1.Text;
             }
             set {
@@ -113,7 +114,7 @@ namespace EditorCore
 
         bool EditingList { get { return ListEditingStack.Count != 0; } }
 
-		public EditorForm(string[] args, ExtensionManifest[] Modules)
+		public EditorForm(string[] args, ExtensionManifest[] Modules, IGameModule selectedModule = null)
 		{
 			InitializeComponent();
 #if DEBUG
@@ -161,16 +162,24 @@ namespace EditorCore
 				}
 			}
 
-			if (ExtensionsWithGameModules.Count == 0) return;
-			else if (ExtensionsWithGameModules.Count == 1) GameModule = ExtensionsWithGameModules[0].GameModule;
+			if (selectedModule != null)
+			{
+				GameModule = selectedModule;
+			}
 			else
 			{
-				var dlg = new OtherForms.GameModuleSelect(ExtensionsWithGameModules);
-				dlg.ShowDialog();
-				if (dlg.result == null) return;
-				GameModule = dlg.result.GameModule;
+
+				if (ExtensionsWithGameModules.Count == 0) return;
+				else if (ExtensionsWithGameModules.Count == 1) GameModule = ExtensionsWithGameModules[0].GameModule;
+				else
+				{
+					var dlg = new OtherForms.GameModuleSelect(ExtensionsWithGameModules);
+					dlg.ShowDialog();
+					if (dlg.result == null) return;
+					GameModule = dlg.result.GameModule;
+				}
+				if (GameModule == null) return;
 			}
-			if (GameModule == null) return;
 
 			GameModule.InitModule(this);
 			ModelsFolder = GameModule.ModelsFolder;
@@ -213,8 +222,6 @@ namespace EditorCore
 			}
 
 			GamePathAndModelCheck();
-            if (Properties.Settings.Default.CheckUpdates)
-                UpdateCheck.CheckForUpdatesAsync();
 
 			if (FileOpenArgs != null)
 				GameModule.ParseArgs(FileOpenArgs);
@@ -222,15 +229,9 @@ namespace EditorCore
 			this.Text += $" - {GameModule.ModuleName} module";
 		}
 
-        private void openToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog openFile = new OpenFileDialog();
-            openFile.Filter = GameModule.LevelFormatFilter;
-            if (openFile.ShowDialog() != DialogResult.OK) return;
-            LoadLevel(openFile.FileName);
-        }
+		private void openToolStripMenuItem_Click(object sender, EventArgs e) => LoadLevel();
 
-        void UnloadLevel()
+		void UnloadLevel()
         {
             List<Form> ToClose = new List<Form>();
 			foreach (Form frm in Application.OpenForms)
@@ -275,11 +276,12 @@ namespace EditorCore
             else File.WriteAllLines($"{ModelsFolder}/SkipModels.txt", SkipModels.ToArray());
         }
 
-        public void LoadLevel(string path)
+        public void LoadLevel(string path = null)
         {
             UnloadLevel();
 
 			LoadedLevel = GameModule.LoadLevel(path);
+			if (LoadedLevel == null) return;
 
 			if (LoadedLevel.LevelFiles != null)
 			{
@@ -323,18 +325,17 @@ namespace EditorCore
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
         {
             UnloadLevel();
-            SaveFileDialog sav = new SaveFileDialog();
-            sav.Filter = GameModule.LevelFormatFilter;
-            if (sav.ShowDialog() != DialogResult.OK) return;
-            LoadedLevel =  GameModule.NewLevel(sav.FileName);
-            //Populate combobox
-            comboBox1.Items.AddRange(LoadedLevel.objs.Keys.ToArray());
+			LoadedLevel = GameModule.NewLevel();
+			if (LoadedLevel == null)
+				return;
+			//Populate combobox
+			comboBox1.Items.AddRange(LoadedLevel.objs.Keys.ToArray());
             comboBox1.SelectedIndex = 0;
             splitContainer2.Enabled = true;
             FindMenu.Visible = true;
         }
 
-        bool NoModels = true; //Debug only
+        bool NoModels = false; //Debug only
         List<string> SkipModels = null;
         string GetModelName(string ObjName) //convert bfres to obj and cache in models folder
         {
@@ -346,7 +347,7 @@ namespace EditorCore
 
 			string CachedModelPath = $"{ModelsFolder}\\{ObjName}.obj";
 			if (render.ImportedModels.ContainsKey(CachedModelPath) || //The model has aready been loaded or has been converted
-				GameModule.GetModelFile(ObjName, CachedModelPath))
+				GameModule.ConvertModelFile(ObjName, CachedModelPath))
 				return CachedModelPath;
 
 			SkipModels?.Add(ObjName);
@@ -369,12 +370,9 @@ namespace EditorCore
 				return;
 			}
 
-            string PlaceholderModel = $"{ModelsFolder}/UnkBlue.obj";
-            if (listName == "AreaList") PlaceholderModel = $"{ModelsFolder}/UnkYellow.obj";
-            else if (listName == "DebugList") PlaceholderModel = $"{ModelsFolder}/UnkRed.obj";
-            else if (listName == "CameraAreaInfo") PlaceholderModel = $"{ModelsFolder}/UnkGreen.obj";
+			string PlaceholderModel = ModelsFolder + "\\" + GameModule.GetPlaceholderModel(obj.Name, listName);
 
-            string ModelFile = GetModelName(obj.ModelName);
+			string ModelFile = GetModelName(obj.ModelName);
             if (ModelFile == null) ModelFile = PlaceholderModel;
             render.AddModel(ModelFile, obj, obj.ModelView_Pos, obj.ModelView_Scale, obj.ModelView_Rot);
         }
@@ -399,10 +397,10 @@ namespace EditorCore
 
         public void EditList(IList<dynamic> objList)
         {
-            IObjList list = GameModule.CreateObjList(RendererControl.C0ListName, objList);
+            IObjList list = GameModule.CreateObjList(LinkedListName, objList);
             ListEditingStack.Push(list);
             foreach (var o in list) ObjectsListBox.Items.Add(o.ToString());
-            LoadObjListModels(list, RendererControl.C0ListName);
+            LoadObjListModels(list, LinkedListName);
             PopulateListBox();
         }
 
@@ -452,7 +450,7 @@ namespace EditorCore
                 if (GameModule.ModelFieldPropNames.Contains(name) || name == "Name")
                 {
                     string path = GetModelName(SelectedObj.ModelName);
-                    if (path == null) path = $"{ModelsFolder}/UnkBlue.obj";
+                    if (path == null) path = $"{ModelsFolder}/{GameModule.GetPlaceholderModel(SelectedObj.Name,CurListName)}";
                     foreach (var i in SelectedObjs) render.ChangeModel(i, path);
                 }
                 foreach (var i in SelectedObjs)
@@ -600,31 +598,24 @@ namespace EditorCore
         {
             string name = ((ToolStripMenuItem)sender).Text;
 			var stream = new MemoryStream(LoadedLevel.LevelFiles[name]);
-			GameModule.OpenLevelFile(name, stream);
+			if (!GameModule.OpenLevelFile(name, stream))
+				OpenFileHandler.OpenFile(name, stream);
         }
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
-        {
+		{
+			if (LoadedLevel == null) return;
 #if DEBUG
 			saveAsToolStripMenuItem_Click(sender, e); //Let's not risk modifing our precious dump
 #else
-            File.WriteAllBytes(LoadedLevel.FilePath, LoadedLevel.SaveSzs());
+			GameModule.SaveLevel(LoadedLevel);
 #endif
-        }
+		}
 
-		private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (LoadedLevel == null) return;
-            SaveFileDialog sav = new SaveFileDialog();
-            sav.Filter = GameModule.LevelFormatFilter;
-            sav.FileName = Path.GetFileNameWithoutExtension(LoadedLevel.FilePath);
-            if (sav.ShowDialog() == DialogResult.OK)
-            {
-                File.WriteAllBytes(sav.FileName, LoadedLevel.Save(sav.FileName));
-            }
-        }
-		
-        private void Btn_addType_Click(object sender, EventArgs e)
+		private void saveAsToolStripMenuItem_Click(object sender, EventArgs e) =>
+			GameModule?.SaveLevelAs(LoadedLevel);
+
+		private void Btn_addType_Click(object sender, EventArgs e)
         {
 			string res = GameModule.AddObjList(LoadedLevel);
 			if (res == null) return;
@@ -645,7 +636,7 @@ namespace EditorCore
 			}
         }
 
-        private void preferencesToolStripMenuItem_Click(object sender, EventArgs e) => new Settings(render).ShowDialog();
+        private void preferencesToolStripMenuItem_Click(object sender, EventArgs e) => new Settings().ShowDialog();
 
         private void DuplicateSelectedObj_btn(object sender, EventArgs e) => DuplicateObj(SelectedObj, CurList);
         private void btn_delObj_Click(object sender, EventArgs e)
@@ -953,7 +944,7 @@ namespace EditorCore
             {
                 ObjectsListBox.Items.Add(o.ToString());
             }
-            if (!(list.name == RendererControl.C0ListName && EditingList))
+            if (!(list.name == LinkedListName && EditingList))
                 AddModel(o, list.name);
         }
 
@@ -1042,9 +1033,14 @@ namespace EditorCore
                 Properties.Settings.Default.FirstStart = false;
                 Properties.Settings.Default.Save();
                 MessageBox.Show("You can now custmize the settings (to open this window again click on File -> Settings)");
-                new Settings(render).ShowDialog();
-                this.Focus();
+				preferencesToolStripMenuItem_Click(null, null);
+				this.Focus();
             }
         }
+
+		private void newEditorInstanceToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			new EditorForm(null, LoadedModules, GameModule).Show();
+		}
 	}
 }

@@ -22,8 +22,6 @@ namespace EditorCore.Interfaces
 		string FilePath { get; set; }
 		int HighestID { get; set; }
 
-		byte[] Save(string newPath = null);
-
 		bool HasList(string name);
 		IObjList FindListByObj(ILevelObj o);
 	}

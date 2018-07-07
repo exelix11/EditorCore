@@ -21,21 +21,27 @@ namespace EditorCore.Interfaces
 		
 		bool IsAddListSupported { get; }
 		bool IsPropertyEditingSupported { get; }
-		string LevelFormatFilter { get; }
 		EditorForm ViewForm { get; set; }
 
 		string[] AutoHideList { get; }
 
 		void InitModule(EditorForm currentView);
+		void FormLoaded(); //for startup checks
 		void ParseArgs(string[] Args);
-		ILevel LoadLevel(string file);
-		ILevel NewLevel(string file);
-		bool GetModelFile(string ObjName, string path);
+
+		ILevel LoadLevel(string path = null); 
+		ILevel NewLevel(string path = null);
 		IObjList CreateObjList(string name, IList<dynamic> baseList);
 		ILevelObj NewObject();
-		void OpenLevelFile(string name, Stream file);
+
+		void SaveLevel(ILevel level);
+		void SaveLevelAs(ILevel level);
+
+		bool ConvertModelFile(string ObjName, string path);
+		string GetPlaceholderModel(string ObjName, string ListName);
+
+		bool OpenLevelFile(string name, Stream file); //if it fails the editor will try using OpenFileHandler
 		string AddObjList(ILevel level);
 		void EditChildrenNode(ILevelObj obj);
-		void FormLoaded(); //for startup checks
 	}
 }

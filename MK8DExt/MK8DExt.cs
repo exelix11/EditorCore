@@ -29,5 +29,12 @@ namespace MK8DExt
 				return _module;
 			}
 		}
+
+		public IFileHander[] Handlers => null;
+
+		public void CheckForUpdates()
+		{
+			return;
+		}
 	}
 }

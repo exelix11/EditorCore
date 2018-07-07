@@ -77,7 +77,7 @@ namespace OdysseyExt
 
         void Load(byte[] file, int scenarioIndex = -1)
         {
-            LevelFiles = new SARC().unpackRam(YAZ0.Decompress(file));
+            LevelFiles = SARC.UnpackRam(YAZ0.Decompress(file));
 			LoadByml(scenarioIndex);
         }
 
@@ -150,8 +150,7 @@ namespace OdysseyExt
             var res = mem.ToArray();
             return res;
         }
-
-		public byte[] Save(string newPath = null) => SaveSzs(newPath);
+		
 		public byte[] SaveSzs(string newPath = null)
         {
             if (newPath != null)

@@ -1,4 +1,5 @@
-﻿using EditorCore.Interfaces;
+﻿using EditorCore;
+using EditorCore.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,6 +31,14 @@ namespace OdysseyExt
 				if (_module == null) _module = new OdysseyModule();
 				return _module;
 			}
+		}
+
+		public IFileHander[] Handlers => null;
+
+		public void CheckForUpdates()
+		{
+			return;
+			//var res = await GitHubUpdateCheck.CheckForUpdates("Exelix11", "OdysseyEditor");
 		}
 	}
 }

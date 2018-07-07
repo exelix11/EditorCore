@@ -7,26 +7,37 @@ using System.Windows.Forms;
 
 namespace EditorCore
 {
-    class UpdateCheck
-    {
+	public class GitHubUpdateCheck
+	{
+		public class GitHubRelease
+		{
+			public DateTimeOffset CreatedAt { get; protected set; }
+			public string Body { get; protected set; }
+			public string Name { get; protected set; }
+			public string TargetCommitish { get; protected set; }
+			public string TagName { get; protected set; }
+			public int Id { get; protected set; }
+			public string Url { get; protected set; }
+
+			internal GitHubRelease(Octokit.Release release)
+			{
+				CreatedAt = release.CreatedAt;
+				Body = release.Body;
+				Name = release.Name;
+				TargetCommitish = release.TargetCommitish;
+				TagName = release.TagName;
+				Id = release.Id;
+				Url = release.Url;
+			}
+		}
+
         public const int ReleaseID = 1;
 
-        public static async Task CheckForUpdates()
+        public static async Task<GitHubRelease> CheckForUpdates(string owner, string name)
         {
-			return;
             var githubClient = new Octokit.GitHubClient(new Octokit.ProductHeaderValue("OdysseyEditor"));
-            var ver = await githubClient.Repository.Release.GetAll("exelix11", "OdysseyEditor");
-            if (ver.Count > ReleaseID)
-            {                
-                if (MessageBox.Show($"There is a new version of the editor, do you want to open the github page ?\r\n\r\nDetails:\r\n{ver[0].Body}", "", MessageBoxButtons.YesNo) == DialogResult.Yes)
-                    System.Diagnostics.Process.Start("https://github.com/exelix11/OdysseyEditor/releases");
-            }
-        }
-
-        public static void CheckForUpdatesAsync()
-        {
-			return;
-            Task.Run(async () => await CheckForUpdates());
+            Octokit.Release ver = await githubClient.Repository.Release.GetLatest("exelix11", "OdysseyEditor");
+			return new GitHubRelease(ver);
         }
     }
 }

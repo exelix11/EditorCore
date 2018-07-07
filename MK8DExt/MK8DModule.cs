@@ -37,9 +37,7 @@ namespace MK8DExt
 
 		public bool IsAddListSupported => false;
 		public bool IsPropertyEditingSupported => false;
-
-		public string LevelFormatFilter => "course_muunt.byaml |*_muunt.byaml| every file | *.*";
-
+		
 		public EditorForm ViewForm { get; set; }
 		public string[] AutoHideList => new string[0];
 
@@ -83,7 +81,8 @@ namespace MK8DExt
 			}
 		}
 
-		public bool GetModelFile(string ObjName, string path) => BfresConverter.Convert(FindBfres(ObjName), path);
+		public bool ConvertModelFile(string ObjName, string path) => BfresConverter.Convert(FindBfres(ObjName), path);
+		public string GetPlaceholderModel(string ObjName, string ListName) => "UnkBlue.obj";
 
 		byte[] FindBfres(string objname)
 		{
@@ -100,8 +99,15 @@ namespace MK8DExt
 		}
 
 		LevelObj StageDummyModel;
-		public ILevel LoadLevel(string file)
+		string LevelFormatFilter => "course_muunt.byaml |*_muunt.byaml| every file | *.*";
+		public ILevel LoadLevel(string file = null)
 		{
+			if (file == null) {
+				var opn = new OpenFileDialog() { Filter = LevelFormatFilter };
+				if (opn.ShowDialog() != DialogResult.OK) return null;
+				file = opn.FileName;
+			}
+
 			var res = new Level(file);
 
 			string stageName = new DirectoryInfo(file).Parent.Name;
@@ -128,20 +134,27 @@ namespace MK8DExt
 		public ILevel NewLevel(string file)
 		{
 			MessageBox.Show("New levels can't be created");
-			throw new NotImplementedException();
+			return null;
 		}
 
 		public ILevelObj NewObject() => new LevelObj();
 
-		public void OpenLevelFile(string name, Stream file) //Mk8 doesn't use archives for levels
-		{
-			throw new NotImplementedException();
-		}
+		public bool OpenLevelFile(string name, Stream file) => false;
 
 		public void ParseArgs(string[] Args)
 		{
 			if (Args.Length > 0 && Args[0].EndsWith(".byaml"))
 				LoadLevel(Args[0]);
 		}
+
+		public void SaveLevel(ILevel level) => File.WriteAllBytes(level.FilePath, ((Level)level).Save());
+
+		public void SaveLevelAs(ILevel level)
+		{
+			var sav = new SaveFileDialog() { Filter = LevelFormatFilter };
+			if (sav.ShowDialog() != DialogResult.OK) return;
+			File.WriteAllBytes(sav.FileName, ((Level)level).Save(sav.FileName));
+		}
+		
 	}
 }
