@@ -124,12 +124,6 @@ namespace OdysseyExt
 			LoadObjects(newScenario);
 		}
 
-        public void OpenBymlViewer()
-        {
-            ByamlViewer v = new ByamlViewer(LoadedLevelData);
-            v.Show();
-        }
-
         void ApplyChangesToByml() //this makes sure new objects are added
         {
             objs.OrderBy(k => k.Key);

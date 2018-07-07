@@ -20,9 +20,9 @@ using static System.Windows.Forms.ListBox;
 namespace ModelViewer
 {
     public class DragArgs
-    {
-        public dynamic obj;
-        public Vector3D position;
+	{
+		public Vector3D DeltaPos;
+		public Vector3D position;
         public Vector3D StartPos;
     }
 
@@ -233,10 +233,10 @@ namespace ModelViewer
                 }
                 else
                 {
-                    vec.X = Math.Round(vec.X, 3, MidpointRounding.AwayFromZero);
-                    vec.Y = Math.Round(vec.Y, 3, MidpointRounding.AwayFromZero);
-                    vec.Z = Math.Round(vec.Z, 3, MidpointRounding.AwayFromZero);
-                    return vec;
+					vec.X = (int)vec.X;
+					vec.Y = (int)vec.Y;
+					vec.Z = (int)vec.Z;
+					return vec;
                 }
             }
             return pos.Value.ToVector3D();

@@ -71,16 +71,13 @@ namespace EditorCore
             }
         }
 
-		public int SelectionCount
-        {
-            get { return ObjectsListBox.SelectedItems.Count; }
-        }
+		public int SelectionCount => ObjectsListBox.SelectedItems.Count;
 
 		ILevelObj SelectedObj
 		{
 			get
 			{
-				return SelectionCount == 0 ? null : CurList[ObjectsListBox.SelectedIndex];
+				return SelectionCount == 0 ? null : (ILevelObj)ObjectsListBox.SelectedItem;
 			}
 			set
 			{
@@ -94,7 +91,7 @@ namespace EditorCore
 					if (list != null)
 						CurListName = list.name;
 				}
-				ObjectsListBox.SelectedIndex = CurList.IndexOf(value);
+				ObjectsListBox.SelectedItem = value;
 			}
 		}
 
@@ -102,13 +99,11 @@ namespace EditorCore
         {
             get
             {
-                if (SelectionCount > 0)
-                {
-                    var res = new ILevelObj[ObjectsListBox.SelectedIndices.Count];
-                    for (int i = 0; i < res.Length; i++) res[i] = CurList[ObjectsListBox.SelectedIndices[i]];
-                    return res;
-                }
-                else return new ILevelObj[0];
+				if (SelectionCount > 0)
+				{
+					return ObjectsListBox.SelectedItems.Cast<ILevelObj>().ToArray();
+				}
+				else return new ILevelObj[0];
             }
         }
 
@@ -179,11 +174,12 @@ namespace EditorCore
 					GameModule = dlg.result.GameModule;
 				}
 				if (GameModule == null) return;
+
+				Properties.Settings.Default.Add<string>($"{GameModule.ModuleName}_GamePath", "");
 			}
 
 			GameModule.InitModule(this);
 			ModelsFolder = GameModule.ModelsFolder;
-			Properties.Settings.Default.Add<string>($"{GameModule.ModuleName}_GamePath","");
 			GameFolder = (string)Properties.Settings.Default[$"{GameModule.ModuleName}_GamePath"];
 
 			IsAddListSupported = GameModule.IsAddListSupported;
@@ -335,7 +331,7 @@ namespace EditorCore
             FindMenu.Visible = true;
         }
 
-        bool NoModels = false; //Debug only
+        bool NoModels = true; //Debug only
         List<string> SkipModels = null;
         string GetModelName(string ObjName) //convert bfres to obj and cache in models folder
         {
@@ -391,7 +387,7 @@ namespace EditorCore
         {
             ObjectsListBox.Items.Clear();
             propertyGrid1.SelectedObject = null;
-            foreach (var o in CurList) ObjectsListBox.Items.Add(o.ToString());
+            foreach (var o in CurList) ObjectsListBox.Items.Add(o);
             ListEditingPanel.Visible = EditingList;
         }
 
@@ -399,7 +395,7 @@ namespace EditorCore
         {
             IObjList list = GameModule.CreateObjList(LinkedListName, objList);
             ListEditingStack.Push(list);
-            foreach (var o in list) ObjectsListBox.Items.Add(o.ToString());
+            foreach (var o in list) ObjectsListBox.Items.Add(o);
             LoadObjListModels(list, LinkedListName);
             PopulateListBox();
         }
@@ -757,7 +753,7 @@ namespace EditorCore
             HideGroup_CB.CheckedChanged -= HideGroup_CB_CheckedChanged; //Do not trigger event, unneeded (?)
             HideGroup_CB.Checked = CurList.IsHidden;
             HideGroup_CB.CheckedChanged += HideGroup_CB_CheckedChanged;
-            foreach (var o in CurList) ObjectsListBox.Items.Add(o.ToString());
+            foreach (var o in CurList) ObjectsListBox.Items.Add(o);
         }
 
         private void SelectedObjectChanged(object sender, EventArgs e) //ObjectsListBox
@@ -831,21 +827,33 @@ namespace EditorCore
             int RoundTo = (ModifierKeys & Keys.Alt) == Keys.Alt ? 100 : ((ModifierKeys & Keys.Shift) == Keys.Shift ? 50 : 0);
 
             Vector3D NewPos = render.Drag(DraggingArgs, e, RoundTo);
-            if (NewPos == null) return;
-            ((ILevelObj)DraggingArgs.obj).ModelView_Pos = NewPos;
-            UpdateModelPosition(DraggingArgs.obj);
+			if (NewPos == null) return;
+			DraggingArgs.DeltaPos = NewPos - DraggingArgs.position;
             DraggingArgs.position = NewPos;
+
+			foreach (var o in SelectedObjs)
+			{
+				o.ModelView_Pos += DraggingArgs.DeltaPos;
+				UpdateModelPosition(o);
+			}
         }
 
         void endDragging()
         {
-            AddToUndo((dynamic args) => 
-            {
-                var a = (DragArgs)args;
-                ((ILevelObj)a.obj).ModelView_Pos = a.StartPos;
-                UpdateModelPosition(a.obj);
-            }, $"Moved object {SelectedObj}", DraggingArgs);
-            DraggingArgs = null;
+			Vector3D TotalDelta = DraggingArgs.position - DraggingArgs.StartPos;
+
+			AddToUndo((dynamic args) =>
+			{
+				foreach (var o in args[0])
+				{
+					o.ModelView_Pos -= args[1];
+					UpdateModelPosition(o);
+				}
+			}, 
+			SelectionCount == 1 ? $"Moved object {SelectedObj}" : $"Moved {SelectionCount} objects",
+			new dynamic[] { SelectedObjs, TotalDelta }); //SelectedObjs doesn't need to be cloned as every time it's called it returns a new array
+
+			DraggingArgs = null;
             propertyGrid1.Refresh();
         }
 
@@ -857,25 +865,24 @@ namespace EditorCore
         private void render_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
 			if (RenderIsDragging) return;
-			var obj = render.GetOBJ(sender, e);
+			var obj = render.GetOBJ(sender, e) as ILevelObj;
 			if (obj == null)
 			{
 				return;
 			}
-
-			if ((ModifierKeys & Keys.Shift) == Keys.Shift && CurList.Contains(obj))
+			
+			if (((ModifierKeys & Keys.Shift) == Keys.Shift || 
+				(ModifierKeys & Keys.Control) == Keys.Control) && CurList.Contains(obj)) //Shift add to selection, ctrl start drag as well
 			{
-				ObjectsListBox.SelectedIndices.Add(CurList.IndexOf(obj));
-				return; // drag only a single object
+				ObjectsListBox.SelectedItems.Add(obj);
 			}
 			else
 				SelectedObj = obj;
-
-			if (SelectedObj == obj && (ModifierKeys & Keys.Control) == Keys.Control) //User wants to drag
+			
+			if ((ModifierKeys & Keys.Control) == Keys.Control) //User wants to drag
 			{
 				DraggingArgs = new DragArgs();
-				DraggingArgs.obj = obj;
-				DraggingArgs.StartPos = ((ILevelObj)DraggingArgs.obj).ModelView_Pos;
+				DraggingArgs.StartPos = obj.ModelView_Pos;
 				DraggingArgs.position = DraggingArgs.StartPos;
 			}
 		}
@@ -942,7 +949,7 @@ namespace EditorCore
             list.Add(o);
             if (list == CurList)
             {
-                ObjectsListBox.Items.Add(o.ToString());
+                ObjectsListBox.Items.Add(o);
             }
             if (!(list.name == LinkedListName && EditingList))
                 AddModel(o, list.name);
