@@ -54,7 +54,9 @@ namespace EditorCore
 			if (Properties.Settings.Default.CheckUpdates)
 				foreach (var m in extensions) m.CheckForUpdates();
 
-			Application.Run(new EditorForm(args, extensions.ToArray()));            
+			var firstForm = new EditorForm(args, extensions.ToArray());
+			firstForm.Show();
+			Application.Run();            
         }
     }
 

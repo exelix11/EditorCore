@@ -48,9 +48,22 @@ namespace OdysseyExt
 			return PlaceholderModel;
 		}
 
+		ToolStripMenuItem MenuExtension = new ToolStripMenuItem("Odyssey extension");
+		ToolStripItem KCLModelItem;
+		bool UseKclCollisions = false;
 		public void InitModule(EditorForm currentView)
 		{
 			ViewForm = currentView;
+			ViewForm.RegisterMenuStripExt(MenuExtension);
+			KCLModelItem = MenuExtension.DropDownItems.Add("");
+			ToggleKclCollisions(false);
+			KCLModelItem.Click += delegate (object o, EventArgs a) { ToggleKclCollisions(); };
+		}
+
+		void ToggleKclCollisions(bool? val = null)
+		{
+			UseKclCollisions = val.HasValue ? val.Value : !UseKclCollisions;
+			KCLModelItem.Text = $"Use collisions as stage models : {(UseKclCollisions ? "ON" : "OFF")}";
 		}
 
 		public void ParseArgs(string[] Args)

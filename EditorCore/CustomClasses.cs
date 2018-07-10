@@ -262,7 +262,7 @@ namespace ExtensionMethods
 			{
 				PropertyType = typeof(T),
 				Provider = settings.Providers["LocalFileSettingsProvider"],
-				SerializeAs = SettingsSerializeAs.Xml
+				SerializeAs = SettingsSerializeAs.String
 			};
 
 			p.Attributes.Add(typeof(UserScopedSettingAttribute), new UserScopedSettingAttribute());

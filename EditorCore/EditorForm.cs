@@ -194,6 +194,7 @@ namespace EditorCore
 
 		}
 
+		public void RegisterMenuStripExt(ToolStripMenuItem item) => menuStrip1.Items.Add(item);
 		void RegisterMenuExt(ToolStripMenuItem target, ToolStripMenuItem[] list) => target.DropDownItems.AddRange(list);
 		void RegisterMenuExt(ToolStrip target, ToolStripMenuItem[] list) => target.Items.AddRange(list);
 		void RegisterMenuExtIndex(ToolStripMenuItem target, ToolStripMenuItem[] list, int index = 0)
@@ -331,7 +332,7 @@ namespace EditorCore
             FindMenu.Visible = true;
         }
 
-        bool NoModels = true; //Debug only
+        bool NoModels = false; //Debug only
         List<string> SkipModels = null;
         string GetModelName(string ObjName) //convert bfres to obj and cache in models folder
         {

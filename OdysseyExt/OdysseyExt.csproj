@@ -116,5 +116,6 @@
     <None Include="packages.config" />
     <None Include="Resources\baseModels.zip" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
