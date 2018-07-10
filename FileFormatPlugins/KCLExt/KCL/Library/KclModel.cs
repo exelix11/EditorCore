@@ -12,7 +12,7 @@ namespace Syroot.NintenTools.MarioKart8.Collisions
     /// <summary>
     /// Represents a model referenced in a <see cref="KclFile"/> which can hold up to 65535 triangles.
     /// </summary>
-    public class KclModel 
+    public class KclModel : ILoadableFile
     {
         // ---- CONSTANTS ----------------------------------------------------------------------------------------------
 

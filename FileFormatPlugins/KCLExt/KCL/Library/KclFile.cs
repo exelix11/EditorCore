@@ -11,7 +11,7 @@ namespace Syroot.NintenTools.MarioKart8.Collisions
     /// <summary>
     /// Represents the collision model of a course which sorts polygons into an octree to allow fast spatial lookups.
     /// </summary>
-    public class KclFile
+    public class KclFile : ILoadableFile
     {
         // ---- CONSTANTS ----------------------------------------------------------------------------------------------
 

@@ -3,10 +3,6 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
-#GamePlugins should have their own repo
-GamePlugins/*
-!GamePlugins/README.md
-
 # User-specific files
 *.suo
 *.user

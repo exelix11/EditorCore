@@ -30,12 +30,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Syroot.BinaryData, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\EditorCore\bin\Debug\Ext\Syroot.BinaryData.dll</HintPath>
+    <Reference Include="Syroot.BinaryData, Version=2.0.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Syroot.IO.BinaryData.2.0.2\lib\net45\Syroot.BinaryData.dll</HintPath>
     </Reference>
     <Reference Include="Syroot.Maths, Version=1.5.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Syroot.Maths.1.5.0\lib\net45\Syroot.Maths.dll</HintPath>
+      <HintPath>..\..\packages\Syroot.Maths.1.5.0\lib\net45\Syroot.Maths.dll</HintPath>
     </Reference>
     <Reference Include="Syroot.NintenTools, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Syroot.NintenTools.1.1.3\lib\net45\Syroot.NintenTools.dll</HintPath>
@@ -44,7 +43,7 @@
       <HintPath>..\packages\Syroot.NintenTools.Byaml.2.1.0\lib\net45\Syroot.NintenTools.Byaml.dll</HintPath>
     </Reference>
     <Reference Include="Syroot.NintenTools.MarioKart8, Version=0.5.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Syroot.NintenTools.MarioKart8.0.5.2\lib\net451\Syroot.NintenTools.MarioKart8.dll</HintPath>
+      <HintPath>..\..\packages\Syroot.NintenTools.MarioKart8.0.5.2\lib\net451\Syroot.NintenTools.MarioKart8.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

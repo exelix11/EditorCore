@@ -62,6 +62,8 @@
 			this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.FileMenu = new System.Windows.Forms.ToolStripMenuItem();
+			this.newEditorInstanceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
 			this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
 			this.preferencesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.RenderingCanvas = new System.Windows.Forms.Integration.ElementHost();
@@ -85,8 +87,6 @@
 			this.objectByNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.objectByModelNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.splitContainer2 = new System.Windows.Forms.SplitContainer();
-			this.newEditorInstanceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
 			this.splitContainer1.Panel1.SuspendLayout();
 			this.splitContainer1.Panel2.SuspendLayout();
@@ -414,7 +414,7 @@
 			// 
 			this.saveAsToolStripMenuItem.Enabled = false;
 			this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-			this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
 			this.saveAsToolStripMenuItem.Text = "Save as...";
 			this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.saveAsToolStripMenuItem_Click);
 			// 
@@ -422,21 +422,21 @@
 			// 
 			this.saveToolStripMenuItem.Enabled = false;
 			this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-			this.saveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.saveToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
 			this.saveToolStripMenuItem.Text = "Save";
 			this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
 			// 
 			// openToolStripMenuItem
 			// 
 			this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-			this.openToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.openToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
 			this.openToolStripMenuItem.Text = "Open";
 			this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
 			// 
 			// newToolStripMenuItem
 			// 
 			this.newToolStripMenuItem.Name = "newToolStripMenuItem";
-			this.newToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.newToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
 			this.newToolStripMenuItem.Text = "New";
 			this.newToolStripMenuItem.Click += new System.EventHandler(this.newToolStripMenuItem_Click);
 			// 
@@ -455,15 +455,27 @@
 			this.FileMenu.Size = new System.Drawing.Size(37, 20);
 			this.FileMenu.Text = "File";
 			// 
+			// newEditorInstanceToolStripMenuItem
+			// 
+			this.newEditorInstanceToolStripMenuItem.Name = "newEditorInstanceToolStripMenuItem";
+			this.newEditorInstanceToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
+			this.newEditorInstanceToolStripMenuItem.Text = "New editor instance";
+			this.newEditorInstanceToolStripMenuItem.Click += new System.EventHandler(this.newEditorInstanceToolStripMenuItem_Click);
+			// 
+			// toolStripSeparator2
+			// 
+			this.toolStripSeparator2.Name = "toolStripSeparator2";
+			this.toolStripSeparator2.Size = new System.Drawing.Size(176, 6);
+			// 
 			// toolStripSeparator8
 			// 
 			this.toolStripSeparator8.Name = "toolStripSeparator8";
-			this.toolStripSeparator8.Size = new System.Drawing.Size(177, 6);
+			this.toolStripSeparator8.Size = new System.Drawing.Size(176, 6);
 			// 
 			// preferencesToolStripMenuItem
 			// 
 			this.preferencesToolStripMenuItem.Name = "preferencesToolStripMenuItem";
-			this.preferencesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.preferencesToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
 			this.preferencesToolStripMenuItem.Text = "Settings";
 			this.preferencesToolStripMenuItem.Click += new System.EventHandler(this.preferencesToolStripMenuItem_Click);
 			// 
@@ -504,14 +516,14 @@
 			// toolStripSeparator9
 			// 
 			this.toolStripSeparator9.Name = "toolStripSeparator9";
-			this.toolStripSeparator9.Size = new System.Drawing.Size(177, 6);
+			this.toolStripSeparator9.Size = new System.Drawing.Size(132, 6);
 			// 
 			// gamePathToolStripItem
 			// 
 			this.gamePathToolStripItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.changeToolStripMenuItem});
 			this.gamePathToolStripItem.Name = "gamePathToolStripItem";
-			this.gamePathToolStripItem.Size = new System.Drawing.Size(180, 22);
+			this.gamePathToolStripItem.Size = new System.Drawing.Size(135, 22);
 			this.gamePathToolStripItem.Text = "Game path:";
 			// 
 			// changeToolStripMenuItem
@@ -648,18 +660,6 @@
 			this.splitContainer2.SplitterDistance = 248;
 			this.splitContainer2.TabIndex = 17;
 			// 
-			// newEditorInstanceToolStripMenuItem
-			// 
-			this.newEditorInstanceToolStripMenuItem.Name = "newEditorInstanceToolStripMenuItem";
-			this.newEditorInstanceToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-			this.newEditorInstanceToolStripMenuItem.Text = "New editor instance";
-			this.newEditorInstanceToolStripMenuItem.Click += new System.EventHandler(this.newEditorInstanceToolStripMenuItem_Click);
-			// 
-			// toolStripSeparator2
-			// 
-			this.toolStripSeparator2.Name = "toolStripSeparator2";
-			this.toolStripSeparator2.Size = new System.Drawing.Size(177, 6);
-			// 
 			// EditorForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -671,6 +671,7 @@
 			this.Controls.Add(this.splitContainer2);
 			this.Name = "EditorForm";
 			this.Text = "EditorCore";
+			this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.EditorForm_Closed);
 			this.Load += new System.EventHandler(this.Form1_Load);
 			this.splitContainer1.Panel1.ResumeLayout(false);
 			this.splitContainer1.Panel1.PerformLayout();

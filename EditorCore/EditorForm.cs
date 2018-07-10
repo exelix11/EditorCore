@@ -1050,5 +1050,11 @@ namespace EditorCore
 		{
 			new EditorForm(null, LoadedModules, GameModule).Show();
 		}
+
+		private void EditorForm_Closed(object sender, FormClosedEventArgs e)
+		{
+			if (Application.OpenForms.Count == 0)
+				Environment.Exit(0);
+		}
 	}
 }

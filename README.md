@@ -44,7 +44,7 @@ Q | Switch camera mode
 This repo contains just the editor and its libs, to use it you also need a game module :
 (Super Mario Odyssey module)[https://github.com/exelix11/OdysseyEditor]
 
-to build place a symlink to the game module folder in the GamePlugins folder (you could also copy, this step is to keep the structure cleaner) and add it to the solution.
+To build a game module add it to the solution, you might get errors with references, restore nuget packages and check they have the right path in each project.
 Remember to change the build path to the Ext folder in the bin directory or else the editor won't load the dll automatically. The dll name should end with Ext.dll 
 
 ## Credits

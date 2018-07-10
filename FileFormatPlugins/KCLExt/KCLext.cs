@@ -59,18 +59,19 @@ namespace KCLExt
 					var vert = mod.CreateDisplayVertices();
 					foreach (var v in vert)
 					{
-						f.WriteLine($"v {v.pos.X} {v.pos.Y} {v.pos.Z}");
+						f.WriteLine($"v {v.pos.X} {v.pos.Y} {v.pos.Z} {v.col.X} {v.col.Y} {v.col.Z}");
 						f.WriteLine($"vn {v.nrm.X} {v.nrm.Y} {v.nrm.Z}");
 					}
+					var disp = mod.display;
 					for (int i = 0; i < mod.displayFaceSize;)
 						{
 						f.WriteLine(
-							$"f {mod.display[i] + VertexOffest}//{mod.display[i++] + VertexOffest} " +
-							  $"{mod.display[i] + VertexOffest}//{mod.display[i++] + VertexOffest} " +
-							  $"{mod.display[i] + VertexOffest}//{mod.display[i++] + VertexOffest}");
+							$"f {disp[i] + VertexOffest}//{disp[i++] + VertexOffest} " +
+							  $"{disp[i] + VertexOffest}//{disp[i++] + VertexOffest} " +
+							  $"{disp[i] + VertexOffest}//{disp[i++] + VertexOffest}");
 					}
 					VertexOffest += vert.Count;
-					break;
+					break; //export just the first mesh
 				}
 			}
 		}

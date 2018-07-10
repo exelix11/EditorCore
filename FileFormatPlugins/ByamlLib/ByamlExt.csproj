@@ -31,10 +31,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Syroot.BinaryData, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Syroot.IO.BinaryData.2.0.0\lib\net45\Syroot.BinaryData.dll</HintPath>
+      <HintPath>..\..\packages\Syroot.IO.BinaryData.2.0.0\lib\net45\Syroot.BinaryData.dll</HintPath>
     </Reference>
-    <Reference Include="Syroot.Maths, Version=1.5.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Syroot.Maths.1.5.0\lib\net45\Syroot.Maths.dll</HintPath>
+    <Reference Include="Syroot.Maths, Version=1.4.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Syroot.Maths.1.4.0\lib\net45\Syroot.Maths.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

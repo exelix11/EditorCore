@@ -5,14 +5,16 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using Syroot.NintenTools.MarioKart8.Collisions;
+using System.Windows.Forms;
 using System.Windows;
 using System.Drawing;
 using System.Numerics;
 
 namespace Smash_Forge
 {
-    public class KCL 
+    public class KCL : TreeNode
     {
+
         //Set the game's material list
         public GameSet GameMaterialSet = GameSet.MarioKart8D;
 
@@ -76,11 +78,14 @@ namespace Smash_Forge
         }
 
         public KclFile kcl = null;
-        public List<KCLModel> models = new List<KCLModel>();
-		
+        public List<KCLModel> models = new List<KCLModel>();		
+
         public KCL(byte[] file_data) 
         {
+            Text = "KCLFile";
+
             Read(file_data);
+            UpdateVertexData();
         }
 		
         public class Vertex
@@ -99,8 +104,15 @@ namespace Smash_Forge
             public static int Size = 4 * (3 + 3 + 3);
         }
 
-        public class KCLModel
+        public class KCLModel : TreeNode
         {
+            public KCLModel()
+            {
+                Checked = true;
+                ImageKey = "mesh";
+                SelectedImageKey = "mesh";
+            }
+
             public List<int> faces = new List<int>();
             public List<Vertex> vertices = new List<Vertex>();
             public int[] Faces;
@@ -112,7 +124,7 @@ namespace Smash_Forge
             public int strip = 0x40;
             public int displayFaceSize = 0;
 
-            public class Face 
+            public class Face : TreeNode
             {
                 public int MaterialFlag = 0;
 
@@ -201,10 +213,40 @@ namespace Smash_Forge
                 }
             }
         }
+		
 
-		public static Vector3 Vec3F_To_Vec3(Syroot.Maths.Vector3F v) => new Vector3(v.X, v.Y, v.Z);
+        public void UpdateVertexData()
+        {
+            DisplayVertex[] Vertices;
+            int[] Faces;
 
-		public List<int> AllFlags = new List<int>();
+            int poffset = 0;
+            int voffset = 0;
+            List<DisplayVertex> Vs = new List<DisplayVertex>();
+            List<int> Ds = new List<int>();
+            foreach (KCLModel m in models)
+            {
+                m.Offset = poffset * 4;
+                List<DisplayVertex> pv = m.CreateDisplayVertices();
+                Vs.AddRange(pv);
+
+                Console.WriteLine(m.displayFaceSize);
+
+                for (int i = 0; i < m.displayFaceSize; i++)
+                {
+                    Ds.Add(m.display[i] + voffset);
+                }
+                poffset += m.displayFaceSize;
+                voffset += pv.Count;
+            }
+
+            // Binds
+            Vertices = Vs.ToArray();
+            Faces = Ds.ToArray();
+
+        }
+		       
+        public List<int> AllFlags = new List<int>();
 
         public void Read(byte[] file_data)
         {
@@ -224,7 +266,7 @@ namespace Smash_Forge
             {
                 KCLModel kclmodel = new KCLModel();
 
-                //kclmodel.Text = "Model " + CurModelIndx;
+                kclmodel.Text = "Model " + CurModelIndx;
 
 
                 KclFace[] indicesArray = mdl.Faces;
@@ -268,7 +310,7 @@ namespace Smash_Forge
 
                     KCLModel.Face face = new KCLModel.Face();
 
-                    //face.Text = f.CollisionFlags.ToString();
+                    face.Text = f.CollisionFlags.ToString();
 
                     face.MaterialFlag = f.CollisionFlags;
 
@@ -298,7 +340,10 @@ namespace Smash_Forge
 
 
                 models.Add(kclmodel);
-				
+
+
+ 
+                Nodes.Add(kclmodel);
 
                 CurModelIndx++;
             }
@@ -311,6 +356,11 @@ namespace Smash_Forge
 
             }
 
+        }
+        //Convert KCL lib vec3 to opentk one so i can use the cross and dot methods
+        public static Vector3 Vec3F_To_Vec3(Syroot.Maths.Vector3F v)
+        {
+            return new Vector3(v.X, v.Y, v.Z);
         }
 
         public void Save(byte[] file_data)
