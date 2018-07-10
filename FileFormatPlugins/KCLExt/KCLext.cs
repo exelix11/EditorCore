@@ -53,25 +53,24 @@ namespace KCLExt
 			var kcl = new KCL(File.ReadAllBytes(opn.FileName));
 			using (System.IO.StreamWriter f = new System.IO.StreamWriter(opn.FileName + ".obj"))
 			{
-				int VertexOffest = 0;
+				int VertexOffest = 1;
 				foreach (var mod in kcl.models)
 				{
-					var vert = mod.CreateDisplayVertices();
+					var vert = mod.vertices;
 					foreach (var v in vert)
 					{
-						f.WriteLine($"v {v.pos.X} {v.pos.Y} {v.pos.Z} {v.col.X} {v.col.Y} {v.col.Z}");
+						f.WriteLine($"v {v.pos.X} {v.pos.Y} {v.pos.Z}"); //{v.col.X} {v.col.Y} {v.col.Z} for vertex colors
 						f.WriteLine($"vn {v.nrm.X} {v.nrm.Y} {v.nrm.Z}");
 					}
 					var disp = mod.display;
-					for (int i = 0; i < mod.displayFaceSize;)
-						{
+					for (int i = 0; i < disp.Length;)
+					{
 						f.WriteLine(
 							$"f {disp[i] + VertexOffest}//{disp[i++] + VertexOffest} " +
 							  $"{disp[i] + VertexOffest}//{disp[i++] + VertexOffest} " +
 							  $"{disp[i] + VertexOffest}//{disp[i++] + VertexOffest}");
 					}
 					VertexOffest += vert.Count;
-					break; //export just the first mesh
 				}
 			}
 		}

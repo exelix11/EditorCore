@@ -5,16 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using Syroot.NintenTools.MarioKart8.Collisions;
-using System.Windows.Forms;
 using System.Windows;
 using System.Drawing;
 using System.Numerics;
 
 namespace Smash_Forge
 {
-    public class KCL : TreeNode
+    public class KCL
     {
-
         //Set the game's material list
         public GameSet GameMaterialSet = GameSet.MarioKart8D;
 
@@ -82,8 +80,6 @@ namespace Smash_Forge
 
         public KCL(byte[] file_data) 
         {
-            Text = "KCLFile";
-
             Read(file_data);
             UpdateVertexData();
         }
@@ -104,15 +100,8 @@ namespace Smash_Forge
             public static int Size = 4 * (3 + 3 + 3);
         }
 
-        public class KCLModel : TreeNode
+        public class KCLModel 
         {
-            public KCLModel()
-            {
-                Checked = true;
-                ImageKey = "mesh";
-                SelectedImageKey = "mesh";
-            }
-
             public List<int> faces = new List<int>();
             public List<Vertex> vertices = new List<Vertex>();
             public int[] Faces;
@@ -124,7 +113,7 @@ namespace Smash_Forge
             public int strip = 0x40;
             public int displayFaceSize = 0;
 
-            public class Face : TreeNode
+            public class Face
             {
                 public int MaterialFlag = 0;
 
@@ -266,9 +255,6 @@ namespace Smash_Forge
             {
                 KCLModel kclmodel = new KCLModel();
 
-                kclmodel.Text = "Model " + CurModelIndx;
-
-
                 KclFace[] indicesArray = mdl.Faces;
 
                 int ft = 0;
@@ -309,13 +295,10 @@ namespace Smash_Forge
                     vtx3.nrm = norm;
 
                     KCLModel.Face face = new KCLModel.Face();
-
-                    face.Text = f.CollisionFlags.ToString();
-
+					
                     face.MaterialFlag = f.CollisionFlags;
 
                     Color color = SetMaterialColor(face);
-
 
                     AllFlags.Add(face.MaterialFlag);
 
@@ -340,11 +323,7 @@ namespace Smash_Forge
 
 
                 models.Add(kclmodel);
-
-
- 
-                Nodes.Add(kclmodel);
-
+				
                 CurModelIndx++;
             }
 
