@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{6D1801B8-7B24-49D6-83A1-E21CCC280D8E}</ProjectGuid>
+    <ProjectGuid>{9C220305-E452-4DB0-9F99-186640268B4F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ByamlExt</RootNamespace>
-    <AssemblyName>ByamlExt</AssemblyName>
+    <RootNamespace>SARCExt</RootNamespace>
+    <AssemblyName>SARCExt</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -16,10 +16,11 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\EditorCore\bin\Debug\Ext\</OutputPath>
+    <OutputPath>..\..\EditorCore\bin\Debug\Ext\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -33,9 +34,6 @@
     <Reference Include="Syroot.BinaryData, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Syroot.IO.BinaryData.2.0.0\lib\net45\Syroot.BinaryData.dll</HintPath>
     </Reference>
-    <Reference Include="Syroot.Maths, Version=1.4.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Syroot.Maths.1.4.0\lib\net45\Syroot.Maths.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -48,44 +46,31 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ByamlExt.cs" />
-    <Compile Include="Byaml\ByamlException.cs" />
-    <Compile Include="Byaml\ByamlFile.cs" />
-    <Compile Include="Byaml\ByamlNodeType.cs" />
-    <Compile Include="Byaml\ByamlPathPoint.cs" />
-    <Compile Include="Byaml\ByamlViewer.cs">
+    <Compile Include="SarcEditor.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Byaml\ByamlViewer.designer.cs">
-      <DependentUpon>ByamlViewer.cs</DependentUpon>
+    <Compile Include="SarcEditor.Designer.cs">
+      <DependentUpon>SarcEditor.cs</DependentUpon>
     </Compile>
-    <Compile Include="Byaml\BymlPathPointEditor.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Byaml\BymlPathPointEditor.Designer.cs">
-      <DependentUpon>BymlPathPointEditor.cs</DependentUpon>
-    </Compile>
+    <Compile Include="SarcExt.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Byaml\ByamlViewer.resx">
-      <DependentUpon>ByamlViewer.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Byaml\BymlPathPointEditor.resx">
-      <DependentUpon>BymlPathPointEditor.cs</DependentUpon>
-    </EmbeddedResource>
+    <Compile Include="Sarc\SARC.cs" />
+    <Compile Include="Sarc\Yaz0Compression.cs" />
+    <Compile Include="Sarc\Yaz0Exception.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <WCFMetadata Include="Connected Services\" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\EditorCore\EditorCore.csproj">
-      <Project>{DF37F616-9CB6-4594-B30A-D5DD52EE1B3E}</Project>
+    <ProjectReference Include="..\..\EditorCore\EditorCore.csproj">
+      <Project>{df37f616-9cb6-4594-b30a-d5dd52ee1b3e}</Project>
       <Name>EditorCore</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="SarcEditor.resx">
+      <DependentUpon>SarcEditor.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

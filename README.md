@@ -9,6 +9,7 @@ BfresLib,BnTxx,ByamlExt and SarcExt can be reused for other Switch games as they
   - 3D level editor, with search, drag, raycast, and undo
   - Interfaces for level files and objects
   - Plugin structure to load different extensions at once (but only one GameExtension)
+  - Paths rendering
   - Super mario odyssey plugin to edit levels.
   - Mario Kart 8 Deluxe plugin to edit courses.
 
@@ -38,6 +39,13 @@ H | Hide selection from view
 C | Edit the links of the selected object
 B (while editing a links list) | Go back to the previous list
 Q | Switch camera mode
+
+## Building
+This repo contains just the editor and its libs, to use it you also need a game module :
+(Super Mario Odyssey module)[https://github.com/exelix11/OdysseyEditor]
+
+to build place a symlink to the game module folder in the GamePlugins folder (you could also copy, this step is to keep the structure cleaner) and add it to the solution.
+Remember to change the build path to the Ext folder in the bin directory or else the editor won't load the dll automatically. The dll name should end with Ext.dll 
 
 ## Credits
 This editor contains code or libraries from:

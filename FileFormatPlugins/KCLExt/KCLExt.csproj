@@ -16,7 +16,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\EditorCore\bin\Debug\Ext\</OutputPath>
+    <OutputPath>..\..\EditorCore\bin\Debug\Ext\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -79,7 +79,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EditorCore\EditorCore.csproj">
+    <ProjectReference Include="..\..\EditorCore\EditorCore.csproj">
       <Project>{DF37F616-9CB6-4594-B30A-D5DD52EE1B3E}</Project>
       <Name>EditorCore</Name>
     </ProjectReference>
