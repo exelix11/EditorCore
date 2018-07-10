@@ -392,13 +392,19 @@ namespace EditorCore
             ListEditingPanel.Visible = EditingList;
         }
 
-        public void EditList(IList<dynamic> objList)
+		public void EditPath(IPathObj path)
+		{
+			ListEditingStack.Push(path);
+			PopulateListBox();
+			LoadObjListModels(path, LinkedListName);
+		}
+
+		public void EditList(IList<dynamic> objList)
         {
             IObjList list = GameModule.CreateObjList(LinkedListName, objList);
             ListEditingStack.Push(list);
-            foreach (var o in list) ObjectsListBox.Items.Add(o);
-            LoadObjListModels(list, LinkedListName);
-            PopulateListBox();
+			PopulateListBox();
+			LoadObjListModels(list, LinkedListName);
         }
 
         public void PreviousList()
@@ -748,13 +754,11 @@ namespace EditorCore
         private void SelectedListChanged(object sender, EventArgs e) //comboBox1
         {
             if (EditingList) return;
-            ObjectsListBox.Items.Clear();
-            propertyGrid1.SelectedObject = null;
+			PopulateListBox();
             if (CurListName == null || CurListName == "" || CurList.Count == 0) return;
             HideGroup_CB.CheckedChanged -= HideGroup_CB_CheckedChanged; //Do not trigger event, unneeded (?)
             HideGroup_CB.Checked = CurList.IsHidden;
             HideGroup_CB.CheckedChanged += HideGroup_CB_CheckedChanged;
-            foreach (var o in CurList) ObjectsListBox.Items.Add(o);
         }
 
         private void SelectedObjectChanged(object sender, EventArgs e) //ObjectsListBox
@@ -787,7 +791,9 @@ namespace EditorCore
                     AddModel(o, CurList.name);
             }
 
-            render.SelectObjs(SelectedObjs.Cast<dynamic>().ToList());
+			var selection = SelectedObjs.Cast<dynamic>().ToList();
+			if (CurList is IPathObj) selection.Add(CurList);
+			render.SelectObjs(selection);
         }        
 
         private void ObjectsList_DoubleClick(object sender, EventArgs e)

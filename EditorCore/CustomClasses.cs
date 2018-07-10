@@ -249,12 +249,17 @@ namespace EditorCore
 
 namespace ExtensionMethods
 {
-    static class Extensions
+    public static class Extensions
     {
         public static Vector3D ToVect(this Point3D p)
         {
             return new Vector3D(p.X, p.Y, p.Z);
-        }
+		}
+
+		public static Point3D ToPoint3D(this Vector3D p)
+		{
+			return new Point3D(p.X, p.Y, p.Z);
+		}
 
 		public static void Add<T>(this ApplicationSettingsBase settings, string propertyName, T val)
 		{

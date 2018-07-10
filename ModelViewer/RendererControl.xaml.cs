@@ -121,35 +121,33 @@ namespace ModelViewer
 			if (Points.Length < 2) return;
 			LinesVisual3D l = null;
 			if (HasPath(reference))
-				l = Paths[reference];
-			else
 			{
-				l = new LinesVisual3D();
-				Paths.Add(reference, l);
-				ModelViewer.Children.Add(l);
+				RemoveModel(reference);
 			}
+			l = new LinesVisual3D();
+			Paths.Add(reference, l);
+			ModelViewer.Children.Add(l);
 			l.Thickness = thickness;
 			l.Color = Colors.Black;
 			l.Children.Clear();
 			for (int i = 0; i < Points.Length; i++)
 			{
 				l.Points.Add(Points[i]);
-			}
-			for (int i = 1; i < Points.Length; i++) //Fix for a weird glitch (?)
-			{
-				l.Points.Add(Points[i]);
+				if (i != 0 && i != Points.Length - 1) l.Points.Add(Points[i]);
 			}
 			ModelView.UpdateLayout();
 		}
 
 		void SelectPath(dynamic reference)
 		{
+			if (!HasPath(reference)) return;
 			LinesVisual3D l = Paths[reference];
 			l.Color = Colors.Red;
 		}
 
 		void UnselectPath(dynamic reference)
 		{
+			if (!HasPath(reference)) return;
 			LinesVisual3D l = Paths[reference];
 			l.Color = Colors.Black;
 		}
@@ -197,13 +195,7 @@ namespace ModelViewer
 				ModelView.UpdateLayout();
 			}
             ModelView.UpdateLayout();
-        }
-
-        public void RemoveRailPoints(LinesVisual3D rail)
-        {
-            foreach (LinesVisual3D r in rail.Children) RemoveRailPoints(r);
-            rail.Points.Clear();
-        }
+        }		
         
         public void LookAt(Vector3D p)
         {

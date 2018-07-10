@@ -7,7 +7,7 @@ using System.Windows.Media.Media3D;
 
 namespace EditorCore.Interfaces
 {
-	public interface IPathObj : IList<ILevelObj>, ILevelObj
+	public interface IPathObj : ILevelObj, IObjList
 	{
 		Point3D[] Points { get; set; }
 	}
