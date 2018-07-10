@@ -41,8 +41,9 @@ B (while editing a links list) | Go back to the previous list
 Q | Switch camera mode
 
 ## Building
-This repo contains just the editor and its libs, to use it you also need a game module :
-(Super Mario Odyssey module)[https://github.com/exelix11/OdysseyEditor]
+This repo contains just the editor and its libs, to use it you also need a game module : \
+[Super Mario Odyssey module](https://github.com/exelix11/OdysseyEditor) \
+[Mario Kart 8 Deluxe module](https://github.com/exelix11/MK8DEditor)
 
 To build a game module add it to the solution, you might get errors with references, restore nuget packages and check they have the right path in each project.
 Remember to change the build path to the Ext folder in the bin directory or else the editor won't load the dll automatically. The dll name should end with Ext.dll 
