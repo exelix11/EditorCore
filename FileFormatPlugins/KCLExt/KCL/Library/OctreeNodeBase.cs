@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace Syroot.NintenTools.MarioKart8.Collisions
+namespace Syroot.NintenTools.MarioKart8.Collisions.Custom
 {
     /// <summary>
     /// Represents the base for an octree node.

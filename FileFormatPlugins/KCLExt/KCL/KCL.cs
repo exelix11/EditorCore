@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
-using Syroot.NintenTools.MarioKart8.Collisions;
+using Syroot.NintenTools.MarioKart8.Collisions.Custom;
 using System.Windows;
 using System.Drawing;
 using System.Numerics;
@@ -239,14 +239,14 @@ namespace Smash_Forge
 
         public void Read(byte[] file_data)
         {
-            try
-            {
+         //   try
+          //  {
                 kcl = new KclFile(new MemoryStream(file_data), true, false, Syroot.BinaryData.ByteOrder.LittleEndian);
-            }
-            catch
-            {
-                kcl = new KclFile(new MemoryStream(file_data), true, false, Syroot.BinaryData.ByteOrder.BigEndian);
-            }
+          //  }
+           // catch
+          //  {
+          //      kcl = new KclFile(new MemoryStream(file_data), true, false, Syroot.BinaryData.ByteOrder.BigEndian);
+         //   }
 
             AllFlags.Clear();
 
@@ -255,10 +255,8 @@ namespace Smash_Forge
             {
                 KCLModel kclmodel = new KCLModel();
 
-                KclFace[] indicesArray = mdl.Faces;
-
                 int ft = 0;
-                foreach (KclFace f in mdl.Faces)
+                foreach (var f in mdl.Faces)
                 {
                     Vertex vtx = new Vertex();
                     Vertex vtx2 = new Vertex();
@@ -267,14 +265,14 @@ namespace Smash_Forge
 
                     Vector3 CrossA = Vector3.Cross(Vec3F_To_Vec3(mdl.Normals[f.Normal1Index]), Vec3F_To_Vec3(mdl.Normals[f.DirectionIndex]));
                     Vector3 CrossB = Vector3.Cross(Vec3F_To_Vec3(mdl.Normals[f.Normal2Index]), Vec3F_To_Vec3(mdl.Normals[f.DirectionIndex]));
-                    Vector3 CrossC = Vector3.Cross(Vec3F_To_Vec3(mdl.Normals[f.Normal3Index]), Vec3F_To_Vec3(mdl.Normals[f.DirectionIndex]));
+                   // Vector3 CrossC = Vector3.Cross(Vec3F_To_Vec3(mdl.Normals[f.Normal3Index]), Vec3F_To_Vec3(mdl.Normals[f.DirectionIndex]));
                     Vector3 normal_a = Vec3F_To_Vec3(mdl.Normals[f.Normal1Index]);
                     Vector3 normal_b = Vec3F_To_Vec3(mdl.Normals[f.Normal2Index]);
                     Vector3 normal_c = Vec3F_To_Vec3(mdl.Normals[f.Normal3Index]);
 
 
-                    float result1 = Vector3.Dot(new Vector3(CrossB.X, CrossB.Y, CrossB.Z), (new Vector3(normal_c.X, normal_c.Y, normal_c.Z)));
-                    float result2 = Vector3.Dot(new Vector3(CrossA.X, CrossA.Y, CrossA.Z), (new Vector3(normal_c.X, normal_c.Y, normal_c.Z)));
+                    float result1 = Vector3.Dot(CrossB, normal_c);
+                    float result2 = Vector3.Dot(CrossA, normal_c);
 
                     Vector3 pos = Vec3F_To_Vec3(mdl.Positions[f.PositionIndex]);
                     Vector3 nrm = Vec3F_To_Vec3(mdl.Normals[f.Normal1Index]);

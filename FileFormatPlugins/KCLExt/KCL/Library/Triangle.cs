@@ -14,15 +14,23 @@ namespace Syroot.NintenTools.MarioKart8
         /// </summary>
         internal Vector3F[] Vertices;
 
-        // ---- CONSTRUCTORS & DESTRUCTOR ------------------------------------------------------------------------------
+		// ---- CONSTRUCTORS & DESTRUCTOR ------------------------------------------------------------------------------
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Triangle"/> class.
-        /// </summary>
-        internal Triangle()
+		/// <summary>
+		/// Initializes a new instance of the <see cref="Triangle"/> class.
+		/// </summary>
+		internal Triangle()
+		{
+			Vertices = new Vector3F[3];
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="Triangle"/> class.
+		/// </summary>
+		internal Triangle(params Vector3F[] vec)
         {
-            Vertices = new Vector3F[3];
-        }
+			Vertices = vec;
+		}
 
         // ---- PROPERTIES ---------------------------------------------------------------------------------------------
 

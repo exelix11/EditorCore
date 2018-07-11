@@ -1,6 +1,6 @@
 using Syroot.BinaryData;
 
-namespace Syroot.NintenTools.MarioKart8.Collisions
+namespace Syroot.NintenTools.MarioKart8.Collisions.Custom
 {
     /// <summary>
     /// Represents a node in a course model octree.

@@ -1,5 +1,6 @@
 ﻿using EditorCore.Interfaces;
 using Smash_Forge;
+using Syroot.NintenTools.MarioKart8.Common;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -39,11 +40,22 @@ namespace KCLExt
 		public ToolStripMenuItem[] ToolsMenuExtensions => toolsExt;
 		public ToolStripMenuItem[] TitleBarExtensions => null;
 
-		ToolStripMenuItem[] toolsExt = new ToolStripMenuItem[1];
+		ToolStripMenuItem[] toolsExt = new ToolStripMenuItem[2];
 		public menuExt()
 		{
 			toolsExt[0] = new ToolStripMenuItem("KCL to OBJ");
 			toolsExt[0].Click += KCLToObj;
+			toolsExt[1] = new ToolStripMenuItem("OBJ to KCL");
+			toolsExt[1].Click += ObjToKCL;
+		}
+
+		private void ObjToKCL(object sender, EventArgs e)
+		{
+			OpenFileDialog opn = new OpenFileDialog();
+			if (opn.ShowDialog() != DialogResult.OK) return;
+			var mod = new Syroot.NintenTools.MarioKart8.Common.Custom.ObjModel(opn.FileName);
+			var f = new Syroot.NintenTools.MarioKart8.Collisions.Custom.KclFile(mod);
+			f.Save(opn.FileName + ".kcl");
 		}
 
 		private void KCLToObj(object sender, EventArgs e)

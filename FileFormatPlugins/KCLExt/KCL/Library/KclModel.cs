@@ -4,10 +4,10 @@ using System.IO;
 using System.Runtime.InteropServices;
 using Syroot.BinaryData;
 using Syroot.Maths;
-using Syroot.NintenTools.MarioKart8.Common;
+using Syroot.NintenTools.MarioKart8.Common.Custom;
 using Syroot.NintenTools.MarioKart8.IO;
 
-namespace Syroot.NintenTools.MarioKart8.Collisions
+namespace Syroot.NintenTools.MarioKart8.Collisions.Custom
 {
     /// <summary>
     /// Represents a model referenced in a <see cref="KclFile"/> which can hold up to 65535 triangles.
@@ -63,18 +63,19 @@ namespace Syroot.NintenTools.MarioKart8.Collisions
             Vector3F maxCoordinate = new Vector3F(Single.MinValue, Single.MinValue, Single.MinValue);
 
             KclFace[] faces = new KclFace[objModel.Faces.Count];
-            Triangle triangle = new Triangle();
             Dictionary<ushort, Triangle> triangles = new Dictionary<ushort, Triangle>(objModel.Faces.Count);
             ushort i = 0;
             foreach (ObjFace objFace in objModel.Faces)
             {
-                KclFace face = new KclFace()
-                {
-                    PositionIndex = (ushort)objFace.Vertices[0].PositionIndex,
-                    Normal1Index = (ushort)objFace.Vertices[0].NormalIndex,
-                    Normal2Index = (ushort)objFace.Vertices[1].NormalIndex,
-                    Normal3Index = (ushort)objFace.Vertices[2].NormalIndex
-                };
+				Triangle triangle = new Triangle(); 
+				KclFace face = new KclFace()
+				{
+					PositionIndex = (ushort)objFace.Vertices[0].PositionIndex,
+					Normal1Index = (ushort)objFace.Vertices[0].NormalIndex,
+					Normal2Index = (ushort)objFace.Vertices[1].NormalIndex,
+					Normal3Index = (ushort)objFace.Vertices[2].NormalIndex,
+					GlobalIndex = i,
+				};
 
                 // Get the position vectors and find the smallest and biggest coordinates.
                 for (int j = 0; j < 3; j++)
