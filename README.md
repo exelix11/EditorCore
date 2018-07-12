@@ -45,8 +45,25 @@ This repo contains just the editor and its libs, to use it you also need a game 
 [Super Mario Odyssey module](https://github.com/exelix11/OdysseyEditor) \
 [Mario Kart 8 Deluxe module](https://github.com/exelix11/MK8DEditor)
 
-To build a game module add it to the solution, you might get errors with references, restore nuget packages and check they have the right path in each project.
-Remember to change the build path to the Ext folder in the bin directory or else the editor won't load the dll automatically. The dll name should end with Ext.dll 
+to build you might want to setup the folders the way the visual studio solution is set:
+> (Root EditorCore directory)\
+> |-EditorCore \
+> |&nbsp;&nbsp;|-EditorCore.sln \
+> |&nbsp;&nbsp;|-(other files) \
+> |-GamePlugins \
+> |&nbsp;&nbsp;|-OdysseyExt \
+> |&nbsp;&nbsp;|&nbsp;&nbsp;|-OdysseyExt.csproj \
+> |&nbsp;&nbsp;|&nbsp;&nbsp;|-(other files) \
+> |&nbsp;&nbsp;|-MK8DExt \
+> |&nbsp;&nbsp;|&nbsp;&nbsp;|-MK8DExt.csproj \
+> |&nbsp;&nbsp;|&nbsp;&nbsp;|-(other files) 
+
+This way the you should be able to build without issues, you just have to restore nuget packages.
+
+If you add a new project make sure to set it's build path to the Ext folder in the bin directory of EditorCore. The dll name should end with Ext.dll 
+
+To build without using the said folder structure:
+add a game module to the solution, you might get errors with references, restore nuget packages and check they have the right path in each project.
 
 ## Credits
 This editor contains code or libraries from:
