@@ -4,7 +4,7 @@ using System.IO;
 using Syroot.BinaryData;
 using Syroot.Maths;
 
-namespace Syroot.NintenTools.MarioKart8.Collisions
+namespace Syroot.NintenTools.MarioKart8.Collisions.Custom
 {
     /// <summary>
     /// Represents a node in a model triangle octree.

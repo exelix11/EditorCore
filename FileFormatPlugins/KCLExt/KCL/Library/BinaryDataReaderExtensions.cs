@@ -22,9 +22,18 @@ namespace Syroot.NintenTools.MarioKart8.IO
             KclFace[] values = new KclFace[count];
             for (int i = 0; i < count; i++)
             {
-                values[i] = new KclFace(self.ReadSingle(), self.ReadUInt16(), self.ReadUInt16(), self.ReadUInt16(),
-                    self.ReadUInt16(), self.ReadUInt16(), self.ReadUInt16(), self.ReadUInt32());
-            }
+				values[i] = new KclFace()
+				{
+					Length = self.ReadSingle(),
+					PositionIndex = self.ReadUInt16(),
+					DirectionIndex = self.ReadUInt16(),
+					Normal1Index = self.ReadUInt16(),
+					Normal2Index = self.ReadUInt16(),
+					Normal3Index = self.ReadUInt16(),
+					CollisionFlags = self.ReadUInt16(),
+					GlobalIndex = self.ReadUInt32()
+				};
+			}
             return values;
         }
 

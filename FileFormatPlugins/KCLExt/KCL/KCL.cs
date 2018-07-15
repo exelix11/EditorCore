@@ -4,17 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
-using Syroot.NintenTools.MarioKart8.Collisions;
-using System.Windows.Forms;
+using Syroot.NintenTools.MarioKart8.Collisions.Custom;
 using System.Windows;
 using System.Drawing;
 using System.Numerics;
 
 namespace Smash_Forge
 {
-    public class KCL : TreeNode
+    public class KCL
     {
-
         //Set the game's material list
         public GameSet GameMaterialSet = GameSet.MarioKart8D;
 
@@ -82,8 +80,6 @@ namespace Smash_Forge
 
         public KCL(byte[] file_data) 
         {
-            Text = "KCLFile";
-
             Read(file_data);
             UpdateVertexData();
         }
@@ -104,15 +100,8 @@ namespace Smash_Forge
             public static int Size = 4 * (3 + 3 + 3);
         }
 
-        public class KCLModel : TreeNode
+        public class KCLModel 
         {
-            public KCLModel()
-            {
-                Checked = true;
-                ImageKey = "mesh";
-                SelectedImageKey = "mesh";
-            }
-
             public List<int> faces = new List<int>();
             public List<Vertex> vertices = new List<Vertex>();
             public int[] Faces;
@@ -124,7 +113,7 @@ namespace Smash_Forge
             public int strip = 0x40;
             public int displayFaceSize = 0;
 
-            public class Face : TreeNode
+            public class Face
             {
                 public int MaterialFlag = 0;
 
@@ -250,14 +239,14 @@ namespace Smash_Forge
 
         public void Read(byte[] file_data)
         {
-            try
-            {
+         //   try
+          //  {
                 kcl = new KclFile(new MemoryStream(file_data), true, false, Syroot.BinaryData.ByteOrder.LittleEndian);
-            }
-            catch
-            {
-                kcl = new KclFile(new MemoryStream(file_data), true, false, Syroot.BinaryData.ByteOrder.BigEndian);
-            }
+          //  }
+           // catch
+          //  {
+          //      kcl = new KclFile(new MemoryStream(file_data), true, false, Syroot.BinaryData.ByteOrder.BigEndian);
+         //   }
 
             AllFlags.Clear();
 
@@ -266,13 +255,8 @@ namespace Smash_Forge
             {
                 KCLModel kclmodel = new KCLModel();
 
-                kclmodel.Text = "Model " + CurModelIndx;
-
-
-                KclFace[] indicesArray = mdl.Faces;
-
                 int ft = 0;
-                foreach (KclFace f in mdl.Faces)
+                foreach (var f in mdl.Faces)
                 {
                     Vertex vtx = new Vertex();
                     Vertex vtx2 = new Vertex();
@@ -281,14 +265,14 @@ namespace Smash_Forge
 
                     Vector3 CrossA = Vector3.Cross(Vec3F_To_Vec3(mdl.Normals[f.Normal1Index]), Vec3F_To_Vec3(mdl.Normals[f.DirectionIndex]));
                     Vector3 CrossB = Vector3.Cross(Vec3F_To_Vec3(mdl.Normals[f.Normal2Index]), Vec3F_To_Vec3(mdl.Normals[f.DirectionIndex]));
-                    Vector3 CrossC = Vector3.Cross(Vec3F_To_Vec3(mdl.Normals[f.Normal3Index]), Vec3F_To_Vec3(mdl.Normals[f.DirectionIndex]));
+                   // Vector3 CrossC = Vector3.Cross(Vec3F_To_Vec3(mdl.Normals[f.Normal3Index]), Vec3F_To_Vec3(mdl.Normals[f.DirectionIndex]));
                     Vector3 normal_a = Vec3F_To_Vec3(mdl.Normals[f.Normal1Index]);
                     Vector3 normal_b = Vec3F_To_Vec3(mdl.Normals[f.Normal2Index]);
                     Vector3 normal_c = Vec3F_To_Vec3(mdl.Normals[f.Normal3Index]);
 
 
-                    float result1 = Vector3.Dot(new Vector3(CrossB.X, CrossB.Y, CrossB.Z), (new Vector3(normal_c.X, normal_c.Y, normal_c.Z)));
-                    float result2 = Vector3.Dot(new Vector3(CrossA.X, CrossA.Y, CrossA.Z), (new Vector3(normal_c.X, normal_c.Y, normal_c.Z)));
+                    float result1 = Vector3.Dot(CrossB, normal_c);
+                    float result2 = Vector3.Dot(CrossA, normal_c);
 
                     Vector3 pos = Vec3F_To_Vec3(mdl.Positions[f.PositionIndex]);
                     Vector3 nrm = Vec3F_To_Vec3(mdl.Normals[f.Normal1Index]);
@@ -309,13 +293,10 @@ namespace Smash_Forge
                     vtx3.nrm = norm;
 
                     KCLModel.Face face = new KCLModel.Face();
-
-                    face.Text = f.CollisionFlags.ToString();
-
+					
                     face.MaterialFlag = f.CollisionFlags;
 
                     Color color = SetMaterialColor(face);
-
 
                     AllFlags.Add(face.MaterialFlag);
 
@@ -340,11 +321,7 @@ namespace Smash_Forge
 
 
                 models.Add(kclmodel);
-
-
- 
-                Nodes.Add(kclmodel);
-
+				
                 CurModelIndx++;
             }
 

@@ -65,11 +65,11 @@
     <Compile Include="KCL\Library\BinaryDataReaderExtensions.cs" />
     <Compile Include="KCL\Library\BinaryDataWriterExtensions.cs" />
     <Compile Include="KCL\Library\CourseOctreeNode.cs" />
-    <Compile Include="KCL\Library\KclFace.cs" />
     <Compile Include="KCL\Library\KclFile.cs" />
     <Compile Include="KCL\Library\KclModel.cs" />
     <Compile Include="KCL\Library\Maths.cs" />
     <Compile Include="KCL\Library\ModelOctreeNode.cs" />
+    <Compile Include="KCL\Library\ObjModel.cs" />
     <Compile Include="KCL\Library\OctreeNodeBase.cs" />
     <Compile Include="KCL\Library\Triangle.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
