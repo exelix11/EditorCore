@@ -49,6 +49,8 @@ namespace EditorCore
         public static ClipBoardItem StoredValue = null;
         public CustomStack<UndoAction> UndoList = new CustomStack<UndoAction>();
 
+        private bool UndoStackLocked = false;
+
 		const string LinkedListName = "____EditorInternalList___";
         public string CurListName
         {
@@ -117,6 +119,8 @@ namespace EditorCore
 #else
 			splitContainer2.Enabled = false;
 #endif
+            btnPaste.Enabled = (StoredValue!=null && StoredValue.Type == ClipBoardItem.ClipboardType.Objects);
+
 			KeyPreview = true;
 			RenderingCanvas.Child = render;
 			render.MouseMove += render_MouseMove;
@@ -404,7 +408,8 @@ namespace EditorCore
             IObjList list = GameModule.CreateObjList(LinkedListName, objList);
             ListEditingStack.Push(list);
 			PopulateListBox();
-			LoadObjListModels(list, LinkedListName);
+            SelectedObjectChanged(null, null);
+            LoadObjListModels(list, LinkedListName);
         }
 
         public void PreviousList()
@@ -412,6 +417,7 @@ namespace EditorCore
             if (!EditingList) return;
             foreach (var obj in CurList) render.RemoveModel(obj);
             ListEditingStack.Pop().ApplyChanges();
+            SelectedObjectChanged(null, null);
             PopulateListBox();
         }
 
@@ -504,7 +510,11 @@ namespace EditorCore
         private void ClipBoardMenu_CopyScale_Click(object sender, EventArgs e) =>
             StoredValue = new ClipBoardItem() { Type = ClipBoardItem.ClipboardType.Scale, transform = SelectedObj.transform };
 
-        private void Btn_CopyObjs_Click(object sender, EventArgs e) => ClipBoardMenu_CopyFull_Click(null, null);
+        private void Btn_CopyObjs_Click(object sender, EventArgs e)
+        {
+            btnPaste.Enabled = true;
+            ClipBoardMenu_CopyFull_Click(null, null);
+        }
         private void ClipBoardMenu_CopyFull_Click(object sender, EventArgs e)
         {
             ILevelObj[] objs = new ILevelObj[SelectionCount];
@@ -761,17 +771,21 @@ namespace EditorCore
             HideGroup_CB.CheckedChanged += HideGroup_CB_CheckedChanged;
         }
 
-        private void SelectedObjectChanged(object sender, EventArgs e) //ObjectsListBox
+        public void SelectedObjectChanged(object sender, EventArgs e) //ObjectsListBox
         {
             if (SelectionCount > 1)
             {
-                Btn_CopyObjs.Visible = true;
-                Btn_Duplicate.Visible = false;
+                btnDuplicate.Visible = false;
+                btnCopy.Enabled = true;
+            }
+            else if (SelectionCount == 1)
+            {
+                btnDuplicate.Visible = btnCopy.Enabled = true;
+
             }
             else
             {
-                Btn_CopyObjs.Visible = false;
-                Btn_Duplicate.Visible = true;
+                btnDuplicate.Visible = btnCopy.Enabled = false;
             }
 
             if (ObjectsListBox.SelectedIndex == -1 || SelectedObj == null)
@@ -902,7 +916,7 @@ namespace EditorCore
             if (e.Key == Key.B && EditingList) PreviousList();
             if (SelectionCount == 0) return;
 			if (e.Key == Key.Space) render.LookAt(SelectedObj.ModelView_Pos);
-			else if (e.Key == Key.OemPlus && Btn_AddObj.Enabled) Btn_AddObj_Click(null, null);
+			//else if (e.Key == Key.OemPlus && Btn_AddObj.Enabled) Btn_AddObj_Click(null, null);
 			else if (e.Key == Key.D && SelectionCount == 1) DuplicateObj(SelectedObj, CurList);
 			else if (e.Key == Key.Delete) btn_delObj_Click(null, null);
 			else if (e.Key == Key.F) FindMenu.ShowDropDown();
@@ -924,6 +938,7 @@ namespace EditorCore
         const int UndoMax = 30;
         public void AddToUndo(Action<dynamic> act, string desc, dynamic arg = null)
         {
+            if (UndoStackLocked) return; //so subactions from big actions like paste don't land in here
             UndoList.Push(new UndoAction(desc, act, arg));
             if (UndoList.Count > UndoMax) UndoList.RemoveAt(0);
         }
@@ -1062,5 +1077,39 @@ namespace EditorCore
 			if (Application.OpenForms.Count == 0)
 				Environment.Exit(0);
 		}
-	}
+
+        private void btnPaste_Click(object sender, EventArgs e)
+        {
+            if (StoredValue.Type == ClipBoardItem.ClipboardType.Objects)
+            {
+                Vector3D offset = new Vector3D();
+                if (SelectedObj != null)
+                    offset = StoredValue.Objs.First().ModelView_Pos - SelectedObj.ModelView_Pos;
+                ObjectsListBox.SelectedIndices.Clear();
+
+                UndoStackLocked = true;
+                foreach (var o in StoredValue.Objs)
+                {
+                    ILevelObj copiedObj = (ILevelObj)o.Clone();
+                    copiedObj.ModelView_Pos -= offset;
+                    AddObj(copiedObj, CurList);
+                    ObjectsListBox.SelectedIndices.Add(CurList.IndexOf(copiedObj));
+                }
+                UndoStackLocked = false;
+
+                AddToUndo((dynamic args) =>
+                {
+                    var aArray = (dynamic[])args;
+                    var listName = (string)aArray[0];
+                    var selObjs = (ILevelObj[])aArray[1];
+
+                    UndoStackLocked = true;
+                    foreach (ILevelObj obj in selObjs)
+                        DeleteObj(obj, LoadedLevel.objs[listName]);
+
+                    UndoStackLocked = false;
+                }, SelectionCount > 1 ? $"Pasted in {SelectionCount} objects" : $"Pasted in object {SelectedObj}", new dynamic[] { CurListName, SelectedObjs.Clone() });
+            }
+        }
+    }
 }
