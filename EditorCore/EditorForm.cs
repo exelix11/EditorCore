@@ -847,17 +847,32 @@ namespace EditorCore
         private void render_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
         {
             if (!RenderIsDragging) return;
-            int RoundTo = (ModifierKeys & Keys.Alt) == Keys.Alt ? 100 : ((ModifierKeys & Keys.Shift) == Keys.Shift ? 50 : 0);
+            int roundTo = (ModifierKeys & Keys.Alt) == Keys.Alt ? 100 : ((ModifierKeys & Keys.Shift) == Keys.Shift ? 50 : 0);
 
-            Vector3D DeltaPos = render.DeltaDrag(DraggingArgs, e, RoundTo);
+            Vector3D DeltaPos = render.DeltaDrag(DraggingArgs, e);
 			if (DeltaPos == null) return;
 			DraggingArgs.DeltaPos = DeltaPos;
             DraggingArgs.position += DeltaPos;
 
 			foreach (var o in SelectedObjs)
 			{
-				o.ModelView_Pos += DraggingArgs.DeltaPos;
-				UpdateModelPosition(o);
+				Vector3D vec = DraggingArgs.position + DraggingArgs.DeltaPos;
+                if (roundTo != 0)
+                {
+                    vec.X = Math.Round(vec.X / roundTo, 0) * roundTo;
+                    vec.Y = Math.Round(vec.Y / roundTo, 0) * roundTo;
+                    vec.Z = Math.Round(vec.Z / roundTo, 0) * roundTo;
+                }
+                else
+                {
+                    vec.X = (int)vec.X;
+                    vec.Y = (int)vec.Y;
+                    vec.Z = (int)vec.Z;
+                }
+
+                o.ModelView_Pos = vec;
+
+                UpdateModelPosition(o);
 			}
         }
 
