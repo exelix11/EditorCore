@@ -847,10 +847,10 @@ namespace EditorCore
             if (!RenderIsDragging) return;
             int RoundTo = (ModifierKeys & Keys.Alt) == Keys.Alt ? 100 : ((ModifierKeys & Keys.Shift) == Keys.Shift ? 50 : 0);
 
-            Vector3D NewPos = render.Drag(DraggingArgs, e, RoundTo);
-			if (NewPos == null) return;
-			DraggingArgs.DeltaPos = NewPos - DraggingArgs.position;
-            DraggingArgs.position = NewPos;
+            Vector3D DeltaPos = render.DeltaDrag(DraggingArgs, e, RoundTo);
+			if (DeltaPos == null) return;
+			DraggingArgs.DeltaPos = DeltaPos;
+            DraggingArgs.position += DeltaPos;
 
 			foreach (var o in SelectedObjs)
 			{
