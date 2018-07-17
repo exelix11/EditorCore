@@ -9,6 +9,6 @@ namespace EditorCore.Interfaces
 {
 	public interface IPathObj : ILevelObj, IObjList
 	{
-		Point3D[] Points { get; set; }
+		Point3D[] Points { get; }
 	}
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.ComponentModel;
 using System.Collections;
+using System.Linq;
 
 namespace EditorCore
 {
@@ -47,29 +48,33 @@ namespace EditorCore
 
         public class Vector3DConverter : System.ComponentModel.TypeConverter
         {
-            public override bool CanConvertFrom(System.ComponentModel.ITypeDescriptorContext context, Type sourceType)
+			public override bool GetPropertiesSupported(ITypeDescriptorContext context) => true;
+
+			public override PropertyDescriptorCollection GetProperties(ITypeDescriptorContext context, object value, Attribute[] attributes) =>
+				new PropertyDescriptorCollection(
+					TypeDescriptor.GetProperties(value, attributes)
+					.Cast<PropertyDescriptor>()
+					.Where(p => p.Name == "X" || p.Name == "Y" || p.Name == "Z")
+					.ToArray());
+
+			public override bool CanConvertFrom(System.ComponentModel.ITypeDescriptorContext context, Type sourceType)
             {
                 return sourceType == typeof(string);
             }
 
             public override object ConvertFrom(System.ComponentModel.ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
-            {
-                var dict = new Dictionary<string, dynamic>();
-                string[] tokens = ((string)value).Split(';');
-                dict.Add("X", Single.Parse(tokens[0]));
-                dict.Add("Y", Single.Parse(tokens[1]));
-                dict.Add("Z", Single.Parse(tokens[2]));
-                return dict;
-            }
+			{
+				string[] tokens = ((string)value).Split(';');
+                return new System.Windows.Media.Media3D.Vector3D(
+					Single.Parse(tokens[0]),
+					Single.Parse(tokens[1]),
+					Single.Parse(tokens[2]));
+			}
 
             public override object ConvertTo(System.ComponentModel.ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
             {
-				string res = "";
-				foreach (dynamic k in (IEnumerable)value)
-				{
-					res += k.Value + ";";
-				}
-				return res;
+				var v = (System.Windows.Media.Media3D.Vector3D)value;
+				return $"{v.X};{v.Y};{v.Z}";
             }
         }
 
