@@ -76,25 +76,6 @@ namespace EditorCore
 				var v = (System.Windows.Media.Media3D.Vector3D)value;
 				return $"{v.X};{v.Y};{v.Z}";
             }
-
-            public override bool GetPropertiesSupported(ITypeDescriptorContext context)
-            {
-                return true;
-            }
-
-            public override PropertyDescriptorCollection GetProperties(ITypeDescriptorContext context, object value, Attribute[] attributes)
-            {
-                ArrayList properties = new ArrayList();
-                foreach (string e in ((Dictionary<string, dynamic>)value).Keys)
-                {
-                    properties.Add(new DictionaryConverter.DictionaryPropertyDescriptor((Dictionary<string, dynamic>)value, e));
-                }
-
-                PropertyDescriptor[] props =
-                    (PropertyDescriptor[])properties.ToArray(typeof(PropertyDescriptor));
-
-                return new PropertyDescriptorCollection(props);
-            }
         }
 
         //System.ComponentModel.Container
