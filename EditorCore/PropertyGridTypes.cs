@@ -78,6 +78,8 @@ namespace EditorCore
             }
         }
 
+        //System.ComponentModel.Container
+
         public class DictionaryConverter : System.ComponentModel.TypeConverter
         {
             public override bool GetPropertiesSupported(ITypeDescriptorContext context)

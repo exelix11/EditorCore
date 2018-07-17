@@ -28,6 +28,8 @@ namespace ModelViewer
 
     public partial class RendererControl : UserControl
     {
+        public Point lastMousePos = new Point();
+
         public Dictionary<string, Model3D> ImportedModels = new Dictionary<string, Model3D>();
         Dictionary<dynamic, ModelVisual3D> Models = new Dictionary<dynamic, ModelVisual3D>(); //Can't use LevelObj because this project is referenced into OdysseyEditor
 		Dictionary<dynamic, ModelVisual3D> Paths = new Dictionary<dynamic, ModelVisual3D>();
@@ -211,6 +213,7 @@ namespace ModelViewer
         public Vector3D Drag(DragArgs args, System.Windows.Input.MouseEventArgs e, double roundTo)
         {
             Point p = e.GetPosition(ModelView);
+            
             Vector3D v = args.position;
             Point3D? pos = ModelView.Viewport.UnProject(p, new Point3D(v.X,v.Y,v.Z), ModelView.Camera.LookDirection);
             if (pos.HasValue)
@@ -221,6 +224,7 @@ namespace ModelViewer
                     vec.X = Math.Round(vec.X / roundTo, 0) * roundTo;
                     vec.Y = Math.Round(vec.Y / roundTo, 0) * roundTo;
                     vec.Z = Math.Round(vec.Z / roundTo, 0) * roundTo;
+                    lastMousePos = p;
                     return vec;
                 }
                 else
@@ -228,9 +232,41 @@ namespace ModelViewer
 					vec.X = (int)vec.X;
 					vec.Y = (int)vec.Y;
 					vec.Z = (int)vec.Z;
-					return vec;
+                    lastMousePos = p;
+                    return vec;
                 }
             }
+            lastMousePos = p;
+            return pos.Value.ToVector3D();
+        }
+
+        public Vector3D DeltaDrag(DragArgs args, System.Windows.Input.MouseEventArgs e, double roundTo)
+        {
+            Point p = e.GetPosition(ModelView);
+            Vector3D v = args.position;
+            Point3D? lastPos = ModelView.Viewport.UnProject(lastMousePos, new Point3D(v.X, v.Y, v.Z), ModelView.Camera.LookDirection);
+            Point3D? pos = ModelView.Viewport.UnProject(p, new Point3D(v.X, v.Y, v.Z), ModelView.Camera.LookDirection);
+            if (pos.HasValue)
+            {
+                Vector3D vec = pos.Value.ToVector3D() - lastPos.Value.ToVector3D();
+                if (roundTo != 0)
+                {
+                    vec.X = Math.Round(vec.X / roundTo, 0) * roundTo;
+                    vec.Y = Math.Round(vec.Y / roundTo, 0) * roundTo;
+                    vec.Z = Math.Round(vec.Z / roundTo, 0) * roundTo;
+                    lastMousePos = p;
+                    return vec;
+                }
+                else
+                {
+                    vec.X = (int)vec.X;
+                    vec.Y = (int)vec.Y;
+                    vec.Z = (int)vec.Z;
+                    lastMousePos = p;
+                    return vec;
+                }
+            }
+            lastMousePos = p;
             return pos.Value.ToVector3D();
         }
 
@@ -268,6 +304,7 @@ namespace ModelViewer
         public dynamic GetOBJ(object sender, dynamic e)
         {
             Point p = e.GetPosition(ModelView);
+            lastMousePos = p;
             ModelVisual3D result = GetHitResult(p);
             if (result == null) return null;
 			if (result is LinesVisual3D)
