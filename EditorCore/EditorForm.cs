@@ -198,6 +198,7 @@ namespace EditorCore
 
 		}
 
+		public void RegisterFindMenuStripExt(ToolStripMenuItem item) => FindMenu.DropDownItems.Add(item);
 		public void RegisterMenuStripExt(ToolStripMenuItem item) => menuStrip1.Items.Add(item);
 		void RegisterMenuExt(ToolStripMenuItem target, ToolStripMenuItem[] list) => target.DropDownItems.AddRange(list);
 		void RegisterMenuExt(ToolStrip target, ToolStripMenuItem[] list) => target.Items.AddRange(list);
@@ -385,7 +386,11 @@ namespace EditorCore
         {
 			if (CurList is IPathObj)
 				render.AddPath(CurList, ((IPathObj)CurList).Points);
-			render.ChangeTransform(o, o.ModelView_Pos, o.ModelView_Scale, o.ModelView_Rot);
+
+			if (o is IPathObj)
+				render.AddPath(o, ((IPathObj)o).Points);
+			else
+				render.ChangeTransform(o, o.ModelView_Pos, o.ModelView_Scale, o.ModelView_Rot);
         }
 
         void PopulateListBox()
@@ -470,13 +475,10 @@ namespace EditorCore
         }
 
         private void Btn_AddObj_Click(object sender, EventArgs e)
-        {
-            string name = "";
-            InputDialog.Show("", "Enter a name for the object", ref name);
-            if (name.Trim() == "") return;
-            var o = GameModule.NewObject();
+		{
+			var o = GameModule.NewObject();
+			if (o == null) return;
 			o.ID_int = LoadedLevel.HighestID++;
-			o.Name = name;
             o.ModelView_Pos = render.GetPositionInView();
             AddObj(o, CurList);
             render.LookAt(o.ModelView_Pos);

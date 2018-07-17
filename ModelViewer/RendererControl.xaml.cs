@@ -307,14 +307,18 @@ namespace ModelViewer
             lastMousePos = p;
             ModelVisual3D result = GetHitResult(p);
             if (result == null) return null;
-            if (Models.ContainsValue(result)) return Models.FirstOrDefault(x => x.Value == result).Key;
+			if (result is LinesVisual3D)
+			{
+				if (Paths.ContainsValue(result)) return Paths.FirstOrDefault(x => x.Value == result).Key;
+			}
+			else if (Models.ContainsValue(result)) return Models.FirstOrDefault(x => x.Value == result).Key;
             return null;
         }
 
         ModelVisual3D GetHitResult(Point location)
         {
             HitTestResult result = VisualTreeHelper.HitTest(ModelView, location);
-            if (result != null && result.VisualHit is ModelVisual3D)
+            if (result != null && result.VisualHit is ModelVisual3D || result.VisualHit is LinesVisual3D)
             {
                 ModelVisual3D visual = (ModelVisual3D)result.VisualHit;
                 return visual;
