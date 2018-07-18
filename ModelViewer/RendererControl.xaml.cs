@@ -240,7 +240,7 @@ namespace ModelViewer
             return pos.Value.ToVector3D();
         }
 
-        public Vector3D DeltaDrag(DragArgs args, System.Windows.Input.MouseEventArgs e, double roundTo)
+        public Vector3D DeltaDrag(DragArgs args, System.Windows.Input.MouseEventArgs e)
         {
             Point p = e.GetPosition(ModelView);
             Vector3D v = args.position;
@@ -249,22 +249,9 @@ namespace ModelViewer
             if (pos.HasValue)
             {
                 Vector3D vec = pos.Value.ToVector3D() - lastPos.Value.ToVector3D();
-                if (roundTo != 0)
-                {
-                    vec.X = Math.Round(vec.X / roundTo, 0) * roundTo;
-                    vec.Y = Math.Round(vec.Y / roundTo, 0) * roundTo;
-                    vec.Z = Math.Round(vec.Z / roundTo, 0) * roundTo;
-                    lastMousePos = p;
-                    return vec;
-                }
-                else
-                {
-                    vec.X = (int)vec.X;
-                    vec.Y = (int)vec.Y;
-                    vec.Z = (int)vec.Z;
-                    lastMousePos = p;
-                    return vec;
-                }
+                
+                lastMousePos = p;
+                return vec;
             }
             lastMousePos = p;
             return pos.Value.ToVector3D();
