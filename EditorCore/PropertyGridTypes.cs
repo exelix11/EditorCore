@@ -20,7 +20,7 @@ namespace EditorCore
 					return Activator.CreateInstance(CustomClassConverter[_obj.GetType()]);
 				else if (_obj is IDictionary<string, dynamic>)
 				{
-					if (_obj.Keys.Count == 3 && _obj.ContainsKey("X") && _obj.ContainsKey("Y") && _obj.ContainsKey("Z")) return new Vector3DConverter();
+					if (_obj.Keys.Count == 3 && _obj.ContainsKey("X") && _obj.ContainsKey("Y") && _obj.ContainsKey("Z")) return new Vector3DDictionaryConverter();
 					return new DictionaryConverter();
 				}
 				else if (_obj is IList<dynamic>) return new ArrayNodeConverter();
@@ -66,15 +66,54 @@ namespace EditorCore
 			{
 				string[] tokens = ((string)value).Split(';');
                 return new System.Windows.Media.Media3D.Vector3D(
-					Single.Parse(tokens[0]),
-					Single.Parse(tokens[1]),
-					Single.Parse(tokens[2]));
+					Double.Parse(tokens[0]),
+					Double.Parse(tokens[1]),
+					Double.Parse(tokens[2]));
 			}
 
             public override object ConvertTo(System.ComponentModel.ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
             {
 				var v = (System.Windows.Media.Media3D.Vector3D)value;
 				return $"{v.X};{v.Y};{v.Z}";
+            }
+        }
+
+        public class Vector3DDictionaryConverter : System.ComponentModel.TypeConverter
+        {
+            public override bool GetPropertiesSupported(ITypeDescriptorContext context) => true;
+
+            public override PropertyDescriptorCollection GetProperties(ITypeDescriptorContext context, object value, Attribute[] attributes)
+            {
+                ArrayList properties = new ArrayList();
+                foreach (string e in ((Dictionary<string, dynamic>)value).Keys)
+                {
+                    properties.Add(new DictionaryConverter.DictionaryPropertyDescriptor((Dictionary<string, dynamic>)value, e));
+                }
+
+                PropertyDescriptor[] props =
+                    (PropertyDescriptor[])properties.ToArray(typeof(PropertyDescriptor));
+
+                return new PropertyDescriptorCollection(props);
+            }
+
+            public override bool CanConvertFrom(System.ComponentModel.ITypeDescriptorContext context, Type sourceType) => false;
+
+            /*
+            public override object ConvertFrom(System.ComponentModel.ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+            {
+                string[] tokens = ((string)value).Split(';');
+                IDictionary<string, dynamic> dict = new Dictionary<string, dynamic>();
+                dict["X"] = Single.Parse(tokens[0]);
+                dict["Y"] = Single.Parse(tokens[1]);
+                dict["Z"] = Single.Parse(tokens[2]);
+                return dict;
+            }
+            */
+
+            public override object ConvertTo(System.ComponentModel.ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+            {
+                var v = (IDictionary<string, dynamic>)value;
+                return $"({Math.Round(v["X"], 2)}, {Math.Round(v["Y"], 2)}, {Math.Round(v["Z"], 2)})";
             }
         }
 
