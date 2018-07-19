@@ -168,13 +168,15 @@ namespace ModelViewer
             else Model = ImportedModels[path];
             Model.Transform = new RotateTransform3D(new AxisAngleRotation3D(new Vector3D(1, 0, 0), 90));
             Models[obj].Content = Model;
-            Transform3DGroup t = new Transform3DGroup();
-            t.Children.Add(new RotateTransform3D(new AxisAngleRotation3D(new Vector3D(1, 0, 0), rot.X)));
-            t.Children.Add(new RotateTransform3D(new AxisAngleRotation3D(new Vector3D(0, 1, 0), rot.Y)));
-            t.Children.Add(new RotateTransform3D(new AxisAngleRotation3D(new Vector3D(0, 0, 1), rot.Z)));
-            t.Children.Add(new ScaleTransform3D(scale));
-            t.Children.Add(new TranslateTransform3D(pos));
-            Models[obj].Transform = t;
+
+            Matrix3D m = Matrix3D.Identity;
+            m.Scale(scale);
+            m.Rotate(new Quaternion(new Vector3D(1, 0, 0), rot.X));
+            m.Rotate(new Quaternion(new Vector3D(0, 0, 1), rot.Z));
+            m.Rotate(new Quaternion(new Vector3D(0, 1, 0), rot.Y));
+            m.Translate(pos);
+
+            Models[obj].Transform = new MatrixTransform3D(m);
         }
 
         public void RemoveModel(dynamic obj)
