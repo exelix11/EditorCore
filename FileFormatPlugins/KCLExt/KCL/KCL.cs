@@ -104,7 +104,7 @@ namespace Smash_Forge
         {
             public List<int> faces = new List<int>();
             public List<Vertex> vertices = new List<Vertex>();
-            public int[] Faces;
+            public List<Face> Faces = new List<Face>();
 
             // for drawing
             public int[] display;
@@ -116,6 +116,10 @@ namespace Smash_Forge
             public class Face
             {
                 public int MaterialFlag = 0;
+                
+                public Vertex vtx;
+                public Vertex vtx2;
+                public Vertex vtx3;
 
             }
 
@@ -309,6 +313,12 @@ namespace Smash_Forge
                     kclmodel.faces.Add(ft);
                     kclmodel.faces.Add(ft + 1);
                     kclmodel.faces.Add(ft + 2);
+
+                    face.vtx = vtx;
+                    face.vtx2 = vtx2;
+                    face.vtx3 = vtx3;
+
+                    kclmodel.Faces.Add(face);
 
                     ft += 3;
 
