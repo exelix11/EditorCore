@@ -263,34 +263,34 @@ namespace Smash_Forge
                     Vertex vtx3 = new Vertex();
 
 
-                    Vector3 CrossA = Vector3.Cross(Vec3F_To_Vec3(mdl.Normals[f.Normal1Index]), Vec3F_To_Vec3(mdl.Normals[f.DirectionIndex]));
-                    Vector3 CrossB = Vector3.Cross(Vec3F_To_Vec3(mdl.Normals[f.Normal2Index]), Vec3F_To_Vec3(mdl.Normals[f.DirectionIndex]));
-                   // Vector3 CrossC = Vector3.Cross(Vec3F_To_Vec3(mdl.Normals[f.Normal3Index]), Vec3F_To_Vec3(mdl.Normals[f.DirectionIndex]));
-                    Vector3 normal_a = Vec3F_To_Vec3(mdl.Normals[f.Normal1Index]);
-                    Vector3 normal_b = Vec3F_To_Vec3(mdl.Normals[f.Normal2Index]);
-                    Vector3 normal_c = Vec3F_To_Vec3(mdl.Normals[f.Normal3Index]);
+					var CrossA = mdl.Normals[f.Normal1Index].Cross(mdl.Normals[f.DirectionIndex]);
+					var CrossB = mdl.Normals[f.Normal2Index].Cross(mdl.Normals[f.DirectionIndex]);
+					
+                    var normal_a = mdl.Normals[f.Normal1Index];
+					var normal_b = mdl.Normals[f.Normal2Index];
+					var normal_c = mdl.Normals[f.Normal3Index];
 
 
-                    float result1 = Vector3.Dot(CrossB, normal_c);
-                    float result2 = Vector3.Dot(CrossA, normal_c);
+					float result1 = CrossB.Dot(normal_c);
+					float result2 = CrossA.Dot(normal_c);
 
-                    Vector3 pos = Vec3F_To_Vec3(mdl.Positions[f.PositionIndex]);
-                    Vector3 nrm = Vec3F_To_Vec3(mdl.Normals[f.Normal1Index]);
+					var pos = mdl.Positions[f.PositionIndex];
+                    var nrm = mdl.Normals[f.Normal1Index];
 
-                    Vector3 Vertex1 = pos;
-                    Vector3 Vertex2 = pos + CrossB * (f.Length / result1);
-                    Vector3 Vertex3 = pos + CrossA * (f.Length / result2);
+                    var Vertex1 = pos;
+                    var Vertex2 = pos + CrossB * (f.Length / result1);
+                    var Vertex3 = pos + CrossA * (f.Length / result2);
 
                     vtx.pos = new Vector3(Vertex1.X, Vertex1.Y, Vertex1.Z);
                     vtx2.pos = new Vector3(Vertex2.X, Vertex2.Y, Vertex2.Z);
                     vtx3.pos = new Vector3(Vertex3.X, Vertex3.Y, Vertex3.Z);
 
-                    var dir = Vector3.Cross(Vertex2 - Vertex1, Vertex3 - Vertex1);
-                    var norm = Vector3.Normalize(dir);
+                    var dir = (Vertex2 - Vertex1).Cross(Vertex3 - Vertex1);
+					var norm = dir.Normalized();
 
-                    vtx.nrm = norm;
-                    vtx2.nrm = norm;
-                    vtx3.nrm = norm;
+                    vtx.nrm = Vec3F_To_Vec3(norm);
+                    vtx2.nrm = Vec3F_To_Vec3(norm);
+                    vtx3.nrm = Vec3F_To_Vec3(norm);
 
                     KCLModel.Face face = new KCLModel.Face();
 					

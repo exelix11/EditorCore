@@ -32,17 +32,18 @@ namespace Syroot.NintenTools.MarioKart8
 			Vertices = vec;
 		}
 
-        // ---- PROPERTIES ---------------------------------------------------------------------------------------------
+		// ---- PROPERTIES ---------------------------------------------------------------------------------------------
 
-        /// <summary>
-        /// Gets the face normal of this triangle.
-        /// </summary>
-        internal Vector3F Normal
-        {
-            get
-            {
-                return (Vertices[1] - Vertices[0]).Cross(Vertices[2] - Vertices[0]).Normalized();
-            }
-        }
-    }
+		/// <summary>
+		/// Gets the face normal of this triangle.
+		/// </summary>
+		public Vector3F Normal
+		{
+			get
+			{
+				Vector3F a = (Vertices[1] - Vertices[0]).Cross(Vertices[2] - Vertices[0]);
+				return a / (float)System.Math.Sqrt(a.X * a.X + a.Y * a.Y + a.Z * a.Z);
+			}
+		}
+	}
 }

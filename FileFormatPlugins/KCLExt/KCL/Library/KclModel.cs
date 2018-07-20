@@ -57,7 +57,7 @@ namespace Syroot.NintenTools.MarioKart8.Collisions.Custom
             
             // Transfer the faces to collision faces and find the smallest and biggest coordinates.
             Positions = new List<Vector3F>(objModel.Positions);
-            Normals = new List<Vector3F>(objModel.Normals);
+            Normals = new List<Vector3F>(objModel.Normals.Count);
 
             Vector3F minCoordinate = new Vector3F(Single.MaxValue, Single.MaxValue, Single.MaxValue);
             Vector3F maxCoordinate = new Vector3F(Single.MinValue, Single.MinValue, Single.MinValue);
@@ -67,34 +67,55 @@ namespace Syroot.NintenTools.MarioKart8.Collisions.Custom
             ushort i = 0;
             foreach (ObjFace objFace in objModel.Faces)
             {
-				Triangle triangle = new Triangle(); 
+				Triangle t = new Triangle(); 
+				// Get the position vectors and find the smallest and biggest coordinates.
+				for (int j = 0; j < 3; j++)
+				{
+					Vector3F position = Positions[objFace.Vertices[j].PositionIndex];
+					minCoordinate.X = Math.Min(position.X, minCoordinate.X);
+					minCoordinate.Y = Math.Min(position.Y, minCoordinate.Y);
+					minCoordinate.Z = Math.Min(position.Z, minCoordinate.Z);
+					maxCoordinate.X = Math.Max(position.X, minCoordinate.X);
+					maxCoordinate.Y = Math.Max(position.X, minCoordinate.Y);
+					maxCoordinate.Z = Math.Max(position.X, minCoordinate.Z);
+					t.Vertices[j] = position;
+				}
+
+				Vector3F qq = (t.Vertices[1] - t.Vertices[0]).Cross(t.Vertices[2] - t.Vertices[0]);
+				if ((qq.X * qq.X + qq.Y * qq.Y + qq.Z * qq.Z) < 0.01) continue;
+
+				Vector3F a = (t.Vertices[2] - t.Vertices[0]).Cross(t.Normal); //Calculate length from EFE
+				a.Normalize();
+				a = -a;
+				Vector3F b = (t.Vertices[1] - t.Vertices[0]).Cross(t.Normal);
+				b.Normalize();
+				Vector3F c = (t.Vertices[2] - t.Vertices[1]).Cross(t.Normal);
+				c.Normalize();
+
+				int normalAindex = Normals.IndexOf(a);
+				if (normalAindex == -1) { normalAindex = Normals.Count; Normals.Add(a); }
+				int normalBindex = Normals.IndexOf(b);
+				if (normalBindex == -1) { normalBindex = Normals.Count; Normals.Add(b); }
+				int normalCindex = Normals.IndexOf(c);
+				if (normalCindex == -1) { normalCindex = Normals.Count; Normals.Add(c); }
+
 				KclFace face = new KclFace()
 				{
+					CollisionFlags = 0,
 					PositionIndex = (ushort)objFace.Vertices[0].PositionIndex,
-					Normal1Index = (ushort)objFace.Vertices[0].NormalIndex,
-					Normal2Index = (ushort)objFace.Vertices[1].NormalIndex,
-					Normal3Index = (ushort)objFace.Vertices[2].NormalIndex,
+					Normal1Index = (ushort)normalAindex,
+					Normal2Index = (ushort)normalBindex,
+					Normal3Index = (ushort)normalCindex,
 					GlobalIndex = i,
+					Length = (t.Vertices[2] - t.Vertices[0]).Dot(c)
 				};
 
-                // Get the position vectors and find the smallest and biggest coordinates.
-                for (int j = 0; j < 3; j++)
-                {
-                    Vector3F position = Positions[objFace.Vertices[j].PositionIndex];
-                    minCoordinate.X = Math.Min(position.X, minCoordinate.X);
-                    minCoordinate.Y = Math.Min(position.Y, minCoordinate.Y);
-                    minCoordinate.Z = Math.Min(position.Z, minCoordinate.Z);
-                    maxCoordinate.X = Math.Max(position.X, minCoordinate.X);
-                    maxCoordinate.Y = Math.Max(position.X, minCoordinate.Y);
-                    maxCoordinate.Z = Math.Max(position.X, minCoordinate.Z);
-                    triangle.Vertices[j] = position;
-                }
 
-                // Compute the face direction (normal) and add it to the normal list.
-                face.DirectionIndex = (ushort)(Normals.Count);
-                Normals.Add(triangle.Normal);
+				// Compute the face direction (normal) and add it to the normal list.
+				face.DirectionIndex = (ushort)(Normals.Count);
+                Normals.Add(t.Normal);
 
-                triangles.Add(i, triangle);
+                triangles.Add(i, t);
                 faces[i++] = face;
             }
             minCoordinate += _minCoordinatePadding;
