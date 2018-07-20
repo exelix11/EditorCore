@@ -249,8 +249,20 @@ namespace EditorCore
 
 namespace ExtensionMethods
 {
-    public static class Extensions
-    {
+	public static class Extensions
+	{
+		public static int AddIfNotContins(this IList l, dynamic obj)
+		{
+			int index = l.IndexOf(obj);
+			if (index == -1)
+			{
+				l.Add(obj);
+				return l.Count - 1;
+			}
+			else
+				return index;
+		}
+
         public static Vector3D ToVect(this Point3D p)
         {
             return new Vector3D(p.X, p.Y, p.Z);

@@ -1,8 +1,4 @@
-﻿//FASTLOAD: allow to reuse node references, loads faster and uses less ram but editing a single field might change other stuff
-#if DEBUG
-//#define FASTLOAD
-#endif
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -39,14 +35,20 @@ namespace Syroot.NintenTools.Byaml.Dynamic
         private List<string> _nameArray;
         private List<string> _stringArray;
         private List<List<ByamlPathPoint>> _pathArray;
+		private bool _fastLoad = false;
 
         // ---- CONSTRUCTORS & DESTRUCTOR ------------------------------------------------------------------------------
 
-        private ByamlFile(bool supportPaths, ByteOrder byteOrder)
+        private ByamlFile(bool supportPaths, ByteOrder byteOrder,bool fastLoad = false)
         {
             _supportPaths = supportPaths;
             _byteOrder = byteOrder;
-        }
+			_fastLoad = fastLoad;
+			if (fastLoad)
+			{
+				AlreadyReadNodes = new Dictionary<uint, dynamic>();
+			}
+		}
 
         // ---- METHODS (PUBLIC) ---------------------------------------------------------------------------------------
         
@@ -78,6 +80,19 @@ namespace Syroot.NintenTools.Byaml.Dynamic
             ByamlFile byamlFile = new ByamlFile(supportPaths, byteOrder);
             return byamlFile.Read(stream);
         }
+
+		/// <summary>
+		/// Deserializes and returns the dynamic value of the BYAML node read from the specified stream keeping the references, do not use this if you intend to edit the byml.
+		/// </summary>
+		/// <param name="stream">The <see cref="Stream"/> to read the data from.</param>
+		/// <param name="supportPaths">Whether to expect a path array offset. This must be enabled for Mario Kart 8
+		/// files.</param>
+		/// <param name="byteOrder">The <see cref="ByteOrder"/> to read data in.</param>
+		public static dynamic FastLoad(Stream stream, bool supportPaths = false, ByteOrder byteOrder = ByteOrder.LittleEndian)
+		{
+			ByamlFile byamlFile = new ByamlFile(supportPaths, byteOrder,true);
+			return byamlFile.Read(stream);
+		}
 
 		/// <summary>
 		/// Deserializes and returns the byte order and the dynamic value of the BYAML file read from the specified stream.
@@ -134,9 +149,6 @@ namespace Syroot.NintenTools.Byaml.Dynamic
         public static void Save(Stream stream, dynamic root, bool supportPaths = false,
             ByteOrder byteOrder = ByteOrder.LittleEndian)
         {
-#if FASTLOAD
-			Debug.Assert(false, "FASTLOAD (shared node references) is enabled, the saved file might have unexpected edits.\r\nTo build without FASTLOAD edit Byaml/ByamlFile.cs");
-#endif
 			ByamlFile byamlFile = new ByamlFile(supportPaths, byteOrder);
             byamlFile.Write(stream, root);
         }
@@ -244,10 +256,9 @@ namespace Syroot.NintenTools.Byaml.Dynamic
             }
         }
 
-		//Node references are disabled since it leads to multiple objects sharing the same values for different fields (eg. a position node can be shared between multiple objects)
-#if FASTLOAD
-		private Dictionary<uint, dynamic> AlreadyReadNodes = new Dictionary<uint, dynamic>(); //Offset in the file, reference to node
-#endif
+		//Node references are disabled unless fastLoad is active since it leads to multiple objects sharing the same values for different fields (eg. a position node can be shared between multiple objects)
+		private Dictionary<uint, dynamic> AlreadyReadNodes = null; //Offset in the file, reference to node
+
 		private dynamic ReadNode(BinaryDataReader reader, ByamlNodeType nodeType = 0)
         {
             // Read the node type if it has not been provided yet.
@@ -265,12 +276,12 @@ namespace Syroot.NintenTools.Byaml.Dynamic
                 {
                     // If the node type was given, the array value is read from an offset.
                     offset = reader.ReadUInt32();
-					#if FASTLOAD
-					if (AlreadyReadNodes.ContainsKey(offset))
+					
+					if (_fastLoad && AlreadyReadNodes.ContainsKey(offset))
                     {
                         return AlreadyReadNodes[offset];
                     }
-					#endif
+
                     oldPos = reader.Position;
                     reader.Seek(offset, SeekOrigin.Begin);
                 }
@@ -355,10 +366,9 @@ namespace Syroot.NintenTools.Byaml.Dynamic
         private List<dynamic> ReadArrayNode(BinaryDataReader reader, int length, uint offset = 0)
         {
             List<dynamic> array = new List<dynamic>(length);
-
-			#if FASTLOAD
-            if (offset != 0) AlreadyReadNodes.Add(offset, array);
-			#endif
+			
+            if (_fastLoad && offset != 0) AlreadyReadNodes.Add(offset, array);
+			
             // Read the element types of the array.
             byte[] nodeTypes = reader.ReadBytes(length);
             // Read the elements, which begin after a padding to the next 4 bytes.
@@ -374,9 +384,9 @@ namespace Syroot.NintenTools.Byaml.Dynamic
         private Dictionary<string, dynamic> ReadDictionaryNode(BinaryDataReader reader, int length, uint offset = 0)
         {
             Dictionary<string, dynamic> dictionary = new Dictionary<string, dynamic>();
-			#if FASTLOAD
-			if (offset != 0) AlreadyReadNodes.Add(offset, dictionary);
-			#endif
+			
+			if (_fastLoad && offset != 0) AlreadyReadNodes.Add(offset, dictionary);
+			
 			// Read the elements of the dictionary.
             for (int i = 0; i < length; i++)
             {

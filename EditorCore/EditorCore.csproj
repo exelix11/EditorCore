@@ -69,6 +69,7 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common\OBJ.cs" />
     <Compile Include="CustomClasses.cs" />
     <Compile Include="EditorFroms\AddPropertyDialog.cs">
       <SubType>Form</SubType>

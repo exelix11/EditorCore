@@ -1,4 +1,5 @@
-﻿using EditorCore.Interfaces;
+﻿using EditorCore.Common;
+using EditorCore.Interfaces;
 using Smash_Forge;
 using Syroot.NintenTools.MarioKart8.Common;
 using System;
@@ -65,11 +66,51 @@ namespace KCLExt
 			if (opn.ShowDialog() != DialogResult.OK) return;
 			var kcl = new KCL(File.ReadAllBytes(opn.FileName));
 
-            PublicFunctions.WriteObj(kcl,opn.FileName);
-		}
+			kcl.ToObj().toWritableObj().WriteObj(opn.FileName + ".obj");
 
+            //PublicFunctions.WriteObj(kcl,opn.FileName);
+		}
         
     }
+
+	public static class Exten
+	{
+		public static OBJ ToObj(this KCL kcl)
+		{
+			var res = new OBJ();
+			Dictionary<int, OBJ.Material> materials = new Dictionary<int, OBJ.Material>();
+
+			OBJ.Material GetOrAddMaterial(int materialFlag, KCL.KCLModel.Face f)
+			{
+				if (materials.ContainsKey(materialFlag))
+					return materials[materialFlag];
+				else
+				{
+					var mat = new OBJ.Material()
+					{
+						Name = $"MatID_{f.MaterialFlag}",
+						Colors = new OBJ.Vertex(0, 0, 0, f.vtx.col.X, f.vtx.col.Y, f.vtx.col.Z)
+					};
+					materials.Add(materialFlag, mat);
+					return mat;
+				}
+			}
+
+			foreach (var m in kcl.models)
+				foreach (var f in m.Faces)
+				{
+					res.Faces.Add(new OBJ.Face()
+					{
+						VA = new OBJ.Vertex(f.vtx.pos.X, f.vtx.pos.Y, f.vtx.pos.Z, f.vtx.nrm.X, f.vtx.nrm.Y, f.vtx.nrm.Z),
+						VB = new OBJ.Vertex(f.vtx2.pos.X, f.vtx2.pos.Y, f.vtx2.pos.Z, f.vtx2.nrm.X, f.vtx2.nrm.Y, f.vtx2.nrm.Z),
+						VC = new OBJ.Vertex(f.vtx3.pos.X, f.vtx3.pos.Y, f.vtx3.pos.Z, f.vtx3.nrm.X, f.vtx3.nrm.Y, f.vtx3.nrm.Z),
+						Mat = GetOrAddMaterial(f.MaterialFlag,f)
+					});
+				}
+
+			return res;
+		}
+	}
 
     public static class PublicFunctions
     {
