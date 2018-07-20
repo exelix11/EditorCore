@@ -375,6 +375,10 @@ namespace EditorCore
 			string PlaceholderModel = ModelsFolder + "\\" + GameModule.GetPlaceholderModel(obj.Name, listName);
 
 			string ModelFile = GetModelName(obj.ModelName);
+
+            if (ModelFile==null&&File.Exists(ModelsFolder + "\\" + obj.ModelName + ".obj"))
+                ModelFile = ModelsFolder + "\\" + obj.ModelName + ".obj";
+
             if (ModelFile == null) ModelFile = PlaceholderModel;
             render.AddModel(ModelFile, obj, obj.ModelView_Pos, obj.ModelView_Scale, obj.ModelView_Rot);
         }
