@@ -97,12 +97,17 @@ namespace SARCExt
 			var sav = new SaveFileDialog() { Filter = "szs file|*.szs" };
 			if (sav.ShowDialog() != DialogResult.OK)
 				return;
-			File.WriteAllBytes(sav.FileName,YAZ0.Compress(SARC.pack(loadedSarc)));
+			if (numericUpDown1.Value == 0)
+				File.WriteAllBytes(sav.FileName, SARC.pack(loadedSarc));
+			else
+				File.WriteAllBytes(sav.FileName,YAZ0.Compress(SARC.pack(loadedSarc),(int)numericUpDown1.Value));
 		}
 
 		private void replaceToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			byte[] compressedSarc = YAZ0.Compress(SARC.pack(loadedSarc));
+			byte[] compressedSarc = SARC.pack(loadedSarc);
+			if (numericUpDown1.Value != 0)
+				compressedSarc = YAZ0.Compress(compressedSarc, (int)numericUpDown1.Value);
 			sourceStream.Position = 0;
 			sourceStream.Write(compressedSarc, 0, compressedSarc.Length);
 		}

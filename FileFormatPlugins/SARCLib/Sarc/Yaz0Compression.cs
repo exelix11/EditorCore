@@ -8,10 +8,12 @@ namespace EveryFileExplorer
     public unsafe class YAZ0
     {
 		//Compression could be optimized by using look-ahead.
-		public static unsafe byte[] Compress(string FileName) => Compress(File.ReadAllBytes(FileName));
-		public static unsafe byte[] Compress(byte[] Data)
+		public static unsafe byte[] Compress(string FileName, int level = 3) => Compress(File.ReadAllBytes(FileName),level);
+		public static unsafe byte[] Compress(byte[] Data, int level = 3)
         {
-            byte* dataptr = (byte*)Marshal.UnsafeAddrOfPinnedArrayElement(Data, 0);
+			int maxBackLevel = (int)(0x10e0 * (level / 9.0) - 0x0e0);
+
+			byte* dataptr = (byte*)Marshal.UnsafeAddrOfPinnedArrayElement(Data, 0);
 
             byte[] result = new byte[Data.Length + Data.Length / 8 + 0x10];
             byte* resultptr = (byte*)Marshal.UnsafeAddrOfPinnedArrayElement(result, 0);
@@ -42,7 +44,7 @@ namespace EveryFileExplorer
                         int maxnum = 0x111;
                         if (length - Offs < maxnum) maxnum = length - Offs;
                         //Use a smaller amount of bytes back to decrease time
-                        int maxback = 0x400;//0x1000;
+                        int maxback = maxBackLevel;//0x1000;
                         if (Offs < maxback) maxback = Offs;
                         maxback = (int)dataptr - maxback;
                         int tmpnr;

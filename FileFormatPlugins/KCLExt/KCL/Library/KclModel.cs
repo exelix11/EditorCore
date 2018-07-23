@@ -252,14 +252,16 @@ namespace Syroot.NintenTools.MarioKart8.Collisions.Custom
                 int normalArrayOffset = reader.ReadInt32();
                 int triangleArrayOffset = reader.ReadInt32();
                 int octreeOffset = reader.ReadInt32();
-                reader.Seek(sizeof(float)); // Unknown value always being 30.0.
+				float unk1 = reader.ReadSingle();
+               // reader.Seek(sizeof(float)); // Unknown value always being 30.0.
                 MinCoordinate = reader.ReadVector3F();
                 CoordinateMask = reader.ReadVector3();
                 CoordinateShift = reader.ReadVector3();
-                reader.Seek(sizeof(float)); // Unknown value always being 25.0.
+				float unk2 = reader.ReadSingle();
+				//reader.Seek(sizeof(float)); // Unknown value always being 25.0.
 
-                // Read the positions.
-                reader.Position = modelPosition + positionArrayOffset; // Mostly unrequired, data is successive.
+				// Read the positions.
+				reader.Position = modelPosition + positionArrayOffset; // Mostly unrequired, data is successive.
                 int positionCount = (normalArrayOffset - positionArrayOffset) / Vector3F.SizeInBytes;
                 Positions = new List<Vector3F>(reader.ReadVector3Fs(positionCount));
 
@@ -322,11 +324,11 @@ namespace Syroot.NintenTools.MarioKart8.Collisions.Custom
                 Offset normalArrayOffset = writer.ReserveOffset();
                 Offset triangleArrayOffset = writer.ReserveOffset();
                 Offset octreeOffset = writer.ReserveOffset();
-                writer.Write(30f);
+                writer.Write(40f); //30
                 writer.Write(MinCoordinate);
                 writer.Write(CoordinateMask);
                 writer.Write(CoordinateShift);
-                writer.Write(25f);
+                writer.Write(0f); //25
 
                 // Write the positions.
                 positionArrayOffset.Satisfy((int)(writer.Position - modelPosition));

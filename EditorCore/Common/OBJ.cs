@@ -143,14 +143,14 @@ namespace EditorCore.Common
 
 				if (Vertices[f.FaceIndex].U != null)
 					s.WriteLine(
-						$"f {f.FaceIndex}\\\\{f.FaceIndex}" +
-						 $" {f.FaceIndex + 1}\\\\{f.FaceIndex + 1}" +
-						 $" {f.FaceIndex + 2}\\\\{f.FaceIndex + 2}");
+						$"f {f.FaceIndex}//{f.FaceIndex}" +
+						 $" {f.FaceIndex + 1}//{f.FaceIndex + 1}" +
+						 $" {f.FaceIndex + 2}//{f.FaceIndex + 2}");
 				else
 					s.WriteLine(
-						$"f {f.FaceIndex}\\{f.FaceIndex}\\{f.FaceIndex}" +
-						 $" {f.FaceIndex + 1}\\{f.FaceIndex + 1}\\{f.FaceIndex + 1}" +
-						 $" {f.FaceIndex + 2}\\{f.FaceIndex + 2}\\{f.FaceIndex + 2}");
+						$"f {f.FaceIndex}/{f.FaceIndex}/{f.FaceIndex}" +
+						 $" {f.FaceIndex + 1}/{f.FaceIndex + 1}/{f.FaceIndex + 1}" +
+						 $" {f.FaceIndex + 2}/{f.FaceIndex + 2}/{f.FaceIndex + 2}");
 			}
 		}
 

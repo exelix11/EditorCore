@@ -65,8 +65,8 @@ namespace Syroot.NintenTools.MarioKart8.Collisions.Custom
 					}
 				}
 			}
-			MinCoordinate = minCoordinate + _minCoordinatePadding;
-			MaxCoordinate = maxCoordinate + _maxCoordinatePadding;
+			MinCoordinate = minCoordinate;// + _minCoordinatePadding; odyssey doesn't seem to use this 
+			MaxCoordinate = maxCoordinate;// + _maxCoordinatePadding;
 
 			// Compute square cube size of the world, and with it the coordinate shift for use with the model octree.
 			Vector3F size = MaxCoordinate - MinCoordinate;
@@ -85,7 +85,7 @@ namespace Syroot.NintenTools.MarioKart8.Collisions.Custom
 			foreach (ObjModel subModel in objSubModels)
 			{
 				Models.Add(new KclModel(objModel));
-			}
+			}			
 		}
 
 		/// <summary>

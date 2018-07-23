@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using EveryFileExplorer;
 using System.IO;
+using EditorCore;
 
 namespace SARCExt
 {
@@ -85,7 +86,13 @@ namespace SARCExt
 		{
 			OpenFileDialog opn = new OpenFileDialog() { Filter = "szs file|*.szs|every file|*.*" };
 			if (opn.ShowDialog() != DialogResult.OK) return;
-			new SarcEditor(SARC.UnpackRam(YAZ0.Decompress(opn.FileName))).Show();
+			byte[] file = File.ReadAllBytes(opn.FileName);
+			if (file[0] == 'S' && file[1] == 'A' && file[2] == 'R' && file[3] == 'C')
+				new SarcEditor(SARC.UnpackRam(file)).Show();
+			else if (file[0] == 'Y' && file[1] == 'a' && file[2] == 'z' && file[3] == '0')
+				new SarcEditor(SARC.UnpackRam(YAZ0.Decompress(file))).Show();
+			else
+				MessageBox.Show("Unknown file format");
 		}
 
 		void Compress(object sender, EventArgs e)
@@ -93,8 +100,21 @@ namespace SARCExt
 			OpenFileDialog openFile = new OpenFileDialog();
 			openFile.Filter = "every file | *.*";
 			if (openFile.ShowDialog() != DialogResult.OK) return;
+
+			string strRes = "3";
+			var res = InputDialog.Show("Enter a compression level", "Select a compression level between 1 (fastest) and 9 (slowest)", ref strRes);
+			if (res != DialogResult.OK)
+				return;
+
+			int Level;
+			if (!int.TryParse(strRes, out Level) || Level < 1 || Level > 9)
+			{
+				MessageBox.Show("The selected value is not valid");
+				return;
+			}
+
 			System.IO.File.WriteAllBytes( openFile.FileName + ".yaz0",
-				EveryFileExplorer.YAZ0.Compress(openFile.FileName));
+				EveryFileExplorer.YAZ0.Compress(openFile.FileName, Level));
 			GC.Collect();
 		}
 
