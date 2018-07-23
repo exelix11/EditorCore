@@ -24,7 +24,7 @@ namespace SARCExt
 		public IClipboardExtension ClipboardExt => null;
 
 		public bool HasGameModule => false;
-		public IGameModule GameModule => null;
+		public IGameModule GetNewGameModule() => null;
 
 		public IFileHander[] Handlers { get; } = new IFileHander[] { };
 

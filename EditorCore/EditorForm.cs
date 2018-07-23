@@ -22,7 +22,9 @@ namespace EditorCore
 {
 	public partial class EditorForm : Form
 	{
+		ExtensionManifest SelectedGameModuleExtension;
 		IGameModule GameModule = null;
+
 		ExtensionManifest[] LoadedModules = null;
 
 		public bool IsAddListSupported
@@ -111,7 +113,7 @@ namespace EditorCore
 
         bool EditingList { get { return ListEditingStack.Count != 0; } }
 
-		public EditorForm(string[] args, ExtensionManifest[] Modules, IGameModule selectedModule = null)
+		public EditorForm(string[] args, ExtensionManifest[] Modules, ExtensionManifest selectedModule = null)
 		{
 			InitializeComponent();
 #if DEBUG
@@ -163,19 +165,20 @@ namespace EditorCore
 
 			if (selectedModule != null)
 			{
-				GameModule = selectedModule;
+				GameModule = selectedModule.GetNewGameModule();
+				SelectedGameModuleExtension = selectedModule;
 			}
 			else
 			{
 
 				if (ExtensionsWithGameModules.Count == 0) return;
-				else if (ExtensionsWithGameModules.Count == 1) GameModule = ExtensionsWithGameModules[0].GameModule;
+				else if (ExtensionsWithGameModules.Count == 1) GameModule = ExtensionsWithGameModules[0].GetNewGameModule();
 				else
 				{
 					var dlg = new OtherForms.GameModuleSelect(ExtensionsWithGameModules);
 					dlg.ShowDialog();
 					if (dlg.result == null) return;
-					GameModule = dlg.result.GameModule;
+					GameModule = dlg.result.GetNewGameModule();
 				}
 				if (GameModule == null) return;
 
@@ -1088,7 +1091,7 @@ namespace EditorCore
 
 		private void newEditorInstanceToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			new EditorForm(null, LoadedModules, GameModule).Show();
+			new EditorForm(null, LoadedModules, SelectedGameModuleExtension).Show();
 		}
 
 		private void EditorForm_Closed(object sender, FormClosedEventArgs e)

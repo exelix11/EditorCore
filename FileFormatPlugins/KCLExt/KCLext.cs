@@ -29,7 +29,7 @@ namespace KCLExt
 
 		public IClipboardExtension ClipboardExt => null;
 
-		public IGameModule GameModule => null;
+		public IGameModule GetNewGameModule() => null;
 
 		public IFileHander[] Handlers => null;
 

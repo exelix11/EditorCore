@@ -87,6 +87,7 @@
     <ProjectReference Include="..\..\EditorCore\EditorCore.csproj">
       <Project>{DF37F616-9CB6-4594-B30A-D5DD52EE1B3E}</Project>
       <Name>EditorCore</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

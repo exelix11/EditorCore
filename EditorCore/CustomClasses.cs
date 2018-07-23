@@ -275,6 +275,9 @@ namespace ExtensionMethods
 
 		public static void Add<T>(this ApplicationSettingsBase settings, string propertyName, T val)
 		{
+			if (settings.Properties[propertyName] != null)
+				return;
+
 			var p = new SettingsProperty(propertyName)
 			{
 				PropertyType = typeof(T),
