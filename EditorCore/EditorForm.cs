@@ -172,13 +172,18 @@ namespace EditorCore
 			{
 
 				if (ExtensionsWithGameModules.Count == 0) return;
-				else if (ExtensionsWithGameModules.Count == 1) GameModule = ExtensionsWithGameModules[0].GetNewGameModule();
+				else if (ExtensionsWithGameModules.Count == 1)
+				{
+					GameModule = ExtensionsWithGameModules[0].GetNewGameModule();
+					SelectedGameModuleExtension = ExtensionsWithGameModules[0];
+				}
 				else
 				{
 					var dlg = new OtherForms.GameModuleSelect(ExtensionsWithGameModules);
 					dlg.ShowDialog();
 					if (dlg.result == null) return;
 					GameModule = dlg.result.GetNewGameModule();
+					SelectedGameModuleExtension = dlg.result;
 				}
 				if (GameModule == null) return;
 
