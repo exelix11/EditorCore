@@ -12,7 +12,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Syroot.BinaryData;
 using EditorCore;
-using EditorCore.EditorFroms;
 
 namespace ByamlExt
 {
@@ -279,7 +278,7 @@ namespace ByamlExt
 				}
 			}
 
-			var newProp = AddPropertyDialog.newProperty(!(target is List<dynamic>));
+			var newProp = AddBymlPropertyDialog.newProperty(!(target is List<dynamic>));
 			if (newProp == null) return;
 			bool clone = newProp.Item2 is Dictionary<string, dynamic> || newProp.Item2 is List<dynamic>; //reference types must be manually cloned
 			var toAdd = clone ? DeepCloneDictArr.DeepClone(newProp.Item2) : newProp.Item2;

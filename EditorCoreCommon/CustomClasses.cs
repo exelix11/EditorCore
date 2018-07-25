@@ -13,25 +13,10 @@ using System.Diagnostics;
 using System.Drawing;
 using EditorCore.Interfaces;
 using System.Configuration;
+using System.Windows;
 
 namespace EditorCore
 {
-	public static class ByamlTypeHelper
-	{
-		public delegate dynamic ConvertMethod(string inString);
-		public static readonly Dictionary<Type, ConvertMethod> StringToNodeTable = new Dictionary<Type, ConvertMethod>()
-		{
-			{ typeof(string) , (s) => s },
-			{ typeof(int) , (s) => (int.Parse(s)) },
-			{ typeof(uint) , (s) =>(uint.Parse(s)) },
-			{ typeof(long) , (s) => (long.Parse(s)) },
-			{ typeof(ulong) , (s) => (ulong.Parse(s)) },
-			{ typeof(double) , (s) =>(double.Parse(s)) },
-			{ typeof(float) , (s) => (float.Parse(s)) },
-		};
-		public static dynamic ConvertValue(Type t, string value) => StringToNodeTable[t](value);
-	}
-
 	public static class InputDialog
     {
         public static DialogResult Show(string title, string promptText, ref string value)

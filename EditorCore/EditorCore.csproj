@@ -43,9 +43,6 @@
     <Reference Include="HelixToolkit.Wpf, Version=2.2.0.0, Culture=neutral, PublicKeyToken=52aa3500039caf0d, processorArchitecture=MSIL">
       <HintPath>..\packages\HelixToolkit.Wpf.2.2.0\lib\net45\HelixToolkit.Wpf.dll</HintPath>
     </Reference>
-    <Reference Include="Octokit, Version=0.29.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Octokit.0.29.0\lib\net45\Octokit.dll</HintPath>
-    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -69,20 +66,6 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Common\OBJ.cs" />
-    <Compile Include="CustomClasses.cs" />
-    <Compile Include="EditorFroms\AddPropertyDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="EditorFroms\AddPropertyDialog.Designer.cs">
-      <DependentUpon>AddPropertyDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="EditorFroms\LoadingForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="EditorFroms\LoadingForm.Designer.cs">
-      <DependentUpon>LoadingForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="EditorFroms\SearchResult.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -95,18 +78,12 @@
     <Compile Include="EditorForm.Designer.cs">
       <DependentUpon>EditorForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Interfaces\EditorChild.cs" />
-    <Compile Include="Interfaces\IPathObj.cs" />
     <Compile Include="OtherForms\FrmCredits.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="OtherForms\FrmCredits.Designer.cs">
       <DependentUpon>FrmCredits.cs</DependentUpon>
     </Compile>
-    <Compile Include="Interfaces\Extensions.cs" />
-    <Compile Include="Interfaces\IGameSpecificModule.cs" />
-    <Compile Include="Interfaces\ILevel.cs" />
-    <Compile Include="Interfaces\ILevelObj.cs" />
     <Compile Include="OtherForms\GameModuleSelect.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -115,20 +92,12 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PropertyGridTypes.cs" />
     <Compile Include="OtherForms\Settings.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="OtherForms\Settings.Designer.cs">
       <DependentUpon>Settings.cs</DependentUpon>
     </Compile>
-    <Compile Include="UpdateCheck.cs" />
-    <EmbeddedResource Include="EditorFroms\AddPropertyDialog.resx">
-      <DependentUpon>AddPropertyDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="EditorFroms\LoadingForm.resx">
-      <DependentUpon>LoadingForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="EditorFroms\SearchResult.resx">
       <DependentUpon>SearchResult.cs</DependentUpon>
     </EmbeddedResource>
@@ -170,6 +139,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\EditorCoreCommon\EditorCoreCommon.csproj">
+      <Project>{ee9882d0-f7a7-45e1-971a-1527b7e399f5}</Project>
+      <Name>EditorCoreCommon</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ModelViewer\ModelViewerCore.csproj">
       <Project>{44045645-B2AB-43D0-A1B7-A67A9D00DC4B}</Project>
       <Name>ModelViewerCore</Name>

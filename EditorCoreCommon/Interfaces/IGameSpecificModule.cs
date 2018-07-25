@@ -1,14 +1,38 @@
-﻿using ModelViewer;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Windows.Media.Media3D;
 
 namespace EditorCore.Interfaces
 {
-	public delegate void HandleHotKeyExHandler(System.Windows.Input.KeyEventArgs e);
+	public interface IEditorFormContext
+	{
+		IObjList CurList { get; }
+		ILevelObj SelectedObj { get; set; }
+		ILevelObj[] SelectedObjs { get; }
+		string GameFolder { get; set; }
+
+		void RegisterClipBoardExt(ToolStripMenuItem item);
+		void RegisterMenuStripExt(ToolStripMenuItem item);
+		void LoadLevel(string path);
+
+		void SelectObject(IObjList List, ILevelObj obj);
+		void EditPath(IPathObj path);
+		void EditList(IObjList objlist);
+		void EditList(IList<dynamic> objList);
+		void AddToUndo(Action<dynamic> act, string desc, dynamic arg = null);
+		void AddObj(ILevelObj o, IObjList list);
+		void DeleteObj(ILevelObj o, IObjList list);
+
+		void AddModelObj(string path, object reference, Vector3D Pos, Vector3D Scale, Vector3D Rot);
+
+		IEditorFormContext NewInstance(params string[] args);
+	}
+
 	public interface IGameModule
 	{
 		string ModuleName {get;}
@@ -21,11 +45,11 @@ namespace EditorCore.Interfaces
 		
 		bool IsAddListSupported { get; }
 		bool IsPropertyEditingSupported { get; }
-		EditorForm ViewForm { get; set; }
+		IEditorFormContext ViewForm { get; set; }
 
 		string[] AutoHideList { get; }
 
-		void InitModule(EditorForm currentView);
+		void InitModule(IEditorFormContext currentView);
 		void FormLoaded(); //for startup checks
 		void ParseArgs(string[] Args);
 
@@ -43,5 +67,7 @@ namespace EditorCore.Interfaces
 		bool OpenLevelFile(string name, Stream file); //if it fails the editor will try using OpenFileHandler
 		string AddObjList(ILevel level);
 		void EditChildrenNode(ILevelObj obj);
+
+		Tuple<string, dynamic> GetNewProperty(dynamic target);
 	}
 }

@@ -14,9 +14,9 @@ namespace EditorCore.EditorFroms
     public partial class SearchResult : Form, IEditorChild
     {
         public Tuple<IObjList, ILevelObj>[] SearchResultArr;
-		public EditorForm ParentEditor { get; set; }
+		public IEditorFormContext ParentEditor { get; set; }
 
-		public SearchResult(Tuple<IObjList,ILevelObj>[] _sr, string title, EditorForm _owner)
+		public SearchResult(Tuple<IObjList,ILevelObj>[] _sr, string title, IEditorFormContext _owner)
         {
             InitializeComponent();
             title = "Search result: " + title;

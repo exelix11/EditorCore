@@ -17,10 +17,11 @@ using EditorCore.EditorFroms;
 using System.Diagnostics;
 using EditorCore.Interfaces;
 using ExtensionMethods;
+using EditorCoreCommon;
 
 namespace EditorCore
 {
-	public partial class EditorForm : Form
+	public partial class EditorForm : Form, IEditorFormContext
 	{
 		ExtensionManifest SelectedGameModuleExtension;
 		IGameModule GameModule = null;
@@ -40,7 +41,7 @@ namespace EditorCore
 			}
 		}
 		
-        public string GameFolder = "";
+        public string GameFolder { get; set; } = "";
         string ModelsFolder = null;
 
         public RendererControl render  = new RendererControl();
@@ -50,9 +51,7 @@ namespace EditorCore
 
         public static ClipBoardItem StoredValue = null;
         public CustomStack<UndoAction> UndoList = new CustomStack<UndoAction>();
-
-        private bool UndoStackLocked = false;
-
+		
 		const string LinkedListName = "____EditorInternalList___";
         public string CurListName
         {
@@ -77,7 +76,7 @@ namespace EditorCore
 
 		public int SelectionCount => ObjectsListBox.SelectedItems.Count;
 
-		ILevelObj SelectedObj
+		public ILevelObj SelectedObj
 		{
 			get
 			{
@@ -206,6 +205,7 @@ namespace EditorCore
 
 		}
 
+		public void RegisterClipBoardExt(ToolStripMenuItem item) => ClipBoardMenu.Items.Add(item);
 		public void RegisterFindMenuStripExt(ToolStripMenuItem item) => FindMenu.DropDownItems.Add(item);
 		public void RegisterMenuStripExt(ToolStripMenuItem item) => menuStrip1.Items.Add(item);
 		void RegisterMenuExt(ToolStripMenuItem target, ToolStripMenuItem[] list) => target.DropDownItems.AddRange(list);
@@ -418,14 +418,19 @@ namespace EditorCore
 			LoadObjListModels(path, LinkedListName);
 		}
 
+		public void EditList(IObjList objlist)
+		{
+			ListEditingStack.Push(objlist);
+			PopulateListBox();
+			SelectedObjectChanged(null, null);
+			LoadObjListModels(objlist, LinkedListName);
+		}
+
 		public void EditList(IList<dynamic> objList)
         {
             IObjList list = GameModule.CreateObjList(LinkedListName, objList);
-            ListEditingStack.Push(list);
-			PopulateListBox();
-            SelectedObjectChanged(null, null);
-            LoadObjListModels(list, LinkedListName);
-        }
+			EditList(list);
+		}
 
         public void PreviousList()
         {
@@ -719,7 +724,7 @@ namespace EditorCore
 
 		private void button4_Click(object sender, EventArgs e)
 		{
-			var newProp = AddPropertyDialog.newProperty(!(propertyGrid1.SelectedGridItem.Value is List<dynamic>));
+			var newProp = GameModule.GetNewProperty(propertyGrid1.SelectedGridItem.Value);
 			if (newProp == null) return;
 			var path = PropertyGridGetPath();
 
@@ -914,7 +919,7 @@ namespace EditorCore
         {
 			if (RenderIsDragging) return;
 			var obj = render.GetOBJ(sender, e) as ILevelObj;
-			if (obj == null)
+			if (obj == null || obj.NotLevel)
 			{
 				return;
 			}
@@ -965,7 +970,6 @@ namespace EditorCore
         const int UndoMax = 30;
         public void AddToUndo(Action<dynamic> act, string desc, dynamic arg = null)
         {
-            if (UndoStackLocked) return; //so subactions from big actions like paste don't land in here
             UndoList.Push(new UndoAction(desc, act, arg));
             if (UndoList.Count > UndoMax) UndoList.RemoveAt(0);
         }
@@ -1113,30 +1117,33 @@ namespace EditorCore
                 if (SelectedObj != null)
                     offset = StoredValue.Objs.First().ModelView_Pos - SelectedObj.ModelView_Pos;
                 ObjectsListBox.SelectedIndices.Clear();
-
-                UndoStackLocked = true;
+				
                 foreach (var o in StoredValue.Objs)
                 {
                     ILevelObj copiedObj = (ILevelObj)o.Clone();
                     copiedObj.ModelView_Pos -= offset;
-                    AddObj(copiedObj, CurList);
+                    InternalAddObj(copiedObj, CurList);
                     ObjectsListBox.SelectedIndices.Add(CurList.IndexOf(copiedObj));
                 }
-                UndoStackLocked = false;
 
                 AddToUndo((dynamic args) =>
                 {
                     var aArray = (dynamic[])args;
                     var listName = (string)aArray[0];
                     var selObjs = (ILevelObj[])aArray[1];
-
-                    UndoStackLocked = true;
+					
                     foreach (ILevelObj obj in selObjs)
-                        DeleteObj(obj, LoadedLevel.objs[listName]);
-
-                    UndoStackLocked = false;
+						InternalDeleteObj(obj, LoadedLevel.objs[listName]);
+					
                 }, SelectionCount > 1 ? $"Pasted in {SelectionCount} objects" : $"Pasted in object {SelectedObj}", new dynamic[] { CurListName, SelectedObjs.Clone() });
             }
         }
-    }
+
+		public IEditorFormContext NewInstance(params string[] args)
+		{
+			var inst = new EditorForm(args, LoadedModules, SelectedGameModuleExtension);
+			inst.Show();
+			return inst;
+		}
+	}
 }

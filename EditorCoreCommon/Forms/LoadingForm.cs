@@ -26,7 +26,7 @@ namespace EditorCore.EditorFroms
             LoadingFormInstance.Refresh();
         }
 
-        public static void EndLoading()
+		public static void EndLoading()
         {
             if (LoadingFormInstance == null) return;
             LoadingFormInstance.Close();

@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // Le informazioni generali relative a un assembly sono controllate dal seguente 
 // set di attributi. Modificare i valori di questi attributi per modificare le informazioni
 // associate a un assembly.
-[assembly: AssemblyTitle("EditorCore")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("EditorCoreCommon")]
+[assembly: AssemblyDescription("Common functions and interfaces for EditorCore")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Exelix")]
-[assembly: AssemblyProduct("EditorCore")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("EditorCoreCommon")]
 [assembly: AssemblyCopyright("Copyright ©  2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // Se il progetto viene esposto a COM, il GUID seguente verrà utilizzato come ID della libreria dei tipi
-[assembly: Guid("df37f616-9cb6-4594-b30a-d5dd52ee1b3e")]
+[assembly: Guid("ee9882d0-f7a7-45e1-971a-1527b7e399f5")]
 
 // Le informazioni sulla versione di un assembly sono costituite dai seguenti quattro valori:
 //
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // È possibile specificare tutti i valori oppure impostare valori predefiniti per i numeri relativi alla revisione e alla build
 // usando l'asterisco '*' come illustrato di seguito:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.1.0")]
-[assembly: AssemblyFileVersion("1.1.0.0")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]

@@ -74,5 +74,5 @@ namespace ByamlExt
 		public ToolStripMenuItem[] FileMenuExtensions { get; internal set; }
 		public ToolStripMenuItem[] ToolsMenuExtensions { get; internal set; }
 		public ToolStripMenuItem[] TitleBarExtensions { get; internal set; }
-	}
+	}	
 }

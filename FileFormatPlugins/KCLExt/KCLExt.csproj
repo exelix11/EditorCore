@@ -75,15 +75,14 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\EditorCore\EditorCore.csproj">
-      <Project>{DF37F616-9CB6-4594-B30A-D5DD52EE1B3E}</Project>
-      <Name>EditorCore</Name>
+    <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\EditorCoreCommon\EditorCoreCommon.csproj">
+      <Project>{EE9882D0-F7A7-45E1-971A-1527B7E399F5}</Project>
+      <Name>EditorCoreCommon</Name>
       <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <WCFMetadata Include="Connected Services\" />
-  </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

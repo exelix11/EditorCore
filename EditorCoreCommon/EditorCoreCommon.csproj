@@ -4,23 +4,23 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{9C220305-E452-4DB0-9F99-186640268B4F}</ProjectGuid>
+    <ProjectGuid>{EE9882D0-F7A7-45E1-971A-1527B7E399F5}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SARCExt</RootNamespace>
-    <AssemblyName>SARCExt</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <RootNamespace>EditorCoreCommon</RootNamespace>
+    <AssemblyName>EditorCoreCommon</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\EditorCore\bin\Debug\Ext\</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,19 +29,14 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="HelixToolkit, Version=2.2.0.0, Culture=neutral, PublicKeyToken=52aa3500039caf0d, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\HelixToolkit.2.2.0\lib\netstandard1.1\HelixToolkit.dll</HintPath>
+    <Reference Include="Octokit, Version=0.31.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Octokit.0.31.0\lib\net45\Octokit.dll</HintPath>
     </Reference>
-    <Reference Include="HelixToolkit.Wpf, Version=2.2.0.0, Culture=neutral, PublicKeyToken=52aa3500039caf0d, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\HelixToolkit.Wpf.2.2.0\lib\net45\HelixToolkit.Wpf.dll</HintPath>
-    </Reference>
-    <Reference Include="Syroot.BinaryData, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Syroot.IO.BinaryData.2.0.0\lib\net45\Syroot.BinaryData.dll</HintPath>
-    </Reference>
+    <Reference Include="PresentationCore" />
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
@@ -53,32 +48,41 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SarcEditor.cs">
+    <Compile Include="Common\OBJ.cs" />
+    <Compile Include="CustomClasses.cs" />
+    <Compile Include="Forms\AddBymlPropertyDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SarcEditor.Designer.cs">
-      <DependentUpon>SarcEditor.cs</DependentUpon>
+    <Compile Include="Forms\AddBymlPropertyDialog.Designer.cs">
+      <DependentUpon>AddBymlPropertyDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="SarcExt.cs" />
+    <Compile Include="Forms\LoadingForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\LoadingForm.Designer.cs">
+      <DependentUpon>LoadingForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Interfaces\EditorChild.cs" />
+    <Compile Include="Interfaces\Extensions.cs" />
+    <Compile Include="Interfaces\IGameSpecificModule.cs" />
+    <Compile Include="Interfaces\ILevel.cs" />
+    <Compile Include="Interfaces\ILevelObj.cs" />
+    <Compile Include="Interfaces\IPathObj.cs" />
+    <Compile Include="OpenFileHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Sarc\SARC.cs" />
-    <Compile Include="Sarc\Yaz0Compression.cs" />
-    <Compile Include="Sarc\Yaz0Exception.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="SarcEditor.resx">
-      <DependentUpon>SarcEditor.cs</DependentUpon>
-    </EmbeddedResource>
+    <Compile Include="PropertyGridTypes.cs" />
+    <Compile Include="UpdateCheck.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\EditorCoreCommon\EditorCoreCommon.csproj">
-      <Project>{ee9882d0-f7a7-45e1-971a-1527b7e399f5}</Project>
-      <Name>EditorCoreCommon</Name>
-      <Private>False</Private>
-    </ProjectReference>
+    <EmbeddedResource Include="Forms\AddBymlPropertyDialog.resx">
+      <DependentUpon>AddBymlPropertyDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\LoadingForm.resx">
+      <DependentUpon>LoadingForm.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

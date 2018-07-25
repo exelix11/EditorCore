@@ -1,6 +1,6 @@
-﻿namespace EditorCore.EditorFroms
+﻿namespace EditorCore
 {
-	partial class AddPropertyDialog
+	partial class AddBymlPropertyDialog
 	{
 		/// <summary>
 		/// Required designer variable.

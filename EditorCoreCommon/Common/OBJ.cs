@@ -118,7 +118,7 @@ namespace EditorCore.Common
 			return res;
 		}
 
-		public struct Vertex : IEquatable<Vertex>
+		public struct Vertex :IEquatable<Vertex>
 		{
 			public Vertex(float x, float y, float z, float nx , float ny, float nz , float? u = null, float? v = null, float? w = null)
 			{
@@ -150,6 +150,7 @@ namespace EditorCore.Common
 			public override bool Equals(object obj) => obj is Vertex ? Equals((Vertex)obj) : false;
 			public static bool operator ==(Vertex c1, Vertex c2) =>  c1.Equals(c2);
 			public static bool operator !=(Vertex c1, Vertex c2) => !c1.Equals(c2);
+			public override int GetHashCode() => base.GetHashCode(); //Probably not going to work, but silences warnings
 		}
 
 		public struct Face : IEquatable<Face>
@@ -172,8 +173,10 @@ namespace EditorCore.Common
 			}
 
 			public bool Equals(Face other) => VA == other.VA && VB == other.VB && VC == other.VB && Mat == other.Mat;
+			public override bool Equals(object other) => other is Face ? this.Equals((Face)other) : false;
 			public static bool operator ==(Face c1, Face c2) => c1.Equals(c2);
 			public static bool operator !=(Face c1, Face c2) => !c1.Equals(c2);
+			public override int GetHashCode() => base.GetHashCode();
 		}
 
 		public class Material : IEquatable<Material>
@@ -189,8 +192,11 @@ namespace EditorCore.Common
 					other.TextureMapName == TextureMapName &&
 					other.Colors == Colors;
 			}
+
+			public override bool Equals(object other) => other is Material ? this.Equals((Material)other) : false;
 			public static bool operator ==(Material c1, Material c2) => c2 is null ? false : c1.Equals(c2);
 			public static bool operator !=(Material c1, Material c2) => !c1.Equals(c2);
+			public override int GetHashCode() => base.GetHashCode();
 		}
 
 		public bool HasMaterial(string name) => Materials.Any(x => x.Name == name);

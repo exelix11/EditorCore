@@ -8,6 +8,6 @@ namespace EditorCore.Interfaces
 {
 	public interface IEditorChild
 	{
-		EditorForm ParentEditor { get; set; }
+		IEditorFormContext ParentEditor { get; set; }
 	}
 }

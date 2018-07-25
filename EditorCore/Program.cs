@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using EditorCore.Interfaces;
+using EditorCoreCommon;
 
 namespace EditorCore
 {
@@ -58,24 +59,5 @@ namespace EditorCore
 			firstForm.Show();
 			Application.Run();            
         }
-    }
-
-	public static class OpenFileHandler
-	{
-		internal static List<IFileHander> handlers = new List<IFileHander>();
-
-		public static void OpenFile(string filename, Stream FileStream, int BasePositionInStream = 0)
-		{
-			foreach (var h in handlers)
-			{
-				FileStream.Position = BasePositionInStream;
-				if (h.IsFormatSupported(filename, FileStream))
-				{
-					FileStream.Position = BasePositionInStream;
-					h.OpenFile(filename, FileStream);
-					break;
-				}
-			}
-		}
-	}
+    }	
 }

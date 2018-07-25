@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using EveryFileExplorer;
+using EditorCoreCommon;
 
 namespace SARCExt
 {
@@ -115,7 +116,7 @@ namespace SARCExt
 		private void ListBoxDoubleClick(object sender, EventArgs e)
 		{
 			if (listBox1.SelectedItem != null)
-				EditorCore.OpenFileHandler.OpenFile(listBox1.SelectedItem.ToString(), 
+				OpenFileHandler.OpenFile(listBox1.SelectedItem.ToString(), 
 					new MemoryStream(loadedSarc[listBox1.SelectedItem.ToString()]));
 		}
 

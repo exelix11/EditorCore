@@ -17,7 +17,7 @@ namespace EditorCore.Interfaces
 	public interface ILevelObj : ICloneable
 	{
 		[Browsable(false)]
-		bool CanDrag { get; set; }
+		bool NotLevel { get; set; } //this model is not part of the level, it can't be selected nor dragged
 
 		Dictionary<string, dynamic> Prop { get; set; }
 

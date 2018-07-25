@@ -8,12 +8,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace EditorCore.EditorFroms
+namespace EditorCore
 {
-	public partial class AddPropertyDialog : Form
+	public partial class AddBymlPropertyDialog : Form
 	{
 		dynamic result = null;
-		AddPropertyDialog()
+		AddBymlPropertyDialog()
 		{
 			InitializeComponent();
 		}
@@ -27,7 +27,7 @@ namespace EditorCore.EditorFroms
 
 		public static Tuple<string, dynamic> newProperty(bool enableName)
 		{
-			var dialog = new AddPropertyDialog();
+			var dialog = new AddBymlPropertyDialog();
 			dialog.textBox5.Enabled = enableName;
 			dialog.ShowDialog();
 			return dialog.result;
@@ -76,5 +76,21 @@ namespace EditorCore.EditorFroms
 			result = new Tuple<string, dynamic>(textBox5.Enabled ? textBox5.Text : null, value);
 			this.Close();
 		}
+	}
+
+	public static class ByamlTypeHelper
+	{
+		public delegate dynamic ConvertMethod(string inString);
+		public static readonly Dictionary<Type, ConvertMethod> StringToNodeTable = new Dictionary<Type, ConvertMethod>()
+		{
+			{ typeof(string) , (s) => s },
+			{ typeof(int) , (s) => (int.Parse(s)) },
+			{ typeof(uint) , (s) =>(uint.Parse(s)) },
+			{ typeof(long) , (s) => (long.Parse(s)) },
+			{ typeof(ulong) , (s) => (ulong.Parse(s)) },
+			{ typeof(double) , (s) =>(double.Parse(s)) },
+			{ typeof(float) , (s) => (float.Parse(s)) },
+		};
+		public static dynamic ConvertValue(Type t, string value) => StringToNodeTable[t](value);
 	}
 }

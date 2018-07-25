@@ -26,7 +26,7 @@ namespace SARCExt
 		public bool HasGameModule => false;
 		public IGameModule GetNewGameModule() => null;
 
-		public IFileHander[] Handlers { get; } = new IFileHander[] { };
+		public IFileHander[] Handlers { get; } = new IFileHander[] { new SzsHandler() };
 
 		public void CheckForUpdates()
 		{
