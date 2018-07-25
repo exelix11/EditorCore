@@ -1,6 +1,6 @@
 ﻿using EditorCore.Common;
 using EditorCore.Interfaces;
-using Smash_Forge;
+using MarioKart.MK7;
 using Syroot.NintenTools.MarioKart8.Common;
 using System;
 using System.Collections.Generic;
@@ -17,9 +17,9 @@ namespace KCLExt
 	{
 		public string ModuleName => "KCL extension";
 
-		public string Author => "";
+		public string Author => "Exelix11";
 
-		public string ThanksTo => "";
+		public string ThanksTo => "Gericom for Every File Explorer";
 
 		public Version TargetVersion => throw new NotImplementedException();
 
@@ -55,9 +55,14 @@ namespace KCLExt
 		{
 			OpenFileDialog opn = new OpenFileDialog();
 			if (opn.ShowDialog() != DialogResult.OK) return;
-			var mod = new Syroot.NintenTools.MarioKart8.Common.Custom.ObjModel(opn.FileName);
-			var f = new Syroot.NintenTools.MarioKart8.Collisions.Custom.KclFile(mod);
-			f.Save(opn.FileName + ".kcl");
+			var mod = OBJ.Read(new MemoryStream(File.ReadAllBytes(opn.FileName)),null);
+			if (mod.Faces.Count > 65535)
+			{
+				MessageBox.Show("this model has too many faces, only models with less than 65535 triangles can be converted");
+				return;
+			}
+			var f = MarioKart.MK7.KCL.FromOBJ(mod);
+			File.WriteAllBytes(opn.FileName + ".kcl", f.Write(Syroot.BinaryData.ByteOrder.LittleEndian));
 		}
 
 		private void KCLToObj(object sender, EventArgs e)
@@ -65,53 +70,13 @@ namespace KCLExt
 			OpenFileDialog opn = new OpenFileDialog();
 			if (opn.ShowDialog() != DialogResult.OK) return;
 			var kcl = new KCL(File.ReadAllBytes(opn.FileName));
-
 #if DEBUG
 			using (StreamWriter f = new System.IO.StreamWriter(opn.FileName + ".obj"))
-				kcl.ToObj().toWritableObj().WriteObj(f, null);
+				kcl.ToOBJ().toWritableObj().WriteObj(f, null);
 #else
-			kcl.ToObj().toWritableObj().WriteObj(opn.FileName + ".obj");
+			kcl.ToOBJ().toWritableObj().WriteObj(opn.FileName + ".obj");
 #endif
 		}
-        
-    }
 
-	public static class Exten
-	{
-		public static OBJ ToObj(this KCL kcl)
-		{
-			var res = new OBJ();
-			Dictionary<int, OBJ.Material> materials = new Dictionary<int, OBJ.Material>();
-
-			OBJ.Material GetOrAddMaterial(int materialFlag, KCL.KCLModel.Face f)
-			{
-				if (materials.ContainsKey(materialFlag))
-					return materials[materialFlag];
-				else
-				{
-					var mat = new OBJ.Material()
-					{
-						Name = $"MatID_{f.MaterialFlag}",
-						Colors = new OBJ.Vertex(0, 0, 0, f.vtx.col.X, f.vtx.col.Y, f.vtx.col.Z)
-					};
-					materials.Add(materialFlag, mat);
-					return mat;
-				}
-			}
-
-			foreach (var m in kcl.models)
-				foreach (var f in m.Faces)
-				{
-					res.Faces.Add(new OBJ.Face()
-					{
-						VA = new OBJ.Vertex(f.vtx.pos.X, f.vtx.pos.Y, f.vtx.pos.Z, f.vtx.nrm.X, f.vtx.nrm.Y, f.vtx.nrm.Z),
-						VB = new OBJ.Vertex(f.vtx2.pos.X, f.vtx2.pos.Y, f.vtx2.pos.Z, f.vtx2.nrm.X, f.vtx2.nrm.Y, f.vtx2.nrm.Z),
-						VC = new OBJ.Vertex(f.vtx3.pos.X, f.vtx3.pos.Y, f.vtx3.pos.Z, f.vtx3.nrm.X, f.vtx3.nrm.Y, f.vtx3.nrm.Z),
-						Mat = GetOrAddMaterial(f.MaterialFlag,f)
-					});
-				}
-
-			return res;
-		}
-	}
+	}	
 }

@@ -300,6 +300,10 @@ namespace ModelViewer
 			{
 				if (Paths.ContainsValue(result)) return Paths.FirstOrDefault(x => x.Value == result).Key;
 			}
+			else if (result is BoundingBoxVisual3D)
+			{
+				if (selectionBoxes.ContainsValue(result)) return selectionBoxes.FirstOrDefault(x => x.Value == result).Key;
+			}
 			else if (Models.ContainsValue(result)) return Models.FirstOrDefault(x => x.Value == result).Key;
             return null;
         }
@@ -307,12 +311,18 @@ namespace ModelViewer
         ModelVisual3D GetHitResult(Point location)
         {
             HitTestResult result = VisualTreeHelper.HitTest(ModelView, location);
-            if (result != null && result.VisualHit is ModelVisual3D || result.VisualHit is LinesVisual3D)
-            {
-                ModelVisual3D visual = (ModelVisual3D)result.VisualHit;
-                return visual;
-            }
-
+			if (result != null && result.VisualHit is PipeVisual3D)
+			{
+				foreach (var s in selectionBoxes)
+					if (s.Value.Children.Contains(result.VisualHit))
+						return s.Value;
+				return null;
+			}
+			else if (result != null && result.VisualHit is ModelVisual3D || result.VisualHit is LinesVisual3D)
+			{
+				ModelVisual3D visual = (ModelVisual3D)result.VisualHit;
+				return visual;
+			}
             return null;
         }
 

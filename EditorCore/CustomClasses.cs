@@ -251,6 +251,9 @@ namespace ExtensionMethods
 {
 	public static class Extensions
 	{
+		public static float Dot(this Vector3D v, Vector3D v2) => (float)Vector3D.DotProduct(v, v2);
+		public static Vector3D Cross(this Vector3D v, Vector3D v2) => Vector3D.CrossProduct(v, v2);
+
 		public static int AddIfNotContins(this IList l, dynamic obj)
 		{
 			int index = l.IndexOf(obj);

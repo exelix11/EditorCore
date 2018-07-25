@@ -2,444 +2,312 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using System.IO;
-using Syroot.NintenTools.MarioKart8.Collisions.Custom;
-using System.Windows;
 using System.Drawing;
+using System.IO;
+using Syroot.BinaryData;
 using System.Numerics;
+using Syroot.NintenTools.MarioKart8.IO;
+using EditorCore.Common;
+using LibEveryFileExplorer._3D;
+using System.Windows.Media.Media3D;
+using ExtensionMethods;
 
-namespace Smash_Forge
+namespace MarioKart.MK7
 {
-    public class KCL
-    {
-        //Set the game's material list
-        public GameSet GameMaterialSet = GameSet.MarioKart8D;
+	public class KCL
+	{
+		List<KCLModel> Models = new List<KCLModel>();
 
-        public enum GameSet : ushort
-        {
-            MarioOdyssey = 0x0,
-            MarioKart8D = 0x1,
-            Splatoon2 = 0x2,
-        }
-        public enum CollisionType_MarioOdssey : ushort
-        {
+		public KCL() { }
 
-        }
-        public enum CollisionType_MK8D : ushort
-        {
-            Road_Default = 0,
-            Road_Bumpy = 2,
-            Road_Sand = 4,
-            Offroad_Sand = 6,
-            Road_HeavySand = 8,
-            Road_IcyRoad = 9,
-            OrangeBooster = 10,
-            AntiGravityPanel = 11,
-            Latiku = 16,
-            Wall5 = 17,
-            Wall4 = 19,
-            Wall = 23,
-            Latiku2 = 28,
-            Glider = 31,
-            SidewalkSlope = 32,
-            Road_Dirt = 33,
-            Unsolid = 56,
-            Water = 60,
-            Road_Stone = 64,
-            Wall1 = 81,
-            Wall2 = 84,
-            FinishLine = 93,
-            RedFlowerEffect = 95,
-            Wall3 = 113,
-            WhiteFlowerEffect = 127,
-            Road_Metal = 128,
-            Road_3DS_MP_Piano = 129,
-            Road_RoyalR_Grass = 134,
-            TopPillar = 135,
-            YoshiCuiruit_Grass = 144,
-            YellowFlowerEffect = 159,
+		public KCL(byte[] Data, ByteOrder bo = ByteOrder.LittleEndian)
+		{
+			BinaryDataReader er = new BinaryDataReader(new MemoryStream(Data));
+			er.ByteOrder = ByteOrder.BigEndian;
+			if (er.ReadUInt32() != 0x02020000) throw new Exception("Wrong KCL Header");
+			er.ByteOrder = bo;
 
-            Road_MetalGating = 160,
-            Road_3DS_MP_Xylophone = 161,
-            Road_3DS_MP_Vibraphone = 193,
-            SNES_RR_road = 227,
-            Offroad_Mud = 230,
-            Trick = 4096,
-            BoosterStunt = 4106,
-            TrickEndOfRamp = 4108,
-            Trick3 = 4130,
-            Trick6 = 4160,
-            Trick4 = 4224,
-            Trick5 = 8192,
-            BoostTrick = 8202,
-        }
+			/*uint OctreeOffset = */er.ReadUInt32();
+			uint ModelListOff = er.ReadUInt32();
+			uint ModelCount = er.ReadUInt32();
 
-        public KclFile kcl = null;
-        public List<KCLModel> models = new List<KCLModel>();		
+			for (int ModelIndex = 0; ModelIndex < ModelCount; ModelIndex++)
+			{
+				KCLModel mod = new KCLModel();
 
-        public KCL(byte[] file_data) 
-        {
-            Read(file_data);
-            UpdateVertexData();
-        }
+				er.BaseStream.Position = ModelListOff + ModelIndex * 4;
+				uint CurModelOffset = er.ReadUInt32();
+				er.BaseStream.Position = CurModelOffset;
+
+				mod.Header = new KCLModel.KCLModelHeader(er);
+				er.BaseStream.Position = mod.Header.VerticesOffset + CurModelOffset;
+				uint nr = (mod.Header.NormalsOffset - mod.Header.VerticesOffset) / 0xC;
+				mod.Vertices = new Vector3D[nr];
+				for (int i = 0; i < nr; i++) mod.Vertices[i] = er.ReadVector3D();
+
+				er.BaseStream.Position = mod.Header.NormalsOffset + CurModelOffset;
+				nr = (mod.Header.PlanesOffset - mod.Header.NormalsOffset) / 0xC;
+				mod.Normals = new Vector3D[nr];
+				for (int i = 0; i < nr; i++) mod.Normals[i] = er.ReadVector3D();
+
+				er.BaseStream.Position = mod.Header.PlanesOffset + CurModelOffset;
+				nr = (mod.Header.OctreeOffset - mod.Header.PlanesOffset) / 0x14;
+				mod.Planes = new KCLModel.KCLPlane[nr];
+				for (int i = 0; i < nr; i++) mod.Planes[i] = new KCLModel.KCLPlane(er);
+
+				er.BaseStream.Position = mod.Header.OctreeOffset + CurModelOffset;
+				int nodes = (int)(
+					((~mod.Header.XMask >> (int)mod.Header.CoordShift) + 1) *
+					((~mod.Header.YMask >> (int)mod.Header.CoordShift) + 1) *
+					((~mod.Header.ZMask >> (int)mod.Header.CoordShift) + 1));
+				mod.Octree = new KCLOctree(er, nodes);
+
+				Models.Add(mod);
+			}
+		}
+
+		public byte[] Write(ByteOrder byteOrder)
+		{
+			if (Models.Count != 1) throw new Exception("Exporting KCL with more than one model is not supported");
+			var mod = Models[0];
+
+			using (MemoryStream m = new MemoryStream())
+			{
+				BinaryDataWriter er = new BinaryDataWriter(m);
+				//Write KCL Header
+				er.ByteOrder = ByteOrder.BigEndian; //The signature is always big endian
+				er.Write(0x02020000);
+				er.ByteOrder = byteOrder;
+				er.Write((UInt32)0x38);
+				er.Write((UInt32)0x58);
+				er.Write((UInt32)1);
+				er.Write(mod.Header.OctreeOrigin);
+				er.Write(mod.Header.OctreeMax);
+				er.Write((UInt32)mod.Header.n_x);
+				er.Write((UInt32)mod.Header.n_y);
+				er.Write((UInt32)mod.Header.n_z);
+				er.Write((UInt32)8);
+				for (int i = 0; i < 8; i++) er.Write((UInt32)0x80000000); //Fake global model octree, supports only one model
+				er.Write((UInt32)0x5C);
+				//Write actual model
+				long HeaderPos = er.BaseStream.Position;
+				mod.Header.Write(er);
+				long curpos = er.BaseStream.Position;
+				//Write vertices array position
+				er.BaseStream.Position = HeaderPos;
+				er.Write((uint)curpos - HeaderPos);
+				er.BaseStream.Position = curpos;
+				foreach (Vector3D v in mod.Vertices) er.Write(v);
+				while ((er.BaseStream.Position % 4) != 0) er.Write((byte)0);
+				curpos = er.BaseStream.Position;
+				//Write normal array position
+				er.BaseStream.Position = HeaderPos + 4;
+				er.Write((uint)curpos - HeaderPos);
+				er.BaseStream.Position = curpos;
+				foreach (Vector3D v in mod.Normals) er.Write(v);
+				while ((er.BaseStream.Position % 4) != 0) er.Write((byte)0);
+				curpos = er.BaseStream.Position;
+				//Write Triangles offset
+				er.BaseStream.Position = HeaderPos + 8;
+				er.Write((uint)(curpos - HeaderPos));
+				er.BaseStream.Position = curpos;
+				int planeIndex = 0;
+				foreach (KCLModel.KCLPlane p in mod.Planes) p.Write(er, planeIndex++);
+				curpos = er.BaseStream.Position;
+				//Write Spatial index offset
+				er.BaseStream.Position = HeaderPos + 12;
+				er.Write((uint)curpos - HeaderPos);
+				er.BaseStream.Position = curpos;
+				mod.Octree.Write(er);
+				er.BaseStream.Position = er.BaseStream.Length;
+				er.Write((ushort)0xFFFF); //Terminate Octree
+
+				return m.ToArray();
+			}
+		}
 		
-        public class Vertex
-        {
-            public Vector3 pos = new Vector3();
-            public Vector3 nrm = new Vector3();
-            public Vector3 col = new Vector3();
-        }
-        public struct DisplayVertex
-        {
-            // Used for rendering.
-            public Vector3 pos;
-            public Vector3 nrm;
-            public Vector3 col;
+		public static KCL FromOBJ(OBJ o)
+		{
+			KCL res = new KCL();
 
-            public static int Size = 4 * (3 + 3 + 3);
-        }
+			List<Vector3D> Vertex = new List<Vector3D>();
+			List<Vector3D> Normals = new List<Vector3D>();
+			List<KCLModel.KCLPlane> planes = new List<KCLModel.KCLPlane>();
+			List<Triangle> Triangles = new List<Triangle>();
+			foreach (var v in o.Faces)
+			{
+				Triangle t = new Triangle(v.VA.pos, v.VB.pos, v.VC.pos);
+				Vector3D qq = (t.PointB - t.PointA).Cross(t.PointC - t.PointA);
+				if ((qq.X * qq.X + qq.Y * qq.Y + qq.Z * qq.Z) < 0.01) continue;
+				KCLModel.KCLPlane p = new KCLModel.KCLPlane();
+				p.CollisionType = 0;// Mapping[v.Material];
+				Vector3D a = (t.PointC - t.PointA).Cross(t.Normal);
+				a.Normalize();
+				a = -a;
+				Vector3D b = (t.PointB - t.PointA).Cross(t.Normal);
+				b.Normalize();
+				Vector3D c = (t.PointC - t.PointB).Cross(t.Normal);
+				c.Normalize();
+				p.Length = (t.PointC - t.PointA).Dot(c);
+				int q = ContainsVector3D(t.PointA, Vertex);
+				if (q == -1) { p.VertexIndex = (ushort)Vertex.Count; Vertex.Add(t.PointA); }
+				else p.VertexIndex = (ushort)q;
+				q = ContainsVector3D(t.Normal, Normals);
+				if (q == -1) { p.NormalIndex = (ushort)Normals.Count; Normals.Add(t.Normal); }
+				else p.NormalIndex = (ushort)q;
+				q = ContainsVector3D(a, Normals);
+				if (q == -1) { p.NormalAIndex = (ushort)Normals.Count; Normals.Add(a); }
+				else p.NormalAIndex = (ushort)q;
+				q = ContainsVector3D(b, Normals);
+				if (q == -1) { p.NormalBIndex = (ushort)Normals.Count; Normals.Add(b); }
+				else p.NormalBIndex = (ushort)q;
+				q = ContainsVector3D(c, Normals);
+				if (q == -1) { p.NormalCIndex = (ushort)Normals.Count; Normals.Add(c); }
+				else p.NormalCIndex = (ushort)q;
+				planes.Add(p);
+				Triangles.Add(t);
+			}
 
-        public class KCLModel 
-        {
-            public List<int> faces = new List<int>();
-            public List<Vertex> vertices = new List<Vertex>();
-            public List<Face> Faces = new List<Face>();
+			KCLModel resMod = new KCLModel();
+			resMod.Vertices = Vertex.ToArray();
+			resMod.Normals = Normals.ToArray();
+			resMod.Planes = planes.ToArray();
+			resMod.Header = new KCLModel.KCLModelHeader();
+			resMod.Octree = KCLOctree.FromTriangles(Triangles.ToArray(), resMod.Header, 2048, 128, 128, 50);
+			res.Models.Add(resMod);
 
-            // for drawing
-            public int[] display;
-            public int Offset; // For Rendering
+			return res;
+		}
 
-            public int strip = 0x40;
-            public int displayFaceSize = 0;
+		private static int ContainsVector3D(Vector3D a, List<Vector3D> b)
+		{
+			for (int i = 0; i < b.Count; i++)
+			{
+				if (b[i].X == a.X && b[i].Y == a.Y && b[i].Z == a.Z)
+				{
+					return i;
+				}
+			}
+			return -1;
+		}
 
-            public class Face
-            {
-                public int MaterialFlag = 0;
-                
-                public Vertex vtx;
-                public Vertex vtx2;
-                public Vertex vtx3;
+		public OBJ ToOBJ()
+		{
+			var res = new OBJ();
+			foreach (var model in Models) res.Merge(model.ToOBJ());
+			return res;
+		}
 
-            }
+		public class KCLModel
+		{
+			public KCLModelHeader Header;
+			public class KCLModelHeader : KCLHeader
+			{
+				public KCLModelHeader() { }
+				public KCLModelHeader(BinaryDataReader er)
+				{
+					VerticesOffset = er.ReadUInt32();
+					NormalsOffset = er.ReadUInt32();
+					PlanesOffset = er.ReadUInt32();
+					OctreeOffset = er.ReadUInt32();
+					Unknown1 = er.ReadSingle();
+					OctreeOrigin = er.ReadVector3D();
+					XMask = er.ReadUInt32();
+					YMask = er.ReadUInt32();
+					ZMask = er.ReadUInt32();
+					CoordShift = er.ReadUInt32();
+					YShift = er.ReadUInt32();
+					ZShift = er.ReadUInt32();
+					Unknown2 = er.ReadSingle();
+				}
+				public void Write(BinaryDataWriter er)
+				{
+					er.Write(VerticesOffset);
+					er.Write(NormalsOffset);
+					er.Write((uint)(PlanesOffset));
+					er.Write(OctreeOffset);
+					er.Write(Unknown1);
+					er.Write(OctreeOrigin);
+					er.Write(XMask);
+					er.Write(YMask);
+					er.Write(ZMask);
+					er.Write(CoordShift);
+					er.Write(YShift);
+					er.Write(ZShift);
+					er.Write(Unknown2);
+				}
+			}
 
-            public void CalulateOctree()
-            {
+			public Vector3D[] Vertices;
+			public Vector3D[] Normals;
 
-            }
+			public KCLPlane[] Planes;
+			public class KCLPlane
+			{
+				public KCLPlane() { }
+				public KCLPlane(BinaryDataReader er)
+				{
+					Length = er.ReadSingle();
+					VertexIndex = er.ReadUInt16();
+					NormalIndex = er.ReadUInt16();
+					NormalAIndex = er.ReadUInt16();
+					NormalBIndex = er.ReadUInt16();
+					NormalCIndex = er.ReadUInt16();
+					CollisionType = er.ReadUInt16();
+					er.ReadUInt32(); //Global plane index
+				}
+				public void Write(BinaryDataWriter er, int index)
+				{
+					er.Write(Length);
+					er.Write(VertexIndex);
+					er.Write(NormalIndex);
+					er.Write(NormalAIndex);
+					er.Write(NormalBIndex);
+					er.Write(NormalCIndex);
+					er.Write(CollisionType);
+					er.Write((UInt32)index);
+				}
+				public Single Length;
+				public UInt16 VertexIndex;
+				public UInt16 NormalIndex;
+				public UInt16 NormalAIndex;
+				public UInt16 NormalBIndex;
+				public UInt16 NormalCIndex;
+				public UInt16 CollisionType;
+			}
 
-            public List<DisplayVertex> CreateDisplayVertices()
-            {
-                // rearrange faces
-                display = getDisplayFace().ToArray();
+			public KCLOctree Octree;
 
-                List<DisplayVertex> displayVertList = new List<DisplayVertex>();
+			public Triangle GetTriangle(KCLPlane Plane)
+			{
+				Vector3D A = Vertices[Plane.VertexIndex];
+				Vector3D CrossA = Normals[Plane.NormalAIndex].Cross(Normals[Plane.NormalIndex]);
+				Vector3D CrossB = Normals[Plane.NormalBIndex].Cross(Normals[Plane.NormalIndex]);
+				Vector3D B = A + CrossB * (Plane.Length / CrossB.Dot(Normals[Plane.NormalCIndex]));
+				Vector3D C = A + CrossA * (Plane.Length / CrossA.Dot(Normals[Plane.NormalCIndex]));
+				return new Triangle(A, B, C);
+			}
 
-                if (faces.Count <= 3)
-                    return displayVertList;
-
-                foreach (Vertex v in vertices)
-                {
-                    DisplayVertex displayVert = new DisplayVertex()
-                    {
-                        pos = v.pos,
-                        nrm = v.nrm,
-                        col = v.col,
-                    };
-
-                    displayVertList.Add(displayVert);
-                }
-
-                return displayVertList;
-            }
-            public List<int> getDisplayFace()
-            {
-                if ((strip >> 4) == 4)
-                {
-                    displayFaceSize = faces.Count;
-                    return faces;
-                }
-                else
-                {
-                    List<int> f = new List<int>();
-
-                    int startDirection = 1;
-                    int p = 0;
-                    int f1 = faces[p++];
-                    int f2 = faces[p++];
-                    int faceDirection = startDirection;
-                    int f3;
-                    do
-                    {
-                        f3 = faces[p++];
-                        if (f3 == 0xFFFF)
-                        {
-                            f1 = faces[p++];
-                            f2 = faces[p++];
-                            faceDirection = startDirection;
-                        }
-                        else
-                        {
-                            faceDirection *= -1;
-                            if ((f1 != f2) && (f2 != f3) && (f3 != f1))
-                            {
-                                if (faceDirection > 0)
-                                {
-                                    f.Add(f3);
-                                    f.Add(f2);
-                                    f.Add(f1);
-                                }
-                                else
-                                {
-                                    f.Add(f2);
-                                    f.Add(f3);
-                                    f.Add(f1);
-                                }
-                            }
-                            f1 = f2;
-                            f2 = f3;
-                        }
-                    } while (p < faces.Count);
-
-                    displayFaceSize = f.Count;
-                    return f;
-                }
-            }
-        }
-		
-
-        public void UpdateVertexData()
-        {
-            DisplayVertex[] Vertices;
-            int[] Faces;
-
-            int poffset = 0;
-            int voffset = 0;
-            List<DisplayVertex> Vs = new List<DisplayVertex>();
-            List<int> Ds = new List<int>();
-            foreach (KCLModel m in models)
-            {
-                m.Offset = poffset * 4;
-                List<DisplayVertex> pv = m.CreateDisplayVertices();
-                Vs.AddRange(pv);
-
-                Console.WriteLine(m.displayFaceSize);
-
-                for (int i = 0; i < m.displayFaceSize; i++)
-                {
-                    Ds.Add(m.display[i] + voffset);
-                }
-                poffset += m.displayFaceSize;
-                voffset += pv.Count;
-            }
-
-            // Binds
-            Vertices = Vs.ToArray();
-            Faces = Ds.ToArray();
-
-        }
-		       
-        public List<int> AllFlags = new List<int>();
-
-        public void Read(byte[] file_data)
-        {
-         //   try
-          //  {
-                kcl = new KclFile(new MemoryStream(file_data), true, false, Syroot.BinaryData.ByteOrder.LittleEndian);
-          //  }
-           // catch
-          //  {
-          //      kcl = new KclFile(new MemoryStream(file_data), true, false, Syroot.BinaryData.ByteOrder.BigEndian);
-         //   }
-
-            AllFlags.Clear();
-
-            int CurModelIndx = 0;
-            foreach (KclModel mdl in kcl.Models)
-            {
-                KCLModel kclmodel = new KCLModel();
-
-                int ft = 0;
-                foreach (var f in mdl.Faces)
-                {
-                    Vertex vtx = new Vertex();
-                    Vertex vtx2 = new Vertex();
-                    Vertex vtx3 = new Vertex();
-
-
-					var CrossA = mdl.Normals[f.Normal1Index].Cross(mdl.Normals[f.DirectionIndex]);
-					var CrossB = mdl.Normals[f.Normal2Index].Cross(mdl.Normals[f.DirectionIndex]);
-					
-                    var normal_a = mdl.Normals[f.Normal1Index];
-					var normal_b = mdl.Normals[f.Normal2Index];
-					var normal_c = mdl.Normals[f.Normal3Index];
-
-
-					float result1 = CrossB.Dot(normal_c);
-					float result2 = CrossA.Dot(normal_c);
-
-					var pos = mdl.Positions[f.PositionIndex];
-                    var nrm = mdl.Normals[f.Normal1Index];
-
-                    var Vertex1 = pos;
-                    var Vertex2 = pos + CrossB * (f.Length / result1);
-                    var Vertex3 = pos + CrossA * (f.Length / result2);
-
-                    vtx.pos = new Vector3(Vertex1.X, Vertex1.Y, Vertex1.Z);
-                    vtx2.pos = new Vector3(Vertex2.X, Vertex2.Y, Vertex2.Z);
-                    vtx3.pos = new Vector3(Vertex3.X, Vertex3.Y, Vertex3.Z);
-
-                    var dir = (Vertex2 - Vertex1).Cross(Vertex3 - Vertex1);
-					var norm = dir.Normalized();
-
-                    vtx.nrm = Vec3F_To_Vec3(norm);
-                    vtx2.nrm = Vec3F_To_Vec3(norm);
-                    vtx3.nrm = Vec3F_To_Vec3(norm);
-
-                    KCLModel.Face face = new KCLModel.Face();
-					
-                    face.MaterialFlag = f.CollisionFlags;
-
-                    Color color = SetMaterialColor(face);
-
-                    AllFlags.Add(face.MaterialFlag);
-
-                    Vector3 ColorSet = new Vector3(color.R / 255.0f, color.G / 255.0f, color.B / 255.0f);
-
-                    vtx.col = (ColorSet);
-                    vtx2.col = (ColorSet);
-                    vtx3.col = (ColorSet);
-
-                    kclmodel.faces.Add(ft);
-                    kclmodel.faces.Add(ft + 1);
-                    kclmodel.faces.Add(ft + 2);
-
-                    face.vtx = vtx;
-                    face.vtx2 = vtx2;
-                    face.vtx3 = vtx3;
-
-                    kclmodel.Faces.Add(face);
-
-                    ft += 3;
-
-                    kclmodel.vertices.Add(vtx);
-                    kclmodel.vertices.Add(vtx2);
-                    kclmodel.vertices.Add(vtx3);
-
-
-                }
-
-
-                models.Add(kclmodel);
-				
-                CurModelIndx++;
-            }
-
-            List<int> noDupes = AllFlags.Distinct().ToList();
-            Console.WriteLine("List of all material flags (Not duped)");
-            foreach (int mat in noDupes)
-            {
-                Console.WriteLine("Mat flag " + (CollisionType_MK8D)mat);
-
-            }
-
-        }
-        //Convert KCL lib vec3 to opentk one so i can use the cross and dot methods
-        public static Vector3 Vec3F_To_Vec3(Syroot.Maths.Vector3F v)
-        {
-            return new Vector3(v.X, v.Y, v.Z);
-        }
-
-        public void Save(byte[] file_data)
-        {
-
-        }
-        private Color SetMaterialColor(KCLModel.Face f)
-        {
-            if (GameMaterialSet == GameSet.MarioKart8D)
-            {
-                switch (f.MaterialFlag)
-                {
-                    case (ushort)CollisionType_MK8D.Road_Default:
-                        return Color.DarkGray;
-                    case (ushort)CollisionType_MK8D.Glider:
-                        return Color.Orange;
-                    case (ushort)CollisionType_MK8D.Road_Sand:
-                        return Color.LightYellow;
-                    case (ushort)CollisionType_MK8D.Offroad_Sand:
-                        return Color.SandyBrown; 
-                    case (ushort)CollisionType_MK8D.Water:
-                        return Color.Blue;
-                    case (ushort)CollisionType_MK8D.Wall1:
-                        return Color.LightSlateGray;
-                    case (ushort)CollisionType_MK8D.Wall2:
-                        return Color.OrangeRed;
-                    case (ushort)CollisionType_MK8D.Wall3:
-                        return Color.IndianRed;
-                    case (ushort)CollisionType_MK8D.Unsolid:
-                        return Color.Beige;
-                    case (ushort)CollisionType_MK8D.Road_3DS_MP_Piano:
-                        return Color.RosyBrown;
-                    case (ushort)CollisionType_MK8D.Road_3DS_MP_Vibraphone:
-                        return Color.BurlyWood;
-                    case (ushort)CollisionType_MK8D.Road_3DS_MP_Xylophone:
-                        return Color.DarkSalmon;
-                    case (ushort)CollisionType_MK8D.Latiku:
-                        return Color.GhostWhite;
-                    case (ushort)CollisionType_MK8D.Road_Bumpy:
-                        return Color.GreenYellow;
-                    case (ushort)CollisionType_MK8D.Road_RoyalR_Grass:
-                        return Color.Green;
-                    case (ushort)CollisionType_MK8D.YoshiCuiruit_Grass:
-                        return Color.Green;
-                    case (ushort)CollisionType_MK8D.Wall:
-                        return Color.LightCyan;
-                    case (ushort)CollisionType_MK8D.Wall4:
-                        return Color.LightSlateGray;
-                    case (ushort)CollisionType_MK8D.Wall5:
-                        return Color.DarkSlateGray;
-                    case (ushort)CollisionType_MK8D.AntiGravityPanel:
-                        return Color.Purple;
-                    case (ushort)CollisionType_MK8D.SidewalkSlope:
-                        return Color.FromArgb(153, 153, 102);
-                    case (ushort)CollisionType_MK8D.BoostTrick:
-                        return Color.DarkOrange;
-                    case (ushort)CollisionType_MK8D.Offroad_Mud:
-                        return Color.FromArgb(77, 26, 0);
-                    case (ushort)CollisionType_MK8D.Road_Metal:
-                        return Color.FromArgb(80, 80, 80);
-                    case (ushort)CollisionType_MK8D.Road_MetalGating:
-                        return Color.FromArgb(64, 64, 64);
-                    case (ushort)CollisionType_MK8D.Road_Dirt:
-                        return Color.Sienna;
-                    case (ushort)CollisionType_MK8D.Road_Stone:
-                        return Color.FromArgb(50, 50, 50);
-                    case (ushort)CollisionType_MK8D.Latiku2:
-                        return Color.WhiteSmoke;
-                    case (ushort)CollisionType_MK8D.RedFlowerEffect:
-                        return Color.MediumVioletRed;
-                    case (ushort)CollisionType_MK8D.WhiteFlowerEffect:
-                        return Color.FloralWhite;
-                    case (ushort)CollisionType_MK8D.YellowFlowerEffect:
-                        return Color.Yellow;
-                    case (ushort)CollisionType_MK8D.TopPillar:
-                        return Color.Gray;
-                    default:
-                        return Color.FromArgb(20, 20, 20);
-                }
-            }
-            else if (GameMaterialSet == GameSet.MarioOdyssey)
-            {
-                return Color.Gray;
-            }
-            else if (GameMaterialSet == GameSet.Splatoon2)
-            {
-                return Color.Gray;
-            }
-            else
-            {
-                return Color.Gray;
-            }
-        }
+			public OBJ ToOBJ()
+			{
+				OBJ o = new OBJ();
+				foreach (var vv in Planes)
+				{
+					Triangle t = GetTriangle(vv);
+					var mat = o.GetOrAddMaterial("COL_" + vv.CollisionType.ToString("X"));
+					var col = KCLColors.GetMaterialColor(vv.CollisionType);
+					mat.Colors = new OBJ.Vertex(new Vector3D(), new Vector3D(col.R / 255f, col.G / 255f, col.B / 255f));
+					o.Faces.Add(new OBJ.Face()
+					{
+						VA = new OBJ.Vertex(t.PointA, t.Normal),
+						VB = new OBJ.Vertex(t.PointB, t.Normal),
+						VC = new OBJ.Vertex(t.PointC, t.Normal),
+						Mat = mat.Name
+					});
+				}
+				return o;
+			}
+		}
+			
     }
 }
