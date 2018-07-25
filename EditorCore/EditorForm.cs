@@ -276,7 +276,9 @@ namespace EditorCore
             ObjectsListBox.Items.Clear();
             propertyGrid1.SelectedObject = null;
 
-            if (SkipModels == null)
+			ListEditingPanel.Visible = false;
+
+			if (SkipModels == null)
             {
                 if (File.Exists($"{ModelsFolder}/SkipModels.txt"))
                     SkipModels = new List<string>(File.ReadAllLines($"{ModelsFolder}/SkipModels.txt"));

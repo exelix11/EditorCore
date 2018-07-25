@@ -115,14 +115,14 @@
 			// replaceToolStripMenuItem
 			// 
 			this.replaceToolStripMenuItem.Name = "replaceToolStripMenuItem";
-			this.replaceToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.replaceToolStripMenuItem.Size = new System.Drawing.Size(118, 22);
 			this.replaceToolStripMenuItem.Text = "Replace";
 			this.replaceToolStripMenuItem.Click += new System.EventHandler(this.replaceToolStripMenuItem_Click);
 			// 
 			// saveAsToolStripMenuItem
 			// 
 			this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-			this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(118, 22);
 			this.saveAsToolStripMenuItem.Text = "Save as..";
 			this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.saveAsToolStripMenuItem_Click);
 			// 
@@ -142,6 +142,7 @@
 			// 
 			// label1
 			// 
+			this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.label1.AutoSize = true;
 			this.label1.Location = new System.Drawing.Point(6, 259);
 			this.label1.Name = "label1";
@@ -151,6 +152,7 @@
 			// 
 			// numericUpDown1
 			// 
+			this.numericUpDown1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.numericUpDown1.Location = new System.Drawing.Point(128, 256);
 			this.numericUpDown1.Maximum = new decimal(new int[] {
             9,
