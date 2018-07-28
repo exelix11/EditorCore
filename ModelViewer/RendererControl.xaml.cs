@@ -24,6 +24,7 @@ namespace ModelViewer
 		public Vector3D DeltaPos;
 		public Vector3D position;
         public Vector3D StartPos;
+		public dynamic obj;
     }
 
     public partial class RendererControl : UserControl

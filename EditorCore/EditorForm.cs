@@ -871,27 +871,27 @@ namespace EditorCore
 			DraggingArgs.DeltaPos = DeltaPos;
             DraggingArgs.position += DeltaPos;
 
-			foreach (var o in SelectedObjs)
+			Vector3D vec = DraggingArgs.position + DraggingArgs.DeltaPos;
+			if (roundTo != 0)
 			{
-				Vector3D vec = DraggingArgs.position + DraggingArgs.DeltaPos;
-                if (roundTo != 0)
-                {
-                    vec.X = Math.Round(vec.X / roundTo, 0) * roundTo;
-                    vec.Y = Math.Round(vec.Y / roundTo, 0) * roundTo;
-                    vec.Z = Math.Round(vec.Z / roundTo, 0) * roundTo;
-                }
-                else
-                {
-                    vec.X = (int)vec.X;
-                    vec.Y = (int)vec.Y;
-                    vec.Z = (int)vec.Z;
-                }
-
-                o.ModelView_Pos = vec;
-
-                UpdateModelPosition(o);
+				vec.X = Math.Round(vec.X / roundTo, 0) * roundTo;
+				vec.Y = Math.Round(vec.Y / roundTo, 0) * roundTo;
+				vec.Z = Math.Round(vec.Z / roundTo, 0) * roundTo;
 			}
-        }
+			else
+			{
+				vec.X = (int)vec.X;
+				vec.Y = (int)vec.Y;
+				vec.Z = (int)vec.Z;
+			}
+			
+			Vector3D translation = Vector3D.Subtract(vec, DraggingArgs.obj.ModelView_Pos);
+			foreach (var obj in SelectedObjs)
+			{
+				obj.ModelView_Pos = Vector3D.Add(obj.ModelView_Pos, translation);
+				UpdateModelPosition(obj);
+			}
+		}
 
         void endDragging()
         {
@@ -939,6 +939,7 @@ namespace EditorCore
 				DraggingArgs = new DragArgs();
 				DraggingArgs.StartPos = obj.ModelView_Pos;
 				DraggingArgs.position = DraggingArgs.StartPos;
+				DraggingArgs.obj = obj;
 			}
 		}
 
