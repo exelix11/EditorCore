@@ -667,7 +667,7 @@
             this.ObjectRightClickMenu_PasteTransform,
             this.ObjectRightClickMenu_Hide});
 			this.ObjectRightClickMenu.Name = "ObjectRightClickMenu";
-			this.ObjectRightClickMenu.Size = new System.Drawing.Size(181, 180);
+			this.ObjectRightClickMenu.Size = new System.Drawing.Size(160, 158);
 			// 
 			// ObjectRightClickMenu_Copy
 			// 
@@ -754,6 +754,7 @@
 			this.Controls.Add(this.splitContainer2);
 			this.Name = "EditorForm";
 			this.Text = "EditorCore";
+			this.Activated += new System.EventHandler(this.EditorForm_Activated);
 			this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.EditorForm_Closed);
 			this.Load += new System.EventHandler(this.Form1_Load);
 			this.splitContainer1.Panel1.ResumeLayout(false);

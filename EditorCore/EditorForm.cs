@@ -120,8 +120,6 @@ namespace EditorCore
 #else
 			splitContainer2.Enabled = false;
 #endif
-            btnPaste.Enabled = (StoredValue!=null && StoredValue.Type == ClipBoardItem.ClipboardType.Objects); //TODO Move this into the activated event
-
 			KeyPreview = true;
 			RenderingCanvas.Child = render;
 			render.MouseMove += render_MouseMove;
@@ -1239,6 +1237,7 @@ namespace EditorCore
 		{
 			ILevelObj[] objs = new ILevelObj[] { (ObjectRightClickMenu.Tag as ILevelObj).Clone() as ILevelObj };
 			StoredValue = new ClipBoardItem() { Type = ClipBoardItem.ClipboardType.Objects, Objs = objs };
+			btnPaste.Enabled = true;
 		}
 
 		private void ObjectRightClickMenu_Delete_Click(object sender, EventArgs e)
@@ -1250,6 +1249,11 @@ namespace EditorCore
 				if (list == null) return;
 			}
 			DeleteObj(ObjectRightClickMenu.Tag as ILevelObj, list);
+		}
+
+		private void EditorForm_Activated(object sender, EventArgs e)
+		{
+			btnPaste.Enabled = (StoredValue != null && StoredValue.Type == ClipBoardItem.ClipboardType.Objects);
 		}
 	}
 }
