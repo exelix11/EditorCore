@@ -285,10 +285,10 @@ namespace EditorCore.Common
 
 			foreach (var v in Vertices)
 			{
-				s.WriteLine($"v {v.pos.X} {v.pos.Y} {v.pos.Z}");
-				s.WriteLine($"vn {v.normal.X} {v.normal.Y} {v.normal.Z}");
+				s.WriteLine($"v {(float)v.pos.X} {(float)v.pos.Y} {(float)v.pos.Z}");
+				s.WriteLine($"vn {(float)v.normal.X} {(float)v.normal.Y} {(float)v.normal.Z}");
 				if (v.tex != null)
-					s.WriteLine($"vt {v.tex.Value.X} {v.tex.Value.Y}{(v.tex.Value.Z != 0 ? v.tex.Value.Z.ToString() : "")}");
+					s.WriteLine($"vt {(float)v.tex.Value.X} {(float)v.tex.Value.Y}{(v.tex.Value.Z != 0 ? ((float)v.tex.Value.Z).ToString() : "")}");
 			}
 
 			int curmat = -1;

@@ -17,8 +17,8 @@ namespace EditorCore.EditorFroms
 
         public static void ShowLoading(Form owner, string text = "Loading...")
         {
-            if (LoadingFormInstance != null)
-                throw new Exception("Unexpected loadingForm state");
+			if (LoadingFormInstance != null)
+				return;
             LoadingFormInstance = new LoadingForm();
             LoadingFormInstance.Show(owner);
             LoadingFormInstance.label1.Text = text;

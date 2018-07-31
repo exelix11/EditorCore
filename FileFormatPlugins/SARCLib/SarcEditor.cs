@@ -101,15 +101,21 @@ namespace SARCExt
 			if (numericUpDown1.Value == 0)
 				File.WriteAllBytes(sav.FileName, SARC.pack(loadedSarc));
 			else
-				File.WriteAllBytes(sav.FileName,YAZ0.Compress(SARC.pack(loadedSarc),(int)numericUpDown1.Value));
+			{
+				var s = SARC.packAlign(loadedSarc);
+				File.WriteAllBytes(sav.FileName, YAZ0.Compress(s.Item2, (int)numericUpDown1.Value,s.Item1));
+			}
 		}
 
 		private void replaceToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			byte[] compressedSarc = SARC.pack(loadedSarc);
+			byte[] compressedSarc = null;
+			var s = SARC.packAlign(loadedSarc);
 			if (numericUpDown1.Value != 0)
-				compressedSarc = YAZ0.Compress(compressedSarc, (int)numericUpDown1.Value);
-			sourceStream.Position = 0;
+				compressedSarc = YAZ0.Compress(s.Item2, (int)numericUpDown1.Value,s.Item1);
+			else
+				compressedSarc = s.Item2;
+			//sourceStream.Position = 0;
 			sourceStream.Write(compressedSarc, 0, compressedSarc.Length);
 		}
 

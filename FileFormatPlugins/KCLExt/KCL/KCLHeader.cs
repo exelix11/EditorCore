@@ -16,9 +16,9 @@ namespace MarioKart
 		public Single Unknown1;
 		public Vector3D OctreeOrigin;
 		public Vector3D OctreeMax;
-		public float n_x;
-		public float n_y;
-		public float n_z;
+		//public float n_x;
+		//public float n_y;
+		//public float n_z;
 		public UInt32 XMask;
 		public UInt32 YMask;
 		public UInt32 ZMask;

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using Syroot.BinaryData;
+using ExtensionMethods;
 
 /* My SARC library. Packing is not yet supported. */
 
@@ -22,9 +23,41 @@ namespace SARCExt
             return result;
         }
 
-        public static byte[] pack(Dictionary<string, byte[]> files)
+		public static uint GuessAlignment(Dictionary<string, byte[]> files) //From https://github.com/aboood40091/SarcLib/blob/master/src/FileArchive.py#L487
+		{
+			uint res = 4;
+			foreach (var f in files.Values)
+			{
+				uint fileRes = 0;
+				if (f.Matches("SARC")) fileRes = 0x2000;
+				else if (f.Matches("Yaz")) fileRes = 0x80;
+				else if (f.Matches("YB") || f.Matches("BY")) fileRes = 0x80;
+				else if (f.Matches("FRES") || f.Matches("Gfx2") || f.Matches("AAHS") || f.Matches("BAHS")) fileRes = 0x2000;
+				else if (f.Matches("BNTX") || f.Matches("BNSH") || f.Matches("FSHA")) fileRes = 0x1000;
+				else if (f.Matches("FFNT")) fileRes = 0x2000;
+				else if (f.Matches("CFNT")) fileRes = 0x80;
+				else if (f.Matches(1, "STM") /* *STM */ || f.Matches(1, "WAV") || f.Matches("FSTP")) fileRes = 0x20;
+				else if (f.Matches("CTPK")) fileRes = 0x10;
+				else if (f.Matches("CGFX")) fileRes = 0x80;
+				else if (f.Matches("AAMP")) fileRes = 8;
+				else if (f.Matches("MsgStdBn") || f.Matches("MsgPrjBn")) fileRes = 0x80;
+				res = fileRes > res ? fileRes : res;
+			}
+			return res;
+		}
+
+		public static Tuple<uint, byte[]> packAlign(Dictionary<string, byte[]> files)
+		{
+			uint align = GuessAlignment(files);
+			return new Tuple<uint, byte[]>(align, pack(files, (int)align));
+		}
+
+        public static byte[] pack(Dictionary<string, byte[]> files, int align = -1)
         {
-            MemoryStream o = new MemoryStream();
+			if (align < 0)
+				align = (int)GuessAlignment(files);
+
+			MemoryStream o = new MemoryStream();
             BinaryDataWriter bw = new BinaryDataWriter(o, false);
             bw.ByteOrder = ByteOrder.LittleEndian;
             bw.Write("SARC",BinaryStringFormat.NoPrefixOrTermination);
@@ -56,13 +89,13 @@ namespace SARCExt
                 bw.Write(k, BinaryStringFormat.ZeroTerminated);
                 bw.Align(4);
             }
-            bw.Align(0x80); //Odyssey padding ?
+            bw.Align(align);
             List<uint> FileOffsets = new List<uint>();
             foreach (string k in files.Keys)
             {
                 FileOffsets.Add((uint)bw.BaseStream.Position);
                 bw.Write(files[k]);
-                bw.Align(0x80); //Odyssey padding ?
+                bw.Align(align);
             }
             for (int i = 0; i < offsetToUpdate.Count; i++)
             {

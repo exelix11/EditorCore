@@ -1,5 +1,6 @@
 ﻿using ExtensionMethods;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,16 +17,17 @@ namespace LibEveryFileExplorer._3D
 			PointC = C;
 		}
 
-		public Vector3D PointA { get; set; }
-		public Vector3D PointB { get; set; }
-		public Vector3D PointC { get; set; }
+		public Vector3D PointA { get; internal set; }
+		public Vector3D PointB { get; internal set; }
+		public Vector3D PointC { get; internal set; }
 
 		public Vector3D Normal
 		{
 			get
 			{
-				Vector3D a = (PointB - PointA).Cross(PointC - PointA);
-				return a / (float)System.Math.Sqrt(a.X * a.X + a.Y * a.Y + a.Z * a.Z);
+				Vector3D faceNormal = (PointB - PointA).Cross(PointC - PointA);
+				faceNormal.Normalize();
+				return faceNormal;
 			}
 		}
 	}

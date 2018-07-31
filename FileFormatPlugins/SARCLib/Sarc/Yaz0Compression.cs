@@ -8,8 +8,8 @@ namespace EveryFileExplorer
     public unsafe class YAZ0
     {
 		//Compression could be optimized by using look-ahead.
-		public static unsafe byte[] Compress(string FileName, int level = 3) => Compress(File.ReadAllBytes(FileName),level);
-		public static unsafe byte[] Compress(byte[] Data, int level = 3)
+		public static unsafe byte[] Compress(string FileName, int level = 3, UInt32 res1 = 0, UInt32 res2 = 0) => Compress(File.ReadAllBytes(FileName),level,res1,res2);
+		public static unsafe byte[] Compress(byte[] Data, int level = 3, UInt32 reserved1 = 0, UInt32 reserved2 = 0)
         {
 			int maxBackLevel = (int)(0x10e0 * (level / 9.0) - 0x0e0);
 
@@ -25,7 +25,23 @@ namespace EveryFileExplorer
             *resultptr++ = (byte)((Data.Length >> 16) & 0xFF);
             *resultptr++ = (byte)((Data.Length >> 8) & 0xFF);
             *resultptr++ = (byte)((Data.Length >> 0) & 0xFF);
-            for (int i = 0; i < 8; i++) *resultptr++ = 0;
+			{
+				var res1 = BitConverter.GetBytes(reserved1);
+				var res2 = BitConverter.GetBytes(reserved2);
+				if (BitConverter.IsLittleEndian)
+				{
+					Array.Reverse(res1);
+					Array.Reverse(res2);
+				}
+				*resultptr++ = (byte)res1[0];
+				*resultptr++ = (byte)res1[1];
+				*resultptr++ = (byte)res1[2];
+				*resultptr++ = (byte)res1[3];
+				*resultptr++ = (byte)res2[0];
+				*resultptr++ = (byte)res2[1];
+				*resultptr++ = (byte)res2[2];
+				*resultptr++ = (byte)res2[3];
+			}
             int length = Data.Length;
             int dstoffs = 16;
             int Offs = 0;

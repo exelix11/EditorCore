@@ -71,6 +71,17 @@ namespace MarioKart.MK7
 			if (Models.Count != 1) throw new Exception("Exporting KCL with more than one model is not supported");
 			var mod = Models[0];
 
+			var size = mod.Header.OctreeMax - mod.Header.OctreeOrigin;
+			int worldLengthExp = KCLOctree.next_exponent(Math.Min(Math.Min(size.X, size.Y), size.Z));
+			var exponents = new Vector3D(
+				KCLOctree.next_exponent(size.X),
+				KCLOctree.next_exponent(size.Y),
+				KCLOctree.next_exponent(size.Z));
+			var CoordinateShift = new Vector3D(
+				(float)KCLOctree.next_exponent(size.X),	//worldLengthExp,
+				(float)KCLOctree.next_exponent(size.Y),	//exponents.X - worldLengthExp,
+				(float)KCLOctree.next_exponent(size.Z));//exponents.X - worldLengthExp + exponents.Y - worldLengthExp);
+
 			using (MemoryStream m = new MemoryStream())
 			{
 				BinaryDataWriter er = new BinaryDataWriter(m);
@@ -83,9 +94,9 @@ namespace MarioKart.MK7
 				er.Write((UInt32)1);
 				er.Write(mod.Header.OctreeOrigin);
 				er.Write(mod.Header.OctreeMax);
-				er.Write((UInt32)mod.Header.n_x);
-				er.Write((UInt32)mod.Header.n_y);
-				er.Write((UInt32)mod.Header.n_z);
+				er.Write((UInt32)CoordinateShift.X);
+				er.Write((UInt32)CoordinateShift.Y);
+				er.Write((UInt32)CoordinateShift.Z);
 				er.Write((UInt32)8);
 				for (int i = 0; i < 8; i++) er.Write((UInt32)0x80000000); //Fake global model octree, supports only one model
 				er.Write((UInt32)0x5C);
@@ -95,17 +106,17 @@ namespace MarioKart.MK7
 				long curpos = er.BaseStream.Position;
 				//Write vertices array position
 				er.BaseStream.Position = HeaderPos;
-				er.Write((uint)curpos - HeaderPos);
+				er.Write((uint)(curpos - HeaderPos));
 				er.BaseStream.Position = curpos;
 				foreach (Vector3D v in mod.Vertices) er.Write(v);
-				while ((er.BaseStream.Position % 4) != 0) er.Write((byte)0);
+				er.Align(4);
 				curpos = er.BaseStream.Position;
 				//Write normal array position
 				er.BaseStream.Position = HeaderPos + 4;
-				er.Write((uint)curpos - HeaderPos);
+				er.Write((uint)(curpos - HeaderPos));
 				er.BaseStream.Position = curpos;
 				foreach (Vector3D v in mod.Normals) er.Write(v);
-				while ((er.BaseStream.Position % 4) != 0) er.Write((byte)0);
+				er.Align(4);
 				curpos = er.BaseStream.Position;
 				//Write Triangles offset
 				er.BaseStream.Position = HeaderPos + 8;
@@ -116,20 +127,20 @@ namespace MarioKart.MK7
 				curpos = er.BaseStream.Position;
 				//Write Spatial index offset
 				er.BaseStream.Position = HeaderPos + 12;
-				er.Write((uint)curpos - HeaderPos);
+				er.Write((uint)(curpos - HeaderPos));
 				er.BaseStream.Position = curpos;
 				mod.Octree.Write(er);
-				er.BaseStream.Position = er.BaseStream.Length;
-				er.Write((ushort)0xFFFF); //Terminate Octree
 
 				return m.ToArray();
 			}
 		}
+
+		public static Vector3D NormalAvg(OBJ.Face face) => (face.VA.normal + face.VB.normal + face.VC.normal)/3;
 		
 		public static KCL FromOBJ(OBJ o)
 		{
 			KCL res = new KCL();
-
+			
 			List<Vector3D> Vertex = new List<Vector3D>();
 			List<Vector3D> Normals = new List<Vector3D>();
 			List<KCLModel.KCLPlane> planes = new List<KCLModel.KCLPlane>();
@@ -137,8 +148,8 @@ namespace MarioKart.MK7
 			foreach (var v in o.Faces)
 			{
 				Triangle t = new Triangle(v.VA.pos, v.VB.pos, v.VC.pos);
-				Vector3D qq = (t.PointB - t.PointA).Cross(t.PointC - t.PointA);
-				if ((qq.X * qq.X + qq.Y * qq.Y + qq.Z * qq.Z) < 0.01) continue;
+				//Vector3D qq = (t.PointB - t.PointA).Cross(t.PointC - t.PointA);
+				//if ((qq.X * qq.X + qq.Y * qq.Y + qq.Z * qq.Z) < 0.01) continue;
 				KCLModel.KCLPlane p = new KCLModel.KCLPlane();
 				p.CollisionType = 0;// Mapping[v.Material];
 				Vector3D a = (t.PointC - t.PointA).Cross(t.Normal);
@@ -173,7 +184,11 @@ namespace MarioKart.MK7
 			resMod.Normals = Normals.ToArray();
 			resMod.Planes = planes.ToArray();
 			resMod.Header = new KCLModel.KCLModelHeader();
-			resMod.Octree = KCLOctree.FromTriangles(Triangles.ToArray(), resMod.Header, 2048, 128, 128, 50);
+			resMod.Octree = KCLOctree.FromTriangles(Triangles.ToArray(), resMod.Header, 128, 50);
+
+			resMod.Header.Unknown1 = 40f;
+			resMod.Header.Unknown2 = 0;
+
 			res.Models.Add(resMod);
 
 			return res;
@@ -203,7 +218,12 @@ namespace MarioKart.MK7
 			public KCLModelHeader Header;
 			public class KCLModelHeader : KCLHeader
 			{
-				public KCLModelHeader() { }
+				public KCLModelHeader()
+				{
+					Unknown1 = 40f;
+					Unknown2 = 0f;
+				}
+
 				public KCLModelHeader(BinaryDataReader er)
 				{
 					VerticesOffset = er.ReadUInt32();
@@ -277,6 +297,8 @@ namespace MarioKart.MK7
 			}
 
 			public KCLOctree Octree;
+
+			Vector3D NormalAvg(KCLPlane Plane) => (Normals[Plane.NormalAIndex] + Normals[Plane.NormalBIndex] + Normals[Plane.NormalCIndex]) / 3;
 
 			public Triangle GetTriangle(KCLPlane Plane)
 			{
