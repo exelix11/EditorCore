@@ -24,6 +24,7 @@ namespace ModelViewer
 		public Vector3D DeltaPos;
 		public Vector3D position;
         public Vector3D StartPos;
+		public dynamic obj;
     }
 
     public partial class RendererControl : UserControl
@@ -381,5 +382,10 @@ namespace ModelViewer
 			selectedPaths.Clear();
 			ModelView.UpdateLayout();
         }
-    }
+
+		private void ModelView_MouseEnter(object sender, MouseEventArgs e)
+		{
+			ModelView.Focus();
+		}
+	}
 }
