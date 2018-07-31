@@ -382,5 +382,10 @@ namespace ModelViewer
 			selectedPaths.Clear();
 			ModelView.UpdateLayout();
         }
-    }
+
+		private void ModelView_MouseEnter(object sender, MouseEventArgs e)
+		{
+			ModelView.Focus();
+		}
+	}
 }

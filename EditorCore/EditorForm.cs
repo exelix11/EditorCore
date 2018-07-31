@@ -120,7 +120,7 @@ namespace EditorCore
 #else
 			splitContainer2.Enabled = false;
 #endif
-            btnPaste.Enabled = (StoredValue!=null && StoredValue.Type == ClipBoardItem.ClipboardType.Objects);
+            btnPaste.Enabled = (StoredValue!=null && StoredValue.Type == ClipBoardItem.ClipboardType.Objects); //TODO Move this into the activated event
 
 			KeyPreview = true;
 			RenderingCanvas.Child = render;
@@ -190,6 +190,14 @@ namespace EditorCore
 			}
 
 			GameModule.InitModule(this);
+
+			editingOptionsModule = GameModule as IEditingOptionsModule;
+
+			if (editingOptionsModule != null)
+			{
+				editingOptionsModule.InitOptionsMenu(ref ObjectRightClickMenu);
+			}
+
 			ModelsFolder = GameModule.ModelsFolder;
 			GameFolder = (string)Properties.Settings.Default[$"{GameModule.ModuleName}_GamePath"];
 
@@ -752,29 +760,6 @@ namespace EditorCore
 			propertyGrid1.Refresh();
 		}
 
-		private void lnk_hideSelectedObjs_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            if (CurList.IsHidden) return;
-            foreach (var o in SelectedObjs)
-                render.RemoveModel(o);            
-        }
-
-        private void lnk_ShowHiddenObjs_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            foreach (var list in ListEditingStack)
-            {
-                if (list.IsHidden) continue;
-                foreach (var o in list)
-                    AddModel(o, list.name);
-            }
-            foreach (var list in LoadedLevel.objs.Values)
-            {
-                if (list.IsHidden) continue;
-                foreach (var o in list)
-                    AddModel(o, list.name);
-            }
-        }
-
         private void ListEditGoBack(object sender, LinkLabelLinkClickedEventArgs e)
         {
             PreviousList();
@@ -845,7 +830,10 @@ namespace EditorCore
 #region RendererEvents
             
         DragArgs DraggingArgs = null;
-        bool RenderIsDragging { get { return DraggingArgs != null && Mouse.LeftButton == MouseButtonState.Pressed && (ModifierKeys & Keys.Control) == Keys.Control; } }        
+		private bool O_KeyHeld = false;
+		private IEditingOptionsModule editingOptionsModule;
+
+		bool RenderIsDragging { get { return DraggingArgs != null && Mouse.LeftButton == MouseButtonState.Pressed && (ModifierKeys & Keys.Control) == Keys.Control; } }        
 		
         private void render_KeyDown(object sender, System.Windows.Input.KeyEventArgs e) //Render hotkeys
         {
@@ -859,6 +847,8 @@ namespace EditorCore
             {
                 if (DraggingArgs != null) endDragging();
             }
+
+			O_KeyHeld = false;
         }        
 
         private void render_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
@@ -920,21 +910,55 @@ namespace EditorCore
         private void render_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
 			if (RenderIsDragging) return;
+
+			if (O_KeyHeld)
+			{
+				O_KeyHeld = false;
+
+				var pos = e.GetPosition(render);
+
+				var Obj = render.GetOBJ(sender, e) as ILevelObj;
+
+				ObjectRightClickMenu_Copy.Visible = (Obj != null);
+				ObjectRightClickMenu_Paste.Enabled = (StoredValue?.Type == ClipBoardItem.ClipboardType.Objects);
+
+				ObjectRightClickMenu_CopyTransform.Visible =
+				ObjectRightClickMenu_PasteTransform.Visible = (Obj != null);
+
+				ObjectRightClickMenu_PasteTransform.Enabled = (StoredValue?.Type == ClipBoardItem.ClipboardType.Transform) ||
+															  (StoredValue?.Type == ClipBoardItem.ClipboardType.Position) ||
+															  (StoredValue?.Type == ClipBoardItem.ClipboardType.Rotation) ||
+															  (StoredValue?.Type == ClipBoardItem.ClipboardType.Scale);
+
+				ObjectRightClickMenu_Delete.Visible =
+				ObjectRightClickMenu_EditChildren.Visible =
+				ObjectRightClickMenu_Hide.Visible = (Obj != null);
+				editingOptionsModule?.GetOptionsMenu(Obj);
+				ObjectRightClickMenu.Tag = Obj;
+
+				ObjectRightClickMenu.Show(RenderingCanvas, (int)pos.X, (int)pos.Y);
+
+				return;
+			}
+
 			var obj = render.GetOBJ(sender, e) as ILevelObj;
 			if (obj == null || obj.NotLevel)
 			{
 				return;
 			}
+
 			
-			if (((ModifierKeys & Keys.Shift) == Keys.Shift || 
-				(ModifierKeys & Keys.Control) == Keys.Control) && CurList.Contains(obj)) //Shift add to selection, ctrl start drag as well
+			if (ModifierKeys.HasFlag(Keys.Shift) && CurList.Contains(obj)) //Shift add to selection, ctrl start drag as well <- thats retarded so how about no
 			{
-				ObjectsListBox.SelectedItems.Add(obj);
+				if(ObjectsListBox.SelectedItems.Contains(obj))
+					ObjectsListBox.SelectedItems.Remove(obj);
+				else
+					ObjectsListBox.SelectedItems.Add(obj);
 			}
-			else
+			else if(!(ModifierKeys.HasFlag(Keys.Control) && ObjectsListBox.SelectedItems.Contains(obj)))
 				SelectedObj = obj;
 			
-			if ((ModifierKeys & Keys.Control) == Keys.Control) //User wants to drag
+			if (ModifierKeys.HasFlag(Keys.Control)) //User wants to drag
 			{
 				DraggingArgs = new DragArgs();
 				DraggingArgs.StartPos = obj.ModelView_Pos;
@@ -949,13 +973,16 @@ namespace EditorCore
         {
             if (RenderIsDragging) return;
             if (e.Key == Key.B && EditingList) PreviousList();
-            if (SelectionCount == 0) return;
+			else if (e.Key == Key.O) O_KeyHeld = true;
+
+			if (SelectionCount == 0) return;
 			if (e.Key == Key.Space) render.LookAt(SelectedObj.ModelView_Pos);
 			//else if (e.Key == Key.OemPlus && Btn_AddObj.Enabled) Btn_AddObj_Click(null, null);
 			else if (e.Key == Key.D && SelectionCount == 1) DuplicateObj(SelectedObj, CurList);
 			else if (e.Key == Key.Delete) btn_delObj_Click(null, null);
 			else if (e.Key == Key.F) FindMenu.ShowDropDown();
-			else if (e.Key == Key.H) lnk_hideSelectedObjs_LinkClicked(null, null);
+			else if (e.Key == Key.H) btnHideSelected_Click(null, null);
+			else if (e.Key == Key.S) btnShowSelected_Click(null, null);
 			else if (e.Key == Key.Z && UndoList.Count > 0) UndoList.Pop().Undo();
 			else if (e.Key == Key.Q) render.CamMode = render.CamMode == HelixToolkit.Wpf.CameraMode.Inspect ? HelixToolkit.Wpf.CameraMode.WalkAround : HelixToolkit.Wpf.CameraMode.Inspect;
 			else if (e.Key == Key.C && SelectionCount == 1)
@@ -1031,11 +1058,10 @@ namespace EditorCore
         {
             ObjectsListBox.SelectedIndex = -1;
             if (list == CurList)
-            {
                 ObjectsListBox.Items.RemoveAt(CurList.IndexOf(o));
-                render.RemoveModel(o);
-            }
-            list.Remove(o);
+
+			render.RemoveModel(o);
+			list.Remove(o);
         }
 
         public void SearchObject(Func<ILevelObj,bool> seachFn, IObjList list = null, string QueryDescription = "")
@@ -1147,6 +1173,83 @@ namespace EditorCore
 			var inst = new EditorForm(args, LoadedModules, SelectedGameModuleExtension);
 			inst.Show();
 			return inst;
+		}
+
+		private void ObjectRightClickMenu_EditChildren_Click(object sender, EventArgs e)
+		{
+			GameModule.EditChildrenNode(ObjectRightClickMenu.Tag as ILevelObj);
+		}
+
+		private void ObjectRightClickMenu_CopyTransform_Click(object sender, EventArgs e)
+		{
+			StoredValue = new ClipBoardItem() { Type = ClipBoardItem.ClipboardType.Transform, transform = (ObjectRightClickMenu.Tag as ILevelObj).transform };
+		}
+
+		private void ObjectRightClickMenu_CopyPos_Click(object sender, EventArgs e)
+		{
+			StoredValue = new ClipBoardItem() { Type = ClipBoardItem.ClipboardType.Position,  transform = (ObjectRightClickMenu.Tag as ILevelObj).transform };
+		}
+
+		private void ObjectRightClickMenu_CopyRot_Click(object sender, EventArgs e)
+		{
+			StoredValue = new ClipBoardItem() { Type = ClipBoardItem.ClipboardType.Rotation, transform = (ObjectRightClickMenu.Tag as ILevelObj).transform };
+		}
+
+		private void ObjectRightClickMenu_CopyScale_Click(object sender, EventArgs e)
+		{
+			StoredValue = new ClipBoardItem() { Type = ClipBoardItem.ClipboardType.Scale, transform = (ObjectRightClickMenu.Tag as ILevelObj).transform };
+		}
+
+		private void ObjectRightClickMenu_Hide_Click(object sender, EventArgs e)
+		{
+			render.RemoveModel(ObjectRightClickMenu.Tag as ILevelObj);
+		}
+
+		private void btnHideSelected_Click(object sender, EventArgs e)
+		{
+			if (CurList.IsHidden) return;
+			foreach (var o in SelectedObjs)
+				render.RemoveModel(o);
+		}
+
+		private void btnShowSelected_Click(object sender, EventArgs e)
+		{
+			if (CurList.IsHidden) return;
+			foreach (var o in SelectedObjs)
+				AddModel(o, CurListName);
+		}
+
+		private void btnShowAll_Click(object sender, EventArgs e)
+		{
+			foreach (var list in ListEditingStack)
+			{
+				if (list.IsHidden) continue;
+				foreach (var o in list)
+					AddModel(o, list.name);
+			}
+			foreach (var list in LoadedLevel.objs.Values)
+			{
+				if (list.IsHidden) continue;
+				foreach (var o in list)
+					AddModel(o, list.name);
+			}
+		}
+
+		private void ObjectRightClickMenu_Copy_Click(object sender, EventArgs e)
+		{
+			ILevelObj[] objs = new ILevelObj[] { (ObjectRightClickMenu.Tag as ILevelObj).Clone() as ILevelObj };
+			StoredValue = new ClipBoardItem() { Type = ClipBoardItem.ClipboardType.Objects, Objs = objs };
+		}
+
+		private void ObjectRightClickMenu_Delete_Click(object sender, EventArgs e)
+		{
+			IObjList list = CurList;
+			if (!CurList.Contains(ObjectRightClickMenu.Tag as ILevelObj))
+			{
+				list = LoadedLevel.FindListByObj(ObjectRightClickMenu.Tag as ILevelObj);
+				if (list == null) return;
+			}
+			DeleteObj(ObjectRightClickMenu.Tag as ILevelObj, list);
 		}
 	}
 }

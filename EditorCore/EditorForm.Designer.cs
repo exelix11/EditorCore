@@ -40,11 +40,12 @@
 			this.btnPaste = new System.Windows.Forms.ToolStripButton();
 			this.btnDuplicate = new System.Windows.Forms.ToolStripButton();
 			this.btnDelete = new System.Windows.Forms.ToolStripButton();
+			this.btnHideSelected = new System.Windows.Forms.ToolStripButton();
+			this.btnShowSelected = new System.Windows.Forms.ToolStripButton();
+			this.btnShowAll = new System.Windows.Forms.ToolStripButton();
 			this.ListEditingPanel = new System.Windows.Forms.Panel();
 			this.linkLabel1 = new System.Windows.Forms.LinkLabel();
-			this.lnk_ShowHiddenObjs = new System.Windows.Forms.LinkLabel();
 			this.comboBox1 = new System.Windows.Forms.ComboBox();
-			this.lnk_hideSelectedObjs = new System.Windows.Forms.LinkLabel();
 			this.Btn_addType = new System.Windows.Forms.Button();
 			this.label1 = new System.Windows.Forms.Label();
 			this.ObjectsListBox = new System.Windows.Forms.ListBox();
@@ -84,6 +85,17 @@
 			this.objectByNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.objectByModelNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+			this.ObjectRightClickMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+			this.ObjectRightClickMenu_Copy = new System.Windows.Forms.ToolStripMenuItem();
+			this.ObjectRightClickMenu_Paste = new System.Windows.Forms.ToolStripMenuItem();
+			this.ObjectRightClickMenu_Delete = new System.Windows.Forms.ToolStripMenuItem();
+			this.ObjectRightClickMenu_EditChildren = new System.Windows.Forms.ToolStripMenuItem();
+			this.ObjectRightClickMenu_CopyTransform = new System.Windows.Forms.ToolStripMenuItem();
+			this.ObjectRightClickMenu_CopyPos = new System.Windows.Forms.ToolStripMenuItem();
+			this.ObjectRightClickMenu_CopyRot = new System.Windows.Forms.ToolStripMenuItem();
+			this.ObjectRightClickMenu_CopyScale = new System.Windows.Forms.ToolStripMenuItem();
+			this.ObjectRightClickMenu_PasteTransform = new System.Windows.Forms.ToolStripMenuItem();
+			this.ObjectRightClickMenu_Hide = new System.Windows.Forms.ToolStripMenuItem();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
 			this.splitContainer1.Panel1.SuspendLayout();
 			this.splitContainer1.Panel2.SuspendLayout();
@@ -97,6 +109,7 @@
 			this.splitContainer2.Panel1.SuspendLayout();
 			this.splitContainer2.Panel2.SuspendLayout();
 			this.splitContainer2.SuspendLayout();
+			this.ObjectRightClickMenu.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// button5
@@ -137,9 +150,7 @@
 			// 
 			this.ObjectListPanel.Controls.Add(this.toolStrip1);
 			this.ObjectListPanel.Controls.Add(this.ListEditingPanel);
-			this.ObjectListPanel.Controls.Add(this.lnk_ShowHiddenObjs);
 			this.ObjectListPanel.Controls.Add(this.comboBox1);
-			this.ObjectListPanel.Controls.Add(this.lnk_hideSelectedObjs);
 			this.ObjectListPanel.Controls.Add(this.Btn_addType);
 			this.ObjectListPanel.Controls.Add(this.label1);
 			this.ObjectListPanel.Controls.Add(this.ObjectsListBox);
@@ -152,16 +163,21 @@
 			// 
 			// toolStrip1
 			// 
+			this.toolStrip1.CanOverflow = false;
 			this.toolStrip1.Dock = System.Windows.Forms.DockStyle.Bottom;
 			this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ddmAdd,
             this.btnCopy,
             this.btnPaste,
             this.btnDuplicate,
-            this.btnDelete});
-			this.toolStrip1.Location = new System.Drawing.Point(0, 259);
+            this.btnDelete,
+            this.btnHideSelected,
+            this.btnShowSelected,
+            this.btnShowAll});
+			this.toolStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
+			this.toolStrip1.Location = new System.Drawing.Point(0, 240);
 			this.toolStrip1.Name = "toolStrip1";
-			this.toolStrip1.Size = new System.Drawing.Size(263, 25);
+			this.toolStrip1.Size = new System.Drawing.Size(263, 44);
 			this.toolStrip1.TabIndex = 22;
 			this.toolStrip1.Text = "toolStrip1";
 			// 
@@ -173,13 +189,13 @@
 			this.ddmAdd.Image = ((System.Drawing.Image)(resources.GetObject("ddmAdd.Image")));
 			this.ddmAdd.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.ddmAdd.Name = "ddmAdd";
-			this.ddmAdd.Size = new System.Drawing.Size(42, 22);
+			this.ddmAdd.Size = new System.Drawing.Size(42, 19);
 			this.ddmAdd.Text = "Add";
 			// 
 			// notWorkingYetToolStripMenuItem
 			// 
 			this.notWorkingYetToolStripMenuItem.Name = "notWorkingYetToolStripMenuItem";
-			this.notWorkingYetToolStripMenuItem.Size = new System.Drawing.Size(159, 22);
+			this.notWorkingYetToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
 			this.notWorkingYetToolStripMenuItem.Text = "Not working yet";
 			// 
 			// btnCopy
@@ -189,7 +205,7 @@
 			this.btnCopy.Image = ((System.Drawing.Image)(resources.GetObject("btnCopy.Image")));
 			this.btnCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.btnCopy.Name = "btnCopy";
-			this.btnCopy.Size = new System.Drawing.Size(39, 22);
+			this.btnCopy.Size = new System.Drawing.Size(39, 19);
 			this.btnCopy.Text = "Copy";
 			this.btnCopy.Click += new System.EventHandler(this.Btn_CopyObjs_Click);
 			// 
@@ -199,7 +215,7 @@
 			this.btnPaste.Image = ((System.Drawing.Image)(resources.GetObject("btnPaste.Image")));
 			this.btnPaste.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.btnPaste.Name = "btnPaste";
-			this.btnPaste.Size = new System.Drawing.Size(39, 22);
+			this.btnPaste.Size = new System.Drawing.Size(39, 19);
 			this.btnPaste.Text = "Paste";
 			this.btnPaste.Click += new System.EventHandler(this.btnPaste_Click);
 			// 
@@ -209,7 +225,7 @@
 			this.btnDuplicate.Image = ((System.Drawing.Image)(resources.GetObject("btnDuplicate.Image")));
 			this.btnDuplicate.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.btnDuplicate.Name = "btnDuplicate";
-			this.btnDuplicate.Size = new System.Drawing.Size(61, 22);
+			this.btnDuplicate.Size = new System.Drawing.Size(61, 19);
 			this.btnDuplicate.Text = "Duplicate";
 			this.btnDuplicate.Visible = false;
 			this.btnDuplicate.Click += new System.EventHandler(this.DuplicateSelectedObj_btn);
@@ -220,9 +236,39 @@
 			this.btnDelete.Image = ((System.Drawing.Image)(resources.GetObject("btnDelete.Image")));
 			this.btnDelete.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.btnDelete.Name = "btnDelete";
-			this.btnDelete.Size = new System.Drawing.Size(44, 22);
+			this.btnDelete.Size = new System.Drawing.Size(44, 19);
 			this.btnDelete.Text = "Delete";
 			this.btnDelete.Click += new System.EventHandler(this.btn_delObj_Click);
+			// 
+			// btnHideSelected
+			// 
+			this.btnHideSelected.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+			this.btnHideSelected.Image = ((System.Drawing.Image)(resources.GetObject("btnHideSelected.Image")));
+			this.btnHideSelected.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.btnHideSelected.Name = "btnHideSelected";
+			this.btnHideSelected.Size = new System.Drawing.Size(83, 19);
+			this.btnHideSelected.Text = "Hide Selected";
+			this.btnHideSelected.Click += new System.EventHandler(this.btnHideSelected_Click);
+			// 
+			// btnShowSelected
+			// 
+			this.btnShowSelected.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+			this.btnShowSelected.Image = ((System.Drawing.Image)(resources.GetObject("btnShowSelected.Image")));
+			this.btnShowSelected.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.btnShowSelected.Name = "btnShowSelected";
+			this.btnShowSelected.Size = new System.Drawing.Size(87, 19);
+			this.btnShowSelected.Text = "Show Selected";
+			this.btnShowSelected.Click += new System.EventHandler(this.btnShowSelected_Click);
+			// 
+			// btnShowAll
+			// 
+			this.btnShowAll.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+			this.btnShowAll.Image = ((System.Drawing.Image)(resources.GetObject("btnShowAll.Image")));
+			this.btnShowAll.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.btnShowAll.Name = "btnShowAll";
+			this.btnShowAll.Size = new System.Drawing.Size(57, 19);
+			this.btnShowAll.Text = "Show All";
+			this.btnShowAll.Click += new System.EventHandler(this.btnShowAll_Click);
 			// 
 			// ListEditingPanel
 			// 
@@ -247,18 +293,6 @@
 			this.linkLabel1.Text = "Editing an object list, click to go back";
 			this.linkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.ListEditGoBack);
 			// 
-			// lnk_ShowHiddenObjs
-			// 
-			this.lnk_ShowHiddenObjs.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.lnk_ShowHiddenObjs.AutoSize = true;
-			this.lnk_ShowHiddenObjs.Location = new System.Drawing.Point(191, 241);
-			this.lnk_ShowHiddenObjs.Name = "lnk_ShowHiddenObjs";
-			this.lnk_ShowHiddenObjs.Size = new System.Drawing.Size(69, 13);
-			this.lnk_ShowHiddenObjs.TabIndex = 19;
-			this.lnk_ShowHiddenObjs.TabStop = true;
-			this.lnk_ShowHiddenObjs.Text = "Show hidden";
-			this.lnk_ShowHiddenObjs.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnk_ShowHiddenObjs_LinkClicked);
-			// 
 			// comboBox1
 			// 
 			this.comboBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -272,18 +306,6 @@
 			this.comboBox1.Size = new System.Drawing.Size(169, 21);
 			this.comboBox1.TabIndex = 6;
 			this.comboBox1.SelectedValueChanged += new System.EventHandler(this.SelectedListChanged);
-			// 
-			// lnk_hideSelectedObjs
-			// 
-			this.lnk_hideSelectedObjs.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.lnk_hideSelectedObjs.AutoSize = true;
-			this.lnk_hideSelectedObjs.Location = new System.Drawing.Point(119, 241);
-			this.lnk_hideSelectedObjs.Name = "lnk_hideSelectedObjs";
-			this.lnk_hideSelectedObjs.Size = new System.Drawing.Size(72, 13);
-			this.lnk_hideSelectedObjs.TabIndex = 18;
-			this.lnk_hideSelectedObjs.TabStop = true;
-			this.lnk_hideSelectedObjs.Text = "Hide selected";
-			this.lnk_hideSelectedObjs.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnk_hideSelectedObjs_LinkClicked);
 			// 
 			// Btn_addType
 			// 
@@ -314,7 +336,7 @@
 			this.ObjectsListBox.Location = new System.Drawing.Point(3, 32);
 			this.ObjectsListBox.Name = "ObjectsListBox";
 			this.ObjectsListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-			this.ObjectsListBox.Size = new System.Drawing.Size(261, 199);
+			this.ObjectsListBox.Size = new System.Drawing.Size(261, 186);
 			this.ObjectsListBox.TabIndex = 8;
 			this.ObjectsListBox.SelectedIndexChanged += new System.EventHandler(this.SelectedObjectChanged);
 			this.ObjectsListBox.DoubleClick += new System.EventHandler(this.ObjectsList_DoubleClick);
@@ -323,7 +345,7 @@
 			// 
 			this.HideGroup_CB.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.HideGroup_CB.AutoSize = true;
-			this.HideGroup_CB.Location = new System.Drawing.Point(3, 240);
+			this.HideGroup_CB.Location = new System.Drawing.Point(4, 220);
 			this.HideGroup_CB.Name = "HideGroup_CB";
 			this.HideGroup_CB.Size = new System.Drawing.Size(82, 17);
 			this.HideGroup_CB.TabIndex = 9;
@@ -634,6 +656,93 @@
 			this.splitContainer2.SplitterDistance = 263;
 			this.splitContainer2.TabIndex = 17;
 			// 
+			// ObjectRightClickMenu
+			// 
+			this.ObjectRightClickMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ObjectRightClickMenu_Copy,
+            this.ObjectRightClickMenu_Paste,
+            this.ObjectRightClickMenu_Delete,
+            this.ObjectRightClickMenu_EditChildren,
+            this.ObjectRightClickMenu_CopyTransform,
+            this.ObjectRightClickMenu_PasteTransform,
+            this.ObjectRightClickMenu_Hide});
+			this.ObjectRightClickMenu.Name = "ObjectRightClickMenu";
+			this.ObjectRightClickMenu.Size = new System.Drawing.Size(181, 180);
+			// 
+			// ObjectRightClickMenu_Copy
+			// 
+			this.ObjectRightClickMenu_Copy.Name = "ObjectRightClickMenu_Copy";
+			this.ObjectRightClickMenu_Copy.Size = new System.Drawing.Size(180, 22);
+			this.ObjectRightClickMenu_Copy.Text = "Copy";
+			this.ObjectRightClickMenu_Copy.Click += new System.EventHandler(this.ObjectRightClickMenu_Copy_Click);
+			// 
+			// ObjectRightClickMenu_Paste
+			// 
+			this.ObjectRightClickMenu_Paste.Name = "ObjectRightClickMenu_Paste";
+			this.ObjectRightClickMenu_Paste.Size = new System.Drawing.Size(159, 22);
+			this.ObjectRightClickMenu_Paste.Text = "Paste";
+			this.ObjectRightClickMenu_Paste.Click += new System.EventHandler(this.btnPaste_Click);
+			// 
+			// ObjectRightClickMenu_Delete
+			// 
+			this.ObjectRightClickMenu_Delete.Name = "ObjectRightClickMenu_Delete";
+			this.ObjectRightClickMenu_Delete.Size = new System.Drawing.Size(180, 22);
+			this.ObjectRightClickMenu_Delete.Text = "Delete";
+			this.ObjectRightClickMenu_Delete.Click += new System.EventHandler(this.ObjectRightClickMenu_Delete_Click);
+			// 
+			// ObjectRightClickMenu_EditChildren
+			// 
+			this.ObjectRightClickMenu_EditChildren.Name = "ObjectRightClickMenu_EditChildren";
+			this.ObjectRightClickMenu_EditChildren.Size = new System.Drawing.Size(159, 22);
+			this.ObjectRightClickMenu_EditChildren.Text = "EditChildren";
+			this.ObjectRightClickMenu_EditChildren.Click += new System.EventHandler(this.ObjectRightClickMenu_EditChildren_Click);
+			// 
+			// ObjectRightClickMenu_CopyTransform
+			// 
+			this.ObjectRightClickMenu_CopyTransform.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ObjectRightClickMenu_CopyPos,
+            this.ObjectRightClickMenu_CopyRot,
+            this.ObjectRightClickMenu_CopyScale});
+			this.ObjectRightClickMenu_CopyTransform.Name = "ObjectRightClickMenu_CopyTransform";
+			this.ObjectRightClickMenu_CopyTransform.Size = new System.Drawing.Size(159, 22);
+			this.ObjectRightClickMenu_CopyTransform.Text = "Copy Transform";
+			this.ObjectRightClickMenu_CopyTransform.Click += new System.EventHandler(this.ObjectRightClickMenu_CopyTransform_Click);
+			// 
+			// ObjectRightClickMenu_CopyPos
+			// 
+			this.ObjectRightClickMenu_CopyPos.Name = "ObjectRightClickMenu_CopyPos";
+			this.ObjectRightClickMenu_CopyPos.Size = new System.Drawing.Size(145, 22);
+			this.ObjectRightClickMenu_CopyPos.Text = "Only Position";
+			this.ObjectRightClickMenu_CopyPos.Click += new System.EventHandler(this.ObjectRightClickMenu_CopyPos_Click);
+			// 
+			// ObjectRightClickMenu_CopyRot
+			// 
+			this.ObjectRightClickMenu_CopyRot.Name = "ObjectRightClickMenu_CopyRot";
+			this.ObjectRightClickMenu_CopyRot.Size = new System.Drawing.Size(145, 22);
+			this.ObjectRightClickMenu_CopyRot.Text = "Only rotation";
+			this.ObjectRightClickMenu_CopyRot.Click += new System.EventHandler(this.ObjectRightClickMenu_CopyRot_Click);
+			// 
+			// ObjectRightClickMenu_CopyScale
+			// 
+			this.ObjectRightClickMenu_CopyScale.Name = "ObjectRightClickMenu_CopyScale";
+			this.ObjectRightClickMenu_CopyScale.Size = new System.Drawing.Size(145, 22);
+			this.ObjectRightClickMenu_CopyScale.Text = "Only Scale";
+			this.ObjectRightClickMenu_CopyScale.Click += new System.EventHandler(this.ObjectRightClickMenu_CopyScale_Click);
+			// 
+			// ObjectRightClickMenu_PasteTransform
+			// 
+			this.ObjectRightClickMenu_PasteTransform.Name = "ObjectRightClickMenu_PasteTransform";
+			this.ObjectRightClickMenu_PasteTransform.Size = new System.Drawing.Size(159, 22);
+			this.ObjectRightClickMenu_PasteTransform.Text = "Paste Transform";
+			this.ObjectRightClickMenu_PasteTransform.Click += new System.EventHandler(this.ClipBoardMenu_Paste_Click);
+			// 
+			// ObjectRightClickMenu_Hide
+			// 
+			this.ObjectRightClickMenu_Hide.Name = "ObjectRightClickMenu_Hide";
+			this.ObjectRightClickMenu_Hide.Size = new System.Drawing.Size(159, 22);
+			this.ObjectRightClickMenu_Hide.Text = "Hide Object";
+			this.ObjectRightClickMenu_Hide.Click += new System.EventHandler(this.ObjectRightClickMenu_Hide_Click);
+			// 
 			// EditorForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -664,6 +773,7 @@
 			this.splitContainer2.Panel2.ResumeLayout(false);
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
 			this.splitContainer2.ResumeLayout(false);
+			this.ObjectRightClickMenu.ResumeLayout(false);
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -708,8 +818,6 @@
         private System.Windows.Forms.ToolStripMenuItem objectByIdToolStripMenuItem;
         private System.Windows.Forms.SplitContainer splitContainer2;
         private System.Windows.Forms.ToolStripMenuItem ClipBoardMenu_CopyTransform;
-        private System.Windows.Forms.LinkLabel lnk_ShowHiddenObjs;
-        private System.Windows.Forms.LinkLabel lnk_hideSelectedObjs;
         private System.Windows.Forms.ToolStripMenuItem objectByNameToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem objectByModelNameToolStripMenuItem;
 		private System.Windows.Forms.Panel ListEditingPanel;
@@ -724,6 +832,20 @@
 		private System.Windows.Forms.ToolStripButton btnPaste;
 		private System.Windows.Forms.ToolStripButton btnDuplicate;
 		private System.Windows.Forms.ToolStripButton btnDelete;
+		private System.Windows.Forms.ContextMenuStrip ObjectRightClickMenu;
+		private System.Windows.Forms.ToolStripMenuItem ObjectRightClickMenu_Copy;
+		private System.Windows.Forms.ToolStripMenuItem ObjectRightClickMenu_Paste;
+		private System.Windows.Forms.ToolStripMenuItem ObjectRightClickMenu_Delete;
+		private System.Windows.Forms.ToolStripMenuItem ObjectRightClickMenu_EditChildren;
+		private System.Windows.Forms.ToolStripMenuItem ObjectRightClickMenu_CopyTransform;
+		private System.Windows.Forms.ToolStripMenuItem ObjectRightClickMenu_CopyPos;
+		private System.Windows.Forms.ToolStripMenuItem ObjectRightClickMenu_CopyRot;
+		private System.Windows.Forms.ToolStripMenuItem ObjectRightClickMenu_CopyScale;
+		private System.Windows.Forms.ToolStripMenuItem ObjectRightClickMenu_PasteTransform;
+		private System.Windows.Forms.ToolStripMenuItem ObjectRightClickMenu_Hide;
+		private System.Windows.Forms.ToolStripButton btnHideSelected;
+		private System.Windows.Forms.ToolStripButton btnShowSelected;
+		private System.Windows.Forms.ToolStripButton btnShowAll;
 	}
 }
 
