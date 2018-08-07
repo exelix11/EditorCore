@@ -9,6 +9,7 @@ namespace EditorCore.Interfaces
 	public interface IObjList : IList<ILevelObj>
 	{
 		bool IsHidden { get; set; }
+		bool ReadOnly { get; }
 		string name { get; set; }
 
 		void ApplyChanges();

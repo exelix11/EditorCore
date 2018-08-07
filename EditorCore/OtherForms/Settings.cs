@@ -39,6 +39,7 @@ namespace EditorCore
             ChbStartupUpdate.Checked = Properties.Settings.Default.CheckUpdates;
             ChbStartupDb.Checked = Properties.Settings.Default.DownloadDb;
             tbUrl.Text = Properties.Settings.Default.DownloadDbLink;
+			chbCustomModels.Checked = Properties.Settings.Default.CustomModels;
             SettingsPanel.Focus();
         }
 
@@ -55,6 +56,7 @@ namespace EditorCore
 			Properties.Settings.Default.CheckUpdates = ChbStartupUpdate.Checked;
 			Properties.Settings.Default.DownloadDb = ChbStartupDb.Checked;
 			Properties.Settings.Default.DownloadDbLink = tbUrl.Text;
+			Properties.Settings.Default.CustomModels = chbCustomModels.Checked;
 			Properties.Settings.Default.Save();
 
 			foreach (var render in renderList)

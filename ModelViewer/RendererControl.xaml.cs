@@ -329,9 +329,10 @@ namespace ModelViewer
 
         public Vector3D GetPositionInView()
         {
-            FrameworkElement pnlClient = this.Content as FrameworkElement;
-            Point3D p = (Point3D)ModelView.Viewport.UnProject(new Point(pnlClient.ActualWidth / 2, pnlClient.ActualHeight / 2), ModelView.Camera.Position, ModelView.Camera.LookDirection);
-            return new Vector3D(Math.Truncate(p.X), Math.Truncate(p.Y), Math.Truncate(p.Z));
+			var direction = ModelView.Camera.LookDirection;
+			direction.Normalize();
+			direction *= 150;
+			return ModelView.Camera.Position.ToVector3D() + new Vector3D((int)direction.X,(int)direction.Y,(int)direction.Z);
         }		
 
         public void UnloadLevel()

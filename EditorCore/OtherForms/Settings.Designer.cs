@@ -50,6 +50,7 @@
 			this.ChbFps = new System.Windows.Forms.CheckBox();
 			this.CamInertiaUpDown = new System.Windows.Forms.NumericUpDown();
 			this.label4 = new System.Windows.Forms.Label();
+			this.chbCustomModels = new System.Windows.Forms.CheckBox();
 			this.SettingsPanel.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.drawDistance)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.RotSenUpDown)).BeginInit();
@@ -60,6 +61,7 @@
 			// SettingsPanel
 			// 
 			this.SettingsPanel.BackColor = System.Drawing.SystemColors.ControlDark;
+			this.SettingsPanel.Controls.Add(this.chbCustomModels);
 			this.SettingsPanel.Controls.Add(this.drawDistance);
 			this.SettingsPanel.Controls.Add(this.label1);
 			this.SettingsPanel.Controls.Add(this.btn_url_Default);
@@ -280,7 +282,7 @@
 			// ChbTriCount
 			// 
 			this.ChbTriCount.AutoSize = true;
-			this.ChbTriCount.Location = new System.Drawing.Point(22, 232);
+			this.ChbTriCount.Location = new System.Drawing.Point(22, 236);
 			this.ChbTriCount.Name = "ChbTriCount";
 			this.ChbTriCount.Size = new System.Drawing.Size(120, 17);
 			this.ChbTriCount.TabIndex = 3;
@@ -323,6 +325,16 @@
 			this.label4.Size = new System.Drawing.Size(271, 26);
 			this.label4.TabIndex = 0;
 			this.label4.Text = "Camera inertia factor:\r\n (This controls how much the camera slips) Default: 0,92";
+			// 
+			// chbCustomModels
+			// 
+			this.chbCustomModels.AutoSize = true;
+			this.chbCustomModels.Location = new System.Drawing.Point(187, 229);
+			this.chbCustomModels.Name = "chbCustomModels";
+			this.chbCustomModels.Size = new System.Drawing.Size(153, 30);
+			this.chbCustomModels.TabIndex = 23;
+			this.chbCustomModels.Text = "Override models folder with\r\nCustom models folder";
+			this.chbCustomModels.UseVisualStyleBackColor = true;
 			// 
 			// Settings
 			// 
@@ -371,5 +383,6 @@
         private System.Windows.Forms.Label label4;
 		private System.Windows.Forms.NumericUpDown drawDistance;
 		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.CheckBox chbCustomModels;
 	}
 }

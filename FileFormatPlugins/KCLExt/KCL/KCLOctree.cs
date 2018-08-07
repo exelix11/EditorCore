@@ -215,7 +215,6 @@ namespace MarioKart
 			public static KCLOctreeNode Generate(Dictionary<ushort, Triangle> Triangles, Vector3D Position, float BoxSize, int MaxTris, int MinSize)
 			{
 				KCLOctreeNode n = new KCLOctreeNode();
-				//Pump this box a little up, to prevent glitches
 				Vector3D midpos = Position + new Vector3D(BoxSize / 2f, BoxSize / 2f, BoxSize / 2f);
 				
 				Dictionary<ushort, Triangle> t = new Dictionary<ushort, Triangle>();
@@ -258,7 +257,7 @@ namespace MarioKart
 				return Math.Min(p, q) > r || Math.Max(p, q) < -r;
 			}
 			//Based on this algorithm: http://jgt.akpeters.com/papers/AkenineMoller01/tribox.html
-			private static bool tricube_overlap(Triangle t, Vector3D Position, float BoxSize)
+			public static bool tricube_overlap(Triangle t, Vector3D Position, float BoxSize)
 			{
 				float half = BoxSize / 2f;
 				//Position is the min pos, so add half the box size
@@ -293,9 +292,9 @@ namespace MarioKart
 			}			
 		}
 
-		public static int next_exponent(double value) => (int)Math.Ceiling(Math.Log(value, 2));
+		public static int next_exponent(double value) => value <= 1 ? 0 : (int)Math.Ceiling(Math.Log(value, 2));
 
-		public static KCLOctree FromTriangles(Triangle[] Triangles, KCLHeader Header,  int MinCubeSize = 32, int MaxNrTris = 10,uint MaxRootSize = 2048, uint MinRootSize = 128)//35)
+		public static KCLOctree FromTriangles(Triangle[] Triangles, KCLHeader Header,  int MinCubeSize = 32, int MaxNrTris = 50,uint MaxRootSize = 2048, uint MinRootSize = 128)//35)
 		{
 			Vector3D min = new Vector3D(float.MaxValue, float.MaxValue, float.MaxValue);
 			Vector3D max = new Vector3D(float.MinValue, float.MinValue, float.MinValue);
@@ -327,17 +326,17 @@ namespace MarioKart
 				index++;
 			}
 			//in real mkds, 25 is subtracted from the min pos
-			//min -= new Vector3D(50, 80, 50);
+			min -= MarioKart.MK7.KCL.MinOffset;
 			//TODO: after that, from some of the components (may be more than one) 30 is subtracted aswell => How do I know from which ones I have to do that?
 
 			//Assume the same is done for max:
-			//max += new Vector3D(50, 50, 50);
+			max += MarioKart.MK7.KCL.MaxOffset;
 			//TODO: +30
 			Header.OctreeOrigin = min;
 			Header.OctreeMax = max;
 			Vector3D size = max - min;
 			float mincomp = (float)Math.Min(Math.Min(size.X, size.Y), size.Z);
-			int CoordShift = next_exponent(mincomp) - 1;
+			int CoordShift = next_exponent(mincomp);
 
 			//if (CoordShift > MathUtil.GetNearest2Power((float)MaxRootSize))
 			//	CoordShift = MathUtil.GetNearest2Power((float)MaxRootSize);

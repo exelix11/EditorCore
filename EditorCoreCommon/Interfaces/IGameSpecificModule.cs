@@ -18,7 +18,9 @@ namespace EditorCore.Interfaces
 
 		void RegisterClipBoardExt(ToolStripMenuItem item);
 		void RegisterMenuStripExt(ToolStripMenuItem item);
+		void RegisterMenuExtension(IMenuExtension ext);
 		void LoadLevel(string path);
+		void LoadLevel(ILevel lev);
 
 		void SelectObject(IObjList List, ILevelObj obj);
 		void EditPath(IPathObj path);

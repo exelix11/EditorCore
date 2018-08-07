@@ -21,7 +21,7 @@ namespace KCLExt
 
 		public string ThanksTo => "Gericom for Every File Explorer";
 
-		public Version TargetVersion => throw new NotImplementedException();
+		public Version TargetVersion => new Version(1, 0, 0, 0);
 
 		public bool HasGameModule => false;
 
@@ -69,7 +69,7 @@ namespace KCLExt
 		{
 			OpenFileDialog opn = new OpenFileDialog();
 			if (opn.ShowDialog() != DialogResult.OK) return;
-			var kcl = new KCL(File.ReadAllBytes(opn.FileName));
+			var kcl = new MarioKart.MK7.KCL(File.ReadAllBytes(opn.FileName));
 #if DEBUG
 			using (StreamWriter f = new System.IO.StreamWriter(opn.FileName + ".obj"))
 				kcl.ToOBJ().toWritableObj().WriteObj(f, null);

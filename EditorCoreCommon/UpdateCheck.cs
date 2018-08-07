@@ -19,7 +19,9 @@ namespace EditorCore
 			public int Id { get; protected set; }
 			public string Url { get; protected set; }
 
-			internal GitHubRelease(Octokit.Release release)
+			public int Index { get; protected set; }
+
+			internal GitHubRelease(Octokit.Release release, int index)
 			{
 				CreatedAt = release.CreatedAt;
 				Body = release.Body;
@@ -28,16 +30,15 @@ namespace EditorCore
 				TagName = release.TagName;
 				Id = release.Id;
 				Url = release.Url;
+				Index = index;
 			}
 		}
-
-        public const int ReleaseID = 1;
-
+		
         public static async Task<GitHubRelease> CheckForUpdates(string owner, string name)
         {
-            var githubClient = new Octokit.GitHubClient(new Octokit.ProductHeaderValue("OdysseyEditor"));
-            Octokit.Release ver = await githubClient.Repository.Release.GetLatest("exelix11", "OdysseyEditor");
-			return new GitHubRelease(ver);
+            var githubClient = new Octokit.GitHubClient(new Octokit.ProductHeaderValue("EditorCore"));
+            var ver = await githubClient.Repository.Release.GetAll(owner, name);
+			return new GitHubRelease(ver[ver.Count - 1],ver.Count -1);
         }
     }
 }

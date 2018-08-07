@@ -35,7 +35,6 @@ namespace EditorCore
 			List<ExtensionManifest> extensions = new List<ExtensionManifest>();
 			foreach (string file in ExtDlls)
 			{
-				AppDomain extDomain = AppDomain.CreateDomain(file);
 				System.Reflection.Assembly assembly = System.Reflection.Assembly.LoadFrom(file);
 				foreach (Type type in assembly.GetTypes())
 				{
@@ -57,7 +56,22 @@ namespace EditorCore
 
 			var firstForm = new EditorForm(args, extensions.ToArray());
 			firstForm.Show();
+
+			Timer ApplicationExitCheck = new Timer()
+			{
+				Enabled = true,
+				Interval = 60000,
+			};
+			ApplicationExitCheck.Tick += delegate (object sender, EventArgs e) { CheckForExit(); };
+			ApplicationExitCheck.Start(); //This is needed because closing every form won't close the application
+
 			Application.Run();            
         }
+
+		public static void CheckForExit()
+		{
+			if (Application.OpenForms.Count == 0)
+				Environment.Exit(0);
+		}
     }	
 }

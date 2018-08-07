@@ -17,7 +17,6 @@ namespace EditorCore.Interfaces
 
 		bool HasGameModule { get; } 
 		IMenuExtension MenuExt { get; }
-		IClipboardExtension ClipboardExt { get; }
 		IGameModule GetNewGameModule();
 		IFileHander[] Handlers { get; }
 

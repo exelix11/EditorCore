@@ -16,7 +16,11 @@ namespace MarioKart.MK7
 {
 	public class KCL
 	{
+		KCLModel.KCLModelHeader GlobalHeader;
 		List<KCLModel> Models = new List<KCLModel>();
+
+		internal static readonly Vector3D MinOffset = new Vector3D(50, 80, 50);
+		internal static readonly Vector3D MaxOffset = new Vector3D(50, 50, 50);
 
 		public KCL() { }
 
@@ -68,10 +72,10 @@ namespace MarioKart.MK7
 
 		public byte[] Write(ByteOrder byteOrder)
 		{
-			if (Models.Count != 1) throw new Exception("Exporting KCL with more than one model is not supported");
-			var mod = Models[0];
+			if (Models.Count != 8)
+				throw new Exception("The root octree is not complete");
 
-			var size = mod.Header.OctreeMax - mod.Header.OctreeOrigin;
+			var size = GlobalHeader.OctreeMax - GlobalHeader.OctreeOrigin;
 			int worldLengthExp = KCLOctree.next_exponent(Math.Min(Math.Min(size.X, size.Y), size.Z));
 			var exponents = new Vector3D(
 				KCLOctree.next_exponent(size.X),
@@ -91,48 +95,78 @@ namespace MarioKart.MK7
 				er.ByteOrder = byteOrder;
 				er.Write((UInt32)0x38);
 				er.Write((UInt32)0x58);
-				er.Write((UInt32)1);
-				er.Write(mod.Header.OctreeOrigin);
-				er.Write(mod.Header.OctreeMax);
+				er.Write((UInt32)Models.Count);
+				er.Write(GlobalHeader.OctreeOrigin);
+				er.Write(GlobalHeader.OctreeMax);
 				er.Write((UInt32)CoordinateShift.X);
 				er.Write((UInt32)CoordinateShift.Y);
 				er.Write((UInt32)CoordinateShift.Z);
-				er.Write((UInt32)8);
-				for (int i = 0; i < 8; i++) er.Write((UInt32)0x80000000); //Fake global model octree, supports only one model
-				er.Write((UInt32)0x5C);
-				//Write actual model
-				long HeaderPos = er.BaseStream.Position;
-				mod.Header.Write(er);
-				long curpos = er.BaseStream.Position;
-				//Write vertices array position
-				er.BaseStream.Position = HeaderPos;
-				er.Write((uint)(curpos - HeaderPos));
-				er.BaseStream.Position = curpos;
-				foreach (Vector3D v in mod.Vertices) er.Write(v);
-				er.Align(4);
-				curpos = er.BaseStream.Position;
-				//Write normal array position
-				er.BaseStream.Position = HeaderPos + 4;
-				er.Write((uint)(curpos - HeaderPos));
-				er.BaseStream.Position = curpos;
-				foreach (Vector3D v in mod.Normals) er.Write(v);
-				er.Align(4);
-				curpos = er.BaseStream.Position;
-				//Write Triangles offset
-				er.BaseStream.Position = HeaderPos + 8;
-				er.Write((uint)(curpos - HeaderPos));
-				er.BaseStream.Position = curpos;
-				int planeIndex = 0;
-				foreach (KCLModel.KCLPlane p in mod.Planes) p.Write(er, planeIndex++);
-				curpos = er.BaseStream.Position;
-				//Write Spatial index offset
-				er.BaseStream.Position = HeaderPos + 12;
-				er.Write((uint)(curpos - HeaderPos));
-				er.BaseStream.Position = curpos;
-				mod.Octree.Write(er);
+				er.Write((UInt32)GlobalHeader.Unknown1);
+				List<KCLModel> WriteModels = new List<KCLModel>();
+				uint modelCount = 0;
+				for (int i = 0; i < 8; i++)
+				{
+					if (Models[i] != null)
+					{
+						er.Write((UInt32)(0x80000000 | modelCount));
+						modelCount++;
+						WriteModels.Add(Models[i]);
+					}
+					else
+						er.Write((UInt32)(0xC0000000));
+				}
+				if (modelCount == 0)
+					throw new Exception("No models in the global octree");
+
+				uint ModelListOff = (uint)er.BaseStream.Position;
+				for (int i = 0; i < modelCount; i++) //Update offsets later
+					er.Write((UInt32)0);
+
+				for (int i = 0; i < modelCount; i++)
+				{
+					er.Align(4);
+					uint pos = (uint)er.BaseStream.Position;
+					er.BaseStream.Position = ModelListOff + i * 4;
+					er.Write((UInt32)pos);
+					er.BaseStream.Position = pos;
+					WriteModel(er, WriteModels[i]);
+				}
 
 				return m.ToArray();
 			}
+		}
+
+		static void WriteModel(BinaryDataWriter er, KCLModel mod)
+		{
+			long HeaderPos = er.BaseStream.Position;
+			mod.Header.Write(er);
+			long curpos = er.BaseStream.Position;
+			//Write vertices array position
+			er.BaseStream.Position = HeaderPos;
+			er.Write((uint)(curpos - HeaderPos));
+			er.BaseStream.Position = curpos;
+			foreach (Vector3D v in mod.Vertices) er.Write(v);
+			er.Align(4);
+			curpos = er.BaseStream.Position;
+			//Write normal array position
+			er.BaseStream.Position = HeaderPos + 4;
+			er.Write((uint)(curpos - HeaderPos));
+			er.BaseStream.Position = curpos;
+			foreach (Vector3D v in mod.Normals) er.Write(v);
+			er.Align(4);
+			curpos = er.BaseStream.Position;
+			//Write Triangles offset
+			er.BaseStream.Position = HeaderPos + 8;
+			er.Write((uint)(curpos - HeaderPos));
+			er.BaseStream.Position = curpos;
+
+			foreach (KCLModel.KCLPlane p in mod.Planes) p.Write(er);
+			curpos = er.BaseStream.Position;
+			//Write Spatial index offset
+			er.BaseStream.Position = HeaderPos + 12;
+			er.Write((uint)(curpos - HeaderPos));
+			er.BaseStream.Position = curpos;
+			mod.Octree.Write(er);
 		}
 
 		public static Vector3D NormalAvg(OBJ.Face face) => (face.VA.normal + face.VB.normal + face.VC.normal)/3;
@@ -140,56 +174,70 @@ namespace MarioKart.MK7
 		public static KCL FromOBJ(OBJ o)
 		{
 			KCL res = new KCL();
+			res.GlobalHeader = new KCLModel.KCLModelHeader();
+
+			Vector3D min = new Vector3D(float.MaxValue, float.MaxValue, float.MaxValue);
+			Vector3D max = new Vector3D(float.MinValue, float.MinValue, float.MinValue);
 			
-			List<Vector3D> Vertex = new List<Vector3D>();
-			List<Vector3D> Normals = new List<Vector3D>();
-			List<KCLModel.KCLPlane> planes = new List<KCLModel.KCLPlane>();
 			List<Triangle> Triangles = new List<Triangle>();
 			foreach (var v in o.Faces)
 			{
 				Triangle t = new Triangle(v.VA.pos, v.VB.pos, v.VC.pos);
-				//Vector3D qq = (t.PointB - t.PointA).Cross(t.PointC - t.PointA);
-				//if ((qq.X * qq.X + qq.Y * qq.Y + qq.Z * qq.Z) < 0.01) continue;
-				KCLModel.KCLPlane p = new KCLModel.KCLPlane();
-				p.CollisionType = 0;// Mapping[v.Material];
-				Vector3D a = (t.PointC - t.PointA).Cross(t.Normal);
-				a.Normalize();
-				a = -a;
-				Vector3D b = (t.PointB - t.PointA).Cross(t.Normal);
-				b.Normalize();
-				Vector3D c = (t.PointC - t.PointB).Cross(t.Normal);
-				c.Normalize();
-				p.Length = (t.PointC - t.PointA).Dot(c);
-				int q = ContainsVector3D(t.PointA, Vertex);
-				if (q == -1) { p.VertexIndex = (ushort)Vertex.Count; Vertex.Add(t.PointA); }
-				else p.VertexIndex = (ushort)q;
-				q = ContainsVector3D(t.Normal, Normals);
-				if (q == -1) { p.NormalIndex = (ushort)Normals.Count; Normals.Add(t.Normal); }
-				else p.NormalIndex = (ushort)q;
-				q = ContainsVector3D(a, Normals);
-				if (q == -1) { p.NormalAIndex = (ushort)Normals.Count; Normals.Add(a); }
-				else p.NormalAIndex = (ushort)q;
-				q = ContainsVector3D(b, Normals);
-				if (q == -1) { p.NormalBIndex = (ushort)Normals.Count; Normals.Add(b); }
-				else p.NormalBIndex = (ushort)q;
-				q = ContainsVector3D(c, Normals);
-				if (q == -1) { p.NormalCIndex = (ushort)Normals.Count; Normals.Add(c); }
-				else p.NormalCIndex = (ushort)q;
-				planes.Add(p);
+
+				#region FindMaxMin
+				if (t.PointA.X < min.X) min.X = t.PointA.X;
+				if (t.PointA.Y < min.Y) min.Y = t.PointA.Y;
+				if (t.PointA.Z < min.Z) min.Z = t.PointA.Z;
+				if (t.PointA.X > max.X) max.X = t.PointA.X;
+				if (t.PointA.Y > max.Y) max.Y = t.PointA.Y;
+				if (t.PointA.Z > max.Z) max.Z = t.PointA.Z;
+
+				if (t.PointB.X < min.X) min.X = t.PointB.X;
+				if (t.PointB.Y < min.Y) min.Y = t.PointB.Y;
+				if (t.PointB.Z < min.Z) min.Z = t.PointB.Z;
+				if (t.PointB.X > max.X) max.X = t.PointB.X;
+				if (t.PointB.Y > max.Y) max.Y = t.PointB.Y;
+				if (t.PointB.Z > max.Z) max.Z = t.PointB.Z;
+
+				if (t.PointC.X < min.X) min.X = t.PointC.X;
+				if (t.PointC.Y < min.Y) min.Y = t.PointC.Y;
+				if (t.PointC.Z < min.Z) min.Z = t.PointC.Z;
+				if (t.PointC.X > max.X) max.X = t.PointC.X;
+				if (t.PointC.Y > max.Y) max.Y = t.PointC.Y;
+				if (t.PointC.Z > max.Z) max.Z = t.PointC.Z;
+				#endregion
+				
 				Triangles.Add(t);
 			}
 
-			KCLModel resMod = new KCLModel();
-			resMod.Vertices = Vertex.ToArray();
-			resMod.Normals = Normals.ToArray();
-			resMod.Planes = planes.ToArray();
-			resMod.Header = new KCLModel.KCLModelHeader();
-			resMod.Octree = KCLOctree.FromTriangles(Triangles.ToArray(), resMod.Header, 128, 50);
+			max += KCL.MaxOffset;
+			min -= KCL.MinOffset;
+			res.GlobalHeader.OctreeOrigin = min;
+			res.GlobalHeader.OctreeMax = max;
+			var size = max - min;
+			res.GlobalHeader.CoordShift = (uint)KCLOctree.next_exponent(size.X);
+			res.GlobalHeader.YShift = (uint)KCLOctree.next_exponent(size.Y);
+			res.GlobalHeader.ZShift = (uint)KCLOctree.next_exponent(size.Z);
 
-			resMod.Header.Unknown1 = 40f;
-			resMod.Header.Unknown2 = 0;
+			size /= 2;
+			uint baseTriCount = 0;
+			for (int i = 0; i < 2; i++)
+				for (int j = 0; j < 2; j++)
+					for (int k = 0; k < 2; k++)
+					{
+						var origin = min + new Vector3D(size.X * k, size.Y * j, size.Z * i);
+						int index = k + j * 2 + i * 4;
+						var mod = KCLModel.FromTriangles(Triangles, baseTriCount, origin, size);
+						res.Models.Add(mod);
+						if (mod != null) baseTriCount += (uint)mod.Planes.Length; 
+					}
 
-			res.Models.Add(resMod);
+			res.GlobalHeader.Unknown1 = baseTriCount;
+			//resMod.Vertices = Vertex.ToArray();
+			//resMod.Normals = Normals.ToArray();
+			//resMod.Planes = planes.ToArray();
+			//resMod.Header = new KCLModel.KCLModelHeader();
+			//resMod.Octree = KCLOctree.FromTriangles(Triangles.ToArray(), resMod.Header, 128, 50);			
 
 			return res;
 		}
@@ -274,9 +322,9 @@ namespace MarioKart.MK7
 					NormalBIndex = er.ReadUInt16();
 					NormalCIndex = er.ReadUInt16();
 					CollisionType = er.ReadUInt16();
-					er.ReadUInt32(); //Global plane index
+					TriangleIndex = er.ReadUInt32(); //Global plane index
 				}
-				public void Write(BinaryDataWriter er, int index)
+				public void Write(BinaryDataWriter er)
 				{
 					er.Write(Length);
 					er.Write(VertexIndex);
@@ -285,7 +333,7 @@ namespace MarioKart.MK7
 					er.Write(NormalBIndex);
 					er.Write(NormalCIndex);
 					er.Write(CollisionType);
-					er.Write((UInt32)index);
+					er.Write((UInt32)TriangleIndex);
 				}
 				public Single Length;
 				public UInt16 VertexIndex;
@@ -294,6 +342,7 @@ namespace MarioKart.MK7
 				public UInt16 NormalBIndex;
 				public UInt16 NormalCIndex;
 				public UInt16 CollisionType;
+				public UInt32 TriangleIndex;
 			}
 
 			public KCLOctree Octree;
@@ -328,6 +377,65 @@ namespace MarioKart.MK7
 					});
 				}
 				return o;
+			}
+
+			internal static KCLModel FromTriangles(List<Triangle> triangles, uint baseTriCount, Vector3D origin, Vector3D halfSize)
+			{
+				List<Triangle> modelTri = new List<Triangle>();
+				List<Vector3D> Vertices = new List<Vector3D>();
+				List<Vector3D> Normals = new List<Vector3D>();
+				List<KCLPlane> Planes = new List<KCLPlane>();
+
+				var center = origin + halfSize;
+				for (int i = 0; i < triangles.Count; i++)
+				{
+					if (!KCLExt.KCL.TriangleBoxIntersect.IntersectsBox(triangles[i], center, halfSize)) continue;
+					modelTri.Add(triangles[i]);
+
+					KCLModel.KCLPlane p = new KCLModel.KCLPlane();
+					p.CollisionType = 0;// Mapping[v.Material];
+					Vector3D a = (triangles[i].PointC - triangles[i].PointA).Cross(triangles[i].Normal);
+					a.Normalize();
+					a = -a;
+					Vector3D b = (triangles[i].PointB - triangles[i].PointA).Cross(triangles[i].Normal);
+					b.Normalize();
+					Vector3D c = (triangles[i].PointC - triangles[i].PointB).Cross(triangles[i].Normal);
+					c.Normalize();
+					p.Length = (triangles[i].PointC - triangles[i].PointA).Dot(c);
+					int q = ContainsVector3D(triangles[i].PointA, Vertices);
+					if (q == -1) { p.VertexIndex = (ushort)Vertices.Count; Vertices.Add(triangles[i].PointA); }
+					else p.VertexIndex = (ushort)q;
+					q = ContainsVector3D(triangles[i].Normal, Normals);
+					if (q == -1) { p.NormalIndex = (ushort)Normals.Count; Normals.Add(triangles[i].Normal); }
+					else p.NormalIndex = (ushort)q;
+					q = ContainsVector3D(a, Normals);
+					if (q == -1) { p.NormalAIndex = (ushort)Normals.Count; Normals.Add(a); }
+					else p.NormalAIndex = (ushort)q;
+					q = ContainsVector3D(b, Normals);
+					if (q == -1) { p.NormalBIndex = (ushort)Normals.Count; Normals.Add(b); }
+					else p.NormalBIndex = (ushort)q;
+					q = ContainsVector3D(c, Normals);
+					if (q == -1) { p.NormalCIndex = (ushort)Normals.Count; Normals.Add(c); }
+					else p.NormalCIndex = (ushort)q;
+
+					p.TriangleIndex = baseTriCount + (uint)modelTri.Count -1;
+					Planes.Add(p);
+				}
+				if (modelTri.Count == 0) return null;
+				if (modelTri.Count > 65535) throw new Exception("Too many triangles");
+
+				KCLModel resMod = new KCLModel();
+				resMod.Vertices = Vertices.ToArray();
+				resMod.Normals = Normals.ToArray();
+				if (Planes.Count != modelTri.Count)
+					throw new Exception();
+				resMod.Planes = Planes.ToArray();
+				resMod.Header = new KCLModelHeader();
+				resMod.Octree = KCLOctree.FromTriangles(modelTri.ToArray(), resMod.Header);
+
+				resMod.Header.Unknown1 = 40f; //odyssey values
+				resMod.Header.Unknown2 = 0;
+				return resMod;
 			}
 		}
 			

@@ -43,8 +43,9 @@ namespace EditorCore
 		
         public string GameFolder { get; set; } = "";
         string ModelsFolder = null;
+		string CustomModelsFolder = null;
 
-        public RendererControl render  = new RendererControl();
+		public RendererControl render  = new RendererControl();
 
         public ILevel LoadedLevel { get; set; }
         public CustomStack<IObjList> ListEditingStack { get; set; } = new CustomStack<IObjList>();
@@ -144,20 +145,12 @@ namespace EditorCore
 			foreach (var module in Modules)
 			{
 				if (module.HasGameModule) ExtensionsWithGameModules.Add(module);
-				if (module.ClipboardExt != null)
-				{
-					if (module.ClipboardExt.PasteExtensions != null) RegisterMenuExt(ClipBoardMenu, module.ClipboardExt.PasteExtensions);
-					if (module.ClipboardExt.CopyExtensions != null) RegisterMenuExtIndex(ClipBoardMenu, module.ClipboardExt.PasteExtensions);
-				}
-				if (module.MenuExt != null)
-				{
-					if (module.MenuExt.FileMenuExtensions != null)
-						RegisterMenuExtIndex(FileMenu, module.MenuExt.FileMenuExtensions, FileMenu.DropDownItems.Count - 2); //last items are separator and settings
-					if (module.MenuExt.ToolsMenuExtensions != null)
-						RegisterMenuExtIndex(ToolsMenu, module.MenuExt.ToolsMenuExtensions);
-					if (module.MenuExt.TitleBarExtensions != null)
-						RegisterMenuExtIndex(menuStrip1, module.MenuExt.TitleBarExtensions);
-				}
+				//if (module.ClipboardExt != null)
+				//{
+				//	if (module.ClipboardExt.PasteExtensions != null) RegisterMenuExt(ClipBoardMenu, module.ClipboardExt.PasteExtensions);
+				//	if (module.ClipboardExt.CopyExtensions != null) RegisterMenuExtIndex(ClipBoardMenu, module.ClipboardExt.PasteExtensions);
+				//}
+				RegisterMenuExtension(module.MenuExt);
 			}
 
 			if (selectedModule != null)
@@ -197,6 +190,7 @@ namespace EditorCore
 			}
 
 			ModelsFolder = GameModule.ModelsFolder;
+			CustomModelsFolder = "Custom" + GameModule.ModelsFolder;
 			GameFolder = (string)Properties.Settings.Default[$"{GameModule.ModuleName}_GamePath"];
 
 			IsAddListSupported = GameModule.IsAddListSupported;
@@ -209,6 +203,19 @@ namespace EditorCore
 
 			FileOpenArgs = args;
 
+		}
+
+		public void RegisterMenuExtension(IMenuExtension ext)
+		{
+			if (ext != null)
+			{
+				if (ext.FileMenuExtensions != null)
+					RegisterMenuExtIndex(FileMenu, ext.FileMenuExtensions, FileMenu.DropDownItems.Count - 2); //last items are separator and settings
+				if (ext.ToolsMenuExtensions != null)
+					RegisterMenuExtIndex(ToolsMenu, ext.ToolsMenuExtensions);
+				if (ext.TitleBarExtensions != null)
+					RegisterMenuExtIndex(menuStrip1, ext.TitleBarExtensions, menuStrip1.Items.Count );
+			}
 		}
 
 		public void RegisterClipBoardExt(ToolStripMenuItem item) => ClipBoardMenu.Items.Add(item);
@@ -296,9 +303,13 @@ namespace EditorCore
 
         public void LoadLevel(string path = null)
         {
-            UnloadLevel();
+			LoadLevel(GameModule.LoadLevel(path));
+        }
 
-			LoadedLevel = GameModule.LoadLevel(path);
+		public void LoadLevel(ILevel lev)
+		{
+			UnloadLevel();
+			LoadedLevel = lev;
 			if (LoadedLevel == null) return;
 
 			if (LoadedLevel.LevelFiles != null)
@@ -317,27 +328,27 @@ namespace EditorCore
 				}
 				LevelFilesMenu.DropDownItems.AddRange(Files.ToArray());
 			}
-            //LoadedLevel.OpenBymlViewer();
-            //Load models
-            LoadingForm.ShowLoading(this, "Loading models...\r\nOpening a Level for the first time will take longer");
-            foreach (string k in LoadedLevel.objs.Keys.ToArray())
-            {
-                LoadObjListModels(LoadedLevel.objs[k],k);
-            }
+			//LoadedLevel.OpenBymlViewer();
+			//Load models
+			LoadingForm.ShowLoading(this, "Loading models...\r\nOpening a Level for the first time will take longer");
+			foreach (string k in LoadedLevel.objs.Keys.ToArray())
+			{
+				LoadObjListModels(LoadedLevel.objs[k], k);
+			}
 
 			foreach (string l in GameModule.AutoHideList)
 				if (LoadedLevel.HasList(l)) HideList(LoadedLevel.objs[l], true);
 
 			HideGroup_CB.CheckedChanged += HideGroup_CB_CheckedChanged;
-            //Populate combobox
-            comboBox1.Items.AddRange(LoadedLevel.objs.Keys.ToArray());
-            comboBox1.SelectedIndex = 0;
-            splitContainer2.Enabled = true;
-            FindMenu.Visible = true;
-            saveAsToolStripMenuItem.Enabled = true;
-            saveToolStripMenuItem.Enabled = true;
-            LoadingForm.EndLoading();
-        }
+			//Populate combobox
+			comboBox1.Items.AddRange(LoadedLevel.objs.Keys.ToArray());
+			comboBox1.SelectedIndex = 0;
+			splitContainer2.Enabled = true;
+			FindMenu.Visible = true;
+			saveAsToolStripMenuItem.Enabled = true;
+			saveToolStripMenuItem.Enabled = true;
+			LoadingForm.EndLoading();
+		}
 
         //NewLevel
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
@@ -361,6 +372,12 @@ namespace EditorCore
 			if (NoModels && Debugger.IsAttached)
                 return null;
 #endif
+			if (Properties.Settings.Default.CustomModels)
+			{
+				string name = $"{CustomModelsFolder}\\{ObjName}.obj";
+				if (File.Exists(name)) return name;
+			}
+
 			if (SkipModels?.Contains(ObjName) ?? false) return null;
 
 			string CachedModelPath = $"{ModelsFolder}\\{ObjName}.obj";
@@ -683,10 +700,20 @@ namespace EditorCore
             foreach (var o in list) DeleteObj(o, CurList);
         }
 
-#endregion
+		private void ddmAdd_Click(object sender, EventArgs e)
+		{
+			var obj = GameModule.NewObject();
+			if (obj != null)
+			{
+				obj.ModelView_Pos = render.GetPositionInView();
+				AddObj(obj, CurList);
+			}
+		}
+
+		#endregion
 
 		//Property grid change, listbox, combobox, show/hide
-#region EditorControlsEvents
+		#region EditorControlsEvents
 
 		List<string> PropertyGridGetPath()
 		{
@@ -775,6 +802,15 @@ namespace EditorCore
 
         public void SelectedObjectChanged(object sender, EventArgs e) //ObjectsListBox
         {
+			if (CurList.ReadOnly && SelectionCount != 0)
+			{
+				propertyGrid1.SelectedObject = null;
+				SelectedObj = null;
+				ObjectsListBox.SelectedIndex = -1;
+				Console.Beep();
+				return;
+			}
+
             if (SelectionCount > 1)
             {
                 btnDuplicate.Visible = false;
@@ -940,7 +976,7 @@ namespace EditorCore
 			}
 
 			var obj = render.GetOBJ(sender, e) as ILevelObj;
-			if (obj == null || obj.NotLevel)
+			if (obj == null || obj.ReadOnly)
 			{
 				return;
 			}
@@ -1021,6 +1057,8 @@ namespace EditorCore
 
         public void AddObj(ILevelObj o, IObjList list)
         {
+			if (list.ReadOnly)
+				return;
             AddToUndo((dynamic) => InternalDeleteObj(o, list), "Added object: " + o.ToString());
             InternalAddObj(o, list);
         }
@@ -1038,7 +1076,7 @@ namespace EditorCore
 
         public void DuplicateObj(ILevelObj o, IObjList list)
         {
-            if (o == null) return;
+            if (o == null || list.ReadOnly) return;
             var newobj = (ILevelObj)o.Clone();
             newobj.ID_int = LoadedLevel.HighestID++;
             AddObj(newobj, list);
@@ -1046,8 +1084,8 @@ namespace EditorCore
 
         public void DeleteObj(ILevelObj o, IObjList list)
         {
-            if (o == null) return;
-            AddToUndo((dynamic) =>
+            if (o == null || list.ReadOnly) return;
+			AddToUndo((dynamic) =>
             InternalAddObj(o, list), "Deleted object: " + o.ToString());
             InternalDeleteObj(o, list);
         }
@@ -1132,8 +1170,7 @@ namespace EditorCore
 
 		private void EditorForm_Closed(object sender, FormClosedEventArgs e)
 		{
-			if (Application.OpenForms.Count == 0)
-				Environment.Exit(0);
+			Program.CheckForExit();
 		}
 
         private void btnPaste_Click(object sender, EventArgs e)

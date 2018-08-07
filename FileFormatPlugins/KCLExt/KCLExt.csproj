@@ -63,6 +63,7 @@
     <Compile Include="BinaryDataReaderExtensions.cs" />
     <Compile Include="BinaryDataWriterExtensions.cs" />
     <Compile Include="KCLExt.cs" />
+    <Compile Include="KCL\TriangleBoxIntersect.cs" />
     <Compile Include="MathUtil.cs" />
     <Compile Include="KCL\KCL.cs" />
     <Compile Include="KCL\KCLColors.cs" />
