@@ -12,6 +12,7 @@ BfresLib,BnTxx,ByamlExt and SarcExt can be reused for other Switch games as they
   - Paths rendering
   - Super mario odyssey plugin to edit levels.
   - Mario Kart 8 Deluxe plugin to edit courses.
+  - Captain Toad Treasure Tracker plugin to edit levels.
 
 ## What's missing
   - A native/GPU-accelerated 3D renderer, the current one uses WPF and is kinda laggy
@@ -43,7 +44,7 @@ Q | Switch camera mode
 ## Building
 This repo contains just the editor and its libs, to use it you also need a game module : \
 [Super Mario Odyssey module](https://github.com/exelix11/OdysseyEditor) \
-[Mario Kart 8 Deluxe module](https://github.com/exelix11/MK8DEditor)
+[Mario Kart 8 and Captain Toad modules](https://github.com/exelix11/EditorCore-Examples)
 
 to build you might want to setup the folders the way the visual studio solution is set:
 > (Root EditorCore directory)\
@@ -62,8 +63,8 @@ This way the you should be able to build without issues, you just have to restor
 
 If you add a new project make sure to set it's build path to the Ext folder in the bin directory of EditorCore. The dll name should end with Ext.dll 
 
-To build without using the said folder structure:
-add a game module to the solution, you might get errors with references, restore nuget packages and check they have the right path in each project.
+To build a custom plugin (also applies to CTTT3DSExt) : \
+Reference EditorCoreCommon.dll and the other needed libs in the project and it should compile. If you're using visual studio you can also debug the plugin without the editor soruce code by attaching the debugger to the editor process.
 
 ## Credits
 This editor contains code or libraries from:
