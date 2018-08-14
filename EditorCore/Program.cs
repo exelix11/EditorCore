@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using System.IO;
 using EditorCore.Interfaces;
 using EditorCoreCommon;
+using EditorCore.OtherForms;
 
 namespace EditorCore
 {

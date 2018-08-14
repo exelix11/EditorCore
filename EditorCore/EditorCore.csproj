@@ -43,6 +43,12 @@
     <Reference Include="HelixToolkit.Wpf, Version=2.2.0.0, Culture=neutral, PublicKeyToken=52aa3500039caf0d, processorArchitecture=MSIL">
       <HintPath>..\packages\HelixToolkit.Wpf.2.2.0\lib\net45\HelixToolkit.Wpf.dll</HintPath>
     </Reference>
+    <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <HintPath>..\packages\Lyncee.OpenTK.1.1.1173.43181\lib\OpenTK.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenTK.GLControl, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <HintPath>..\packages\Lyncee.OpenTK.GLControl.1.1.1173.43182\lib\OpenTK.GLControl.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -78,6 +84,15 @@
     <Compile Include="EditorForm.Designer.cs">
       <DependentUpon>EditorForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="OtherForms\EditorForm2.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OtherForms\EditorForm2.Designer.cs">
+      <DependentUpon>EditorForm2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="OtherForms\EditorForm2_GLStuff.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="OtherForms\FrmCredits.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -89,6 +104,12 @@
     </Compile>
     <Compile Include="OtherForms\GameModuleSelect.Designer.cs">
       <DependentUpon>GameModuleSelect.cs</DependentUpon>
+    </Compile>
+    <Compile Include="OtherForms\ViewGL.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="OtherForms\ViewGL.Designer.cs">
+      <DependentUpon>ViewGL.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -103,6 +124,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="EditorForm.resx">
       <DependentUpon>EditorForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OtherForms\EditorForm2.resx">
+      <DependentUpon>EditorForm2.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="OtherForms\FrmCredits.resx">
       <DependentUpon>FrmCredits.cs</DependentUpon>
@@ -123,6 +147,7 @@
     <EmbeddedResource Include="OtherForms\Settings.resx">
       <DependentUpon>Settings.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="OpenTK.dll.config" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
