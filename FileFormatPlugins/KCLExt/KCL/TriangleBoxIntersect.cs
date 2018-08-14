@@ -1,4 +1,5 @@
-﻿using LibEveryFileExplorer._3D;
+﻿using ExtensionMethods;
+using LibEveryFileExplorer._3D;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,166 +9,178 @@ using System.Windows.Media.Media3D;
 
 namespace KCLExt.KCL
 {
-	//from https://gist.github.com/StagPoint/76ae48f5d7ca2f9820748d08e55c9806#file-triangleboxintersect-cs
+	//based on http://fileadmin.cs.lth.se/cs/Personal/Tomas_Akenine-Moller/code/tribox3.txt
 	static class TriangleBoxIntersect
 	{
-		public static bool IntersectsBox(Triangle tri, Vector3D boxCenter, Vector3D boxExtents)
+		private const int X = 0;
+		private const int Y = 1;
+		private const int Z = 2;
+		private static bool planeBoxOverlap(Vector3D normal, Vector3D vert, Vector3D maxbox)    
 		{
-			// Translate triangle as conceptually moving AABB to origin
-			var v0 = (tri.PointA - boxCenter);
-			var v1 = (tri.PointB - boxCenter);
-			var v2 = (tri.PointC - boxCenter);
-
-			// Compute edge vectors for triangle
-			var f0 = (v1 - v0);
-			var f1 = (v2 - v1);
-			var f2 = (v0 - v2);
-
-			#region Test axes a00..a22 (category 3)
-
-			// Test axis a00
-			var a00 = new Vector3D(0, -f0.Z, f0.Y);
-			var p0 = Vector3D.DotProduct(v0, a00);
-			var p1 = Vector3D.DotProduct(v1, a00);
-			var p2 = Vector3D.DotProduct(v2, a00);
-			var r = boxExtents.Y * Math.Abs(f0.Z) + boxExtents.Z * Math.Abs(f0.Y);
-			if (Math.Max(-fmax(p0, p1, p2), fmin(p0, p1, p2)) > r)
+			int q;
+			Vector3D vmin = new Vector3D(), vmax = new Vector3D();
+			float v;
+			for (q = X; q <= Z; q++)
 			{
-				return false;
+				v = vert.Get(q);                    // -NJMP-
+				if (normal.Get(q) > 0.0f)
+				{
+					vmin.Set(q, -maxbox.Get(q) - v);   // -NJMP-
+					vmax.Set(q,  maxbox.Get(q) - v);    // -NJMP-
+				}
+				else
+				{
+					vmin.Set(q, maxbox.Get(q) - v);    // -NJMP-
+					vmax.Set(q, -maxbox.Get(q) - v);   // -NJMP-
+				}
+			}
+			if (normal.Dot(vmin) > 0.0f) return false; // -NJMP-
+			if (normal.Dot(vmax) >= 0.0f) return true;    // -NJMP-
+			return false;
+		}
+
+		public static bool triBoxOverlap(Vector3D boxcenter, Vector3D boxhalfsize, Triangle tri)
+		{
+			/*    use separating axis theorem to test overlap between triangle and box */
+			/*    need to test for overlap in these directions: */
+			/*    1) the {x,y,z}-directions (actually, since we use the AABB of the triangle */
+			/*       we do not even need to test these) */
+			/*    2) normal of the triangle */
+			/*    3) crossproduct(edge from tri, {x,y,z}-directin) */
+			/*       this gives 3x3=9 more tests */
+			Vector3D v0, v1, v2;
+			//   float axis[3];
+			double min, max, p0, p1, p2, rad, fex, fey, fez;     // -NJMP- "d" local variable removed
+			Vector3D normal, e0, e1, e2;
+
+			bool AXISTEST_X01(double a, double b, double fa, double fb)
+			{
+				p0 = (a * v0.Y - b * v0.Z);
+				p2 = (a * v2.Y - b * v2.Z);
+				if (p0 < p2) { min = p0; max = p2; } else { min = p2; max = p0; }
+				rad = (fa * boxhalfsize.Y + fb * boxhalfsize.Z);
+				if (min > rad || max < -rad) return false;
+				return true;
 			}
 
-			// Test axis a01
-			var a01 = new Vector3D(0, -f1.Z, f1.Y);
-			p0 = Vector3D.DotProduct(v0, a01);
-			p1 = Vector3D.DotProduct(v1, a01);
-			p2 = Vector3D.DotProduct(v2, a01);
-			r = boxExtents.Y * Math.Abs(f1.Z) + boxExtents.Z * Math.Abs(f1.Y);
-			if (Math.Max(-fmax(p0, p1, p2), fmin(p0, p1, p2)) > r)
+			bool AXISTEST_Y02(double a, double b, double fa, double fb)
 			{
-				return false;
+				p0 = -a * v0.X + b * v0.Z;
+				p2 = -a * v2.X + b * v2.Z;
+				if (p0 < p2) { min = p0; max = p2; } else { min = p2; max = p0; }
+				rad = fa * boxhalfsize.X + fb * boxhalfsize.Z;
+				if (min > rad || max < -rad) return false;
+				return true;
 			}
 
-			// Test axis a02
-			var a02 = new Vector3D(0, -f2.Z, f2.Y);
-			p0 = Vector3D.DotProduct(v0, a02);
-			p1 = Vector3D.DotProduct(v1, a02);
-			p2 = Vector3D.DotProduct(v2, a02);
-			r = boxExtents.Y * Math.Abs(f2.Z) + boxExtents.Z * Math.Abs(f2.Y);
-			if (Math.Max(-fmax(p0, p1, p2), fmin(p0, p1, p2)) > r)
+			bool AXISTEST_Z12(double a, double b, double fa, double fb)
 			{
-				return false;
+				p1 = a * v1.X - b * v1.Y;
+				p2 = a * v2.X - b * v2.Y;
+				if (p2 < p1) { min = p2; max = p1; } else { min = p1; max = p2; }
+				rad = fa * boxhalfsize.X + fb * boxhalfsize.Y;
+				return min <= rad && max >= -rad;
 			}
 
-			// Test axis a10
-			var a10 = new Vector3D(f0.Z, 0, -f0.X);
-			p0 = Vector3D.DotProduct(v0, a10);
-			p1 = Vector3D.DotProduct(v1, a10);
-			p2 = Vector3D.DotProduct(v2, a10);
-			r = boxExtents.X * Math.Abs(f0.Z) + boxExtents.Z * Math.Abs(f0.X);
-			if (Math.Max(-fmax(p0, p1, p2), fmin(p0, p1, p2)) > r)
+			bool AXISTEST_Z0(double a, double b, double fa, double fb)
 			{
-				return false;
+				p0 = a * v0.X - b * v0.Y;
+				p1 = a * v1.X - b * v1.Y;
+				if (p0 < p1) { min = p0; max = p1; } else { min = p1; max = p0; }
+				rad = fa * boxhalfsize.X + fb * boxhalfsize.Y;
+				if (min > rad || max < -rad) return false;
+				return true;
 			}
 
-			// Test axis a11
-			var a11 = new Vector3D(f1.Z, 0, -f1.X);
-			p0 = Vector3D.DotProduct(v0, a11);
-			p1 = Vector3D.DotProduct(v1, a11);
-			p2 = Vector3D.DotProduct(v2, a11);
-			r = boxExtents.X * Math.Abs(f1.Z) + boxExtents.Z * Math.Abs(f1.X);
-			if (Math.Max(-fmax(p0, p1, p2), fmin(p0, p1, p2)) > r)
+			bool AXISTEST_X2(double a, double b, double fa, double fb)
 			{
-				return false;
+				p0 = a * v0.Y - b * v0.Z;
+				p1 = a * v1.Y - b * v1.Z;
+				if (p0 < p1) { min = p0; max = p1; } else { min = p1; max = p0; }
+				rad = fa * boxhalfsize.Y + fb * boxhalfsize.Z;
+				if (min > rad || max < -rad) return false;
+				return true;
 			}
 
-			// Test axis a12
-			var a12 = new Vector3D(f2.Z, 0, -f2.X);
-			p0 = Vector3D.DotProduct(v0, a12);
-			p1 = Vector3D.DotProduct(v1, a12);
-			p2 = Vector3D.DotProduct(v2, a12);
-			r = boxExtents.X * Math.Abs(f2.Z) + boxExtents.Z * Math.Abs(f2.X);
-			if (Math.Max(-fmax(p0, p1, p2), fmin(p0, p1, p2)) > r)
+			bool AXISTEST_Y1(double a, double b, double fa, double fb)
 			{
-				return false;
+				p0 = -a * v0.X + b * v0.Z;
+				p1 = -a * v1.X + b * v1.Z;
+				if (p0 < p1) { min = p0; max = p1; } else { min = p1; max = p0; }
+				rad = fa * boxhalfsize.X + fb * boxhalfsize.Z;
+				if (min > rad || max < -rad) return false;
+				return true;
 			}
 
-			// Test axis a20
-			var a20 = new Vector3D(-f0.Y, f0.X, 0);
-			p0 = Vector3D.DotProduct(v0, a20);
-			p1 = Vector3D.DotProduct(v1, a20);
-			p2 = Vector3D.DotProduct(v2, a20);
-			r = boxExtents.X * Math.Abs(f0.Y) + boxExtents.Y * Math.Abs(f0.X);
-			if (Math.Max(-fmax(p0, p1, p2), fmin(p0, p1, p2)) > r)
+			/* This is the fastest branch on Sun */
+
+			/* move everything so that the boxcenter is in (0,0,0) */
+			v0 = tri.PointA - boxcenter;
+			v1 = tri.PointB - boxcenter;
+			v2 = tri.PointC - boxcenter;
+			/* compute triangle edges */
+			e0 = v1 - v0;
+			e1 = v2 - v1;
+			e2 = v0 - v2;
+			/* Bullet 3:  */
+			/*  test the 9 tests first (this was faster) */
+			fex = Math.Abs((float)e0.X);
+			fey = Math.Abs((float)e0.Y);
+			fez = Math.Abs((float)e0.Z);
+
+			if (!AXISTEST_X01((float)e0.Z, (float)e0.Y, fez, fey)) return false;
+			if (!AXISTEST_Y02(e0.Z, e0.X, fez, fex)) return false;
+			if (!AXISTEST_Z12(e0.Y, e0.X, fey, fex)) return false;
+
+			fex = Math.Abs(e1.X);
+			fey = Math.Abs(e1.Y);
+			fez = Math.Abs(e1.Z);
+			if (!AXISTEST_X01(e1.Z, e1.Y, fez, fey)) return false;
+			if (!AXISTEST_Y02(e1.Z, e1.X, fez, fex)) return false;
+			if (!AXISTEST_Z0(e1.Y, e1.X, fey, fex)) return false;
+
+			fex = Math.Abs(e2.X);
+			fey = Math.Abs(e2.Y);
+			fez = Math.Abs(e2.Z);
+			if (!AXISTEST_X2(e2.Z, e2.Y, fez, fey)) return false;
+			if (!AXISTEST_Y1(e2.Z, e2.X, fez, fex)) return false;
+			if (!AXISTEST_Z12(e2.Y, e2.X, fey, fex)) return false;
+
+			/* Bullet 1: */
+			/*  first test overlap in the {x,y,z}-directions */
+			/*  find min, max of the triangle each direction, and test for overlap in */
+			/*  that direction -- this is equivalent to testing a minimal AABB around */
+			/*  the triangle against the AABB */
+			/* test in X-direction */
+
+			void FINDMINMAX(double x0, double x1, double x2, out double m_min,out double m_max)
 			{
-				return false;
+				m_min = m_max = x0;
+				if (x1 < m_min) m_min = x1;
+				if (x1 > m_max) m_max = x1;
+				if (x2 < m_min) m_min = x2;
+				if (x2 > m_max) m_max = x2;
 			}
 
-			// Test axis a21
-			var a21 = new Vector3D(-f1.Y, f1.X, 0);
-			p0 = Vector3D.DotProduct(v0, a21);
-			p1 = Vector3D.DotProduct(v1, a21);
-			p2 = Vector3D.DotProduct(v2, a21);
-			r = boxExtents.X * Math.Abs(f1.Y) + boxExtents.Y * Math.Abs(f1.X);
-			if (Math.Max(-fmax(p0, p1, p2), fmin(p0, p1, p2)) > r)
-			{
-				return false;
-			}
+			FINDMINMAX(v0.X, v1.X, v2.X, out min, out max);
+			if (min > boxhalfsize.X || max < -boxhalfsize.X) return false;
 
-			// Test axis a22
-			var a22 = new Vector3D(-f2.Y, f2.X, 0);
-			p0 = Vector3D.DotProduct(v0, a22);
-			p1 = Vector3D.DotProduct(v1, a22);
-			p2 = Vector3D.DotProduct(v2, a22);
-			r = boxExtents.X * Math.Abs(f2.Y) + boxExtents.Y * Math.Abs(f2.X);
-			if (Math.Max(-fmax(p0, p1, p2), fmin(p0, p1, p2)) > r)
-			{
-				return false;
-			}
+			/* test in Y-direction */
 
-			#endregion
+			FINDMINMAX(v0.Y, v1.Y, v2.Y, out min, out max);
+			if (min > boxhalfsize.Y || max < -boxhalfsize.Y) return false;
 
-			#region Test the three axes corresponding to the face normals of AABB b (category 1)
+			/* test in Z-direction */
+			FINDMINMAX(v0.Z, v1.Z, v2.Z, out min, out max);
+			if (min > boxhalfsize.Z || max < -boxhalfsize.Z) return false;
 
-			// Exit if...
-			// ... [-extents.X, extents.X] and [min(v0.X,v1.X,v2.X), max(v0.X,v1.X,v2.X)] do not overlap
-			if (fmax(v0.X, v1.X, v2.X) < -boxExtents.X || fmin(v0.X, v1.X, v2.X) > boxExtents.X)
-			{
-				return false;
-			}
-
-			// ... [-extents.Y, extents.Y] and [min(v0.Y,v1.Y,v2.Y), max(v0.Y,v1.Y,v2.Y)] do not overlap
-			if (fmax(v0.Y, v1.Y, v2.Y) < -boxExtents.Y || fmin(v0.Y, v1.Y, v2.Y) > boxExtents.Y)
-			{
-				return false;
-			}
-
-			// ... [-extents.Z, extents.Z] and [min(v0.Z,v1.Z,v2.Z), max(v0.Z,v1.Z,v2.Z)] do not overlap
-			if (fmax(v0.Z, v1.Z, v2.Z) < -boxExtents.Z || fmin(v0.Z, v1.Z, v2.Z) > boxExtents.Z)
-			{
-				return false;
-			}
-
-			#endregion
-
-			#region Test separating axis corresponding to triangle face normal (category 2)
-
-			var planeNormal = Vector3D.CrossProduct(f0, f1);
-			var planeDistance = Vector3D.DotProduct(planeNormal, v0);
-
-			// Compute the projection interval radius of b onto L(t) = b.c + t * p.n
-			r = boxExtents.X * Math.Abs(planeNormal.X)
-				+ boxExtents.Y * Math.Abs(planeNormal.Y)
-				+ boxExtents.Z * Math.Abs(planeNormal.Z);
-
-			// Intersection occurs when plane distance falls within [-r,+r] interval
-			if (planeDistance > r)
-			{
-				return false;
-			}
-
-			#endregion
-
-			return true;
+			/* Bulet 2: */
+			/*  test if the box intersects the plane of the triangle */
+			/*  compute plane equation of triangle: normal*x+d=0 */
+			normal = e0.Cross(e1);
+			// -NJMP- (line removed here)
+			if (!planeBoxOverlap(normal, v0, boxhalfsize)) return false;    // -NJMP-
+			return true;   /* box and triangle overlaps */
 		}
 
 		private static float fmin(double a, double b, double c)

@@ -25,9 +25,7 @@ namespace LibEveryFileExplorer._3D
 		{
 			get
 			{
-				Vector3D faceNormal = (PointB - PointA).Cross(PointC - PointA);
-				faceNormal.Normalize();
-				return faceNormal;
+				return (PointB - PointA).Cross(PointC - PointA).GetNormalize();
 			}
 		}
 	}

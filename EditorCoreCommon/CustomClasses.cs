@@ -286,6 +286,42 @@ namespace ExtensionMethods
 		public static float Dot(this Vector3D v, Vector3D v2) => (float)Vector3D.DotProduct(v, v2);
 		public static Vector3D Cross(this Vector3D v, Vector3D v2) => Vector3D.CrossProduct(v, v2);
 
+		public static float Get(this Vector3D v, int id)
+		{
+			switch (id)
+			{
+				case 0:
+					return (float)v.X;
+				case 1:
+					return (float)v.Y;
+				case 2:
+					return (float)v.Z;
+			}
+			throw new Exception();
+		}
+
+		public static void Set(this Vector3D v, int id, double val)
+		{
+			switch (id)
+			{
+				case 0:
+					v.X = val;
+					return;
+				case 1:
+					v.Y = val; return;
+				case 2:
+					v.Z = val; return;
+			}
+			throw new Exception();
+		}
+
+		public static Vector3D GetNormalize(this Vector3D v)
+		{
+			var vv = v;
+			vv.Normalize();
+			return vv;
+		}
+
 		public static bool Matches(this byte[] arr, string magic) =>
 			arr.Matches(0,magic.ToCharArray());
 		public static bool Matches(this byte[] arr, uint startIndex, string magic) =>

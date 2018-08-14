@@ -24,76 +24,77 @@ namespace MarioKart
 			}
 		}
 
-		//public void Write(BinaryDataWriter er)
-		//{
-		//	long basepos = er.BaseStream.Position;
-		//	Queue<uint> NodeBaseOffsets = new Queue<uint>();
-		//	Queue<KCLOctreeNode> Nodes = new Queue<KCLOctreeNode>();
-		//	foreach (var v in RootNodes)
-		//	{
-		//		NodeBaseOffsets.Enqueue(0);
-		//		Nodes.Enqueue(v);
-		//	}
-		//	uint offs = (uint)(RootNodes.Length * 4);
-		//	while (Nodes.Count > 0)
-		//	{
-		//		KCLOctreeNode n = Nodes.Dequeue();
-		//		if (n.IsLeaf)
-		//		{
-		//			NodeBaseOffsets.Dequeue();
-		//			er.Write((uint)0);
-		//		}
-		//		else
-		//		{
-		//			n.DataOffset = offs - NodeBaseOffsets.Dequeue();
-		//			er.Write(n.DataOffset);
-		//			foreach (var v in n.SubNodes)
-		//			{
-		//				NodeBaseOffsets.Enqueue(offs);
-		//				Nodes.Enqueue(v);
-		//			}
-		//			offs += 8 * 4;
-		//		}
-		//	}
-		//	foreach (var v in RootNodes)
-		//	{
-		//		NodeBaseOffsets.Enqueue(0);
-		//		Nodes.Enqueue(v);
-		//	}
-		//	long leafstartpos = er.BaseStream.Position;
-		//	uint relleafstartpos = offs;
-		//	er.BaseStream.Position = basepos;
-		//	offs = (uint)(RootNodes.Length * 4);
-		//	while (Nodes.Count > 0)
-		//	{
-		//		KCLOctreeNode n = Nodes.Dequeue();
-		//		if (n.IsLeaf)
-		//		{
-		//			er.Write((uint)(0x80000000 | (relleafstartpos - NodeBaseOffsets.Dequeue() - 2)));
-		//			long curpos = er.BaseStream.Position;
-		//			er.BaseStream.Position = leafstartpos;
-		//			foreach (var v in n.Triangles)
-		//			{
-		//				er.Write((ushort)(v));
-		//			}
-		//			er.Write((ushort)0xFFFF);
-		//			relleafstartpos += (uint)(n.Triangles.Length * 2) + 2;
-		//			leafstartpos = er.BaseStream.Position;
-		//			er.BaseStream.Position = curpos;
-		//		}
-		//		else
-		//		{
-		//			er.BaseStream.Position += 4;
-		//			NodeBaseOffsets.Dequeue();
-		//			foreach (var v in n.SubNodes)
-		//			{
-		//				NodeBaseOffsets.Enqueue(offs);
-		//				Nodes.Enqueue(v);
-		//			}
-		//			offs += 8 * 4;
-		//		}
-		//	}
-		//}
+		public void Write(BinaryDataWriter er)
+		{
+			long basepos = er.BaseStream.Position;
+			Queue<uint> NodeBaseOffsets = new Queue<uint>();
+			Queue<KCLOctreeNode> Nodes = new Queue<KCLOctreeNode>();
+			foreach (var v in RootNodes)
+			{
+				NodeBaseOffsets.Enqueue(0);
+				Nodes.Enqueue(v);
+			}
+			uint offs = (uint)(RootNodes.Length * 4);
+			while (Nodes.Count > 0)
+			{
+				KCLOctreeNode n = Nodes.Dequeue();
+				if (n.IsLeaf)
+				{
+					NodeBaseOffsets.Dequeue();
+					er.Write((uint)0);
+				}
+				else
+				{
+					n.DataOffset = offs - NodeBaseOffsets.Dequeue();
+					er.Write(n.DataOffset);
+					foreach (var v in n.SubNodes)
+					{
+						NodeBaseOffsets.Enqueue(offs);
+						Nodes.Enqueue(v);
+					}
+					offs += 8 * 4;
+				}
+			}
+			foreach (var v in RootNodes)
+			{
+				NodeBaseOffsets.Enqueue(0);
+				Nodes.Enqueue(v);
+			}
+			long leafstartpos = er.BaseStream.Position;
+			uint relleafstartpos = offs;
+			er.BaseStream.Position = basepos;
+			offs = (uint)(RootNodes.Length * 4);
+			while (Nodes.Count > 0)
+			{
+				KCLOctreeNode n = Nodes.Dequeue();
+				if (n.IsLeaf)
+				{
+					er.Write((uint)(0x80000000 | (relleafstartpos - NodeBaseOffsets.Dequeue() - 2)));
+					long curpos = er.BaseStream.Position;
+					er.BaseStream.Position = leafstartpos;
+					foreach (var v in n.Triangles)
+					{
+						er.Write((ushort)(v));
+					}
+					er.Write((ushort)0xFFFF);
+					relleafstartpos += (uint)(n.Triangles.Length * 2) + 2;
+					leafstartpos = er.BaseStream.Position;
+					er.BaseStream.Position = curpos;
+				}
+				else
+				{
+					er.BaseStream.Position += 4;
+					NodeBaseOffsets.Dequeue();
+					foreach (var v in n.SubNodes)
+					{
+						NodeBaseOffsets.Enqueue(offs);
+						Nodes.Enqueue(v);
+					}
+					offs += 8 * 4;
+				}
+			}
+			er.Position = (int)er.BaseStream.Length;
+		}
 
 		static int GetNodeCount(KCLOctreeNode[] nodes)
 		{
@@ -106,69 +107,69 @@ namespace MarioKart
 			return count;
 		}
 
-		public void Write(BinaryDataWriter er)
-		{
-			long basepos = er.BaseStream.Position;
-			int emptyListPos = GetNodeCount(RootNodes) * sizeof(uint);
-			int triangleListPos = emptyListPos + sizeof(ushort);
-			Queue<KCLOctreeNode[]> queuedNodes = new Queue<KCLOctreeNode[]>();
-			queuedNodes.Enqueue(RootNodes);
-			while (queuedNodes.Count > 0)
-			{
-				KCLOctreeNode[] nodes = queuedNodes.Dequeue();
-				long offset = er.Position - basepos;
-				foreach (KCLOctreeNode node in nodes)
-				{
-					uint key;
-					if (node.IsLeaf)
-					{
-						// Node is a leaf and points to triangle index list.
-						int listPos;
-						if (node.Triangles.Length == 0)
-						{
-							listPos = emptyListPos;
-						}
-						else
-						{
-							listPos = triangleListPos;
-							triangleListPos += (node.Triangles.Length + 1) * sizeof(ushort);
-						}
-						key = 0x80000000u | (uint)(listPos - offset - sizeof(ushort));
-					}
-					else
-					{
-						// Node is a branch and points to 8 children.
-						key = (uint)(nodes.Length + queuedNodes.Count * 8) * sizeof(uint);
-						queuedNodes.Enqueue(node.SubNodes);
-					}
-					er.Write(key);
-				}
-			}
-			// Iterate through the nodes again and write their triangle lists now.
-			er.Write((ushort)0xFFFF); // Terminator for all empty lists.
-			queuedNodes.Enqueue(RootNodes);
-			while (queuedNodes.Count > 0)
-			{
-				KCLOctreeNode[] nodes = queuedNodes.Dequeue();
-				foreach (KCLOctreeNode node in nodes)
-				{
-					if (node.IsLeaf)
-					{
-						if (node.Triangles.Length > 0)
-						{
-							// Node is a leaf and points to triangle index list.
-							er.Write(node.Triangles);
-							er.Write((ushort)0xFFFF);
-						}
-					}
-					else
-					{
-						// Node is a branch and points to 8 children.
-						queuedNodes.Enqueue(node.SubNodes);
-					}
-				}
-			}
-		}
+		//public void Write(BinaryDataWriter er)
+		//{
+		//	long basepos = er.BaseStream.Position;
+		//	int emptyListPos = GetNodeCount(RootNodes) * sizeof(uint);
+		//	int triangleListPos = emptyListPos + sizeof(ushort);
+		//	Queue<KCLOctreeNode[]> queuedNodes = new Queue<KCLOctreeNode[]>();
+		//	queuedNodes.Enqueue(RootNodes);
+		//	while (queuedNodes.Count > 0)
+		//	{
+		//		KCLOctreeNode[] nodes = queuedNodes.Dequeue();
+		//		long offset = er.Position - basepos;
+		//		foreach (KCLOctreeNode node in nodes)
+		//		{
+		//			uint key;
+		//			if (node.IsLeaf)
+		//			{
+		//				// Node is a leaf and points to triangle index list.
+		//				int listPos;
+		//				if (node.Triangles.Length == 0)
+		//				{
+		//					listPos = emptyListPos;
+		//				}
+		//				else
+		//				{
+		//					listPos = triangleListPos;
+		//					triangleListPos += (node.Triangles.Length + 1) * sizeof(ushort);
+		//				}
+		//				key = 0x80000000u | (uint)(listPos - offset - sizeof(ushort));
+		//			}
+		//			else
+		//			{
+		//				// Node is a branch and points to 8 children.
+		//				key = (uint)(nodes.Length + queuedNodes.Count * 8) * sizeof(uint);
+		//				queuedNodes.Enqueue(node.SubNodes);
+		//			}
+		//			er.Write(key);
+		//		}
+		//	}
+		//	// Iterate through the nodes again and write their triangle lists now.
+		//	er.Write((ushort)0xFFFF); // Terminator for all empty lists.
+		//	queuedNodes.Enqueue(RootNodes);
+		//	while (queuedNodes.Count > 0)
+		//	{
+		//		KCLOctreeNode[] nodes = queuedNodes.Dequeue();
+		//		foreach (KCLOctreeNode node in nodes)
+		//		{
+		//			if (node.IsLeaf)
+		//			{
+		//				if (node.Triangles.Length > 0)
+		//				{
+		//					// Node is a leaf and points to triangle index list.
+		//					er.Write(node.Triangles);
+		//					er.Write((ushort)0xFFFF);
+		//				}
+		//			}
+		//			else
+		//			{
+		//				// Node is a branch and points to 8 children.
+		//				queuedNodes.Enqueue(node.SubNodes);
+		//			}
+		//		}
+		//	}
+		//}
 
 
 		public KCLOctreeNode[] RootNodes;
@@ -366,7 +367,7 @@ namespace MarioKart
 				{
 					for (int x = 0; x < NrX; x++)
 					{
-						Vector3D pos = min + ((float)cubesize)/2 * new Vector3D(x, y, z);
+						Vector3D pos = min + ((float)cubesize) * new Vector3D(x, y, z);
 						k.RootNodes[i] = KCLOctreeNode.Generate(tt, pos, cubesize, MaxNrTris, MinCubeSize);
 						i++;
 					}

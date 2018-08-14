@@ -172,7 +172,7 @@ namespace EditorCore.Common
 				}
 			}
 
-			public bool Equals(Face other) => VA == other.VA && VB == other.VB && VC == other.VB && Mat == other.Mat;
+			public bool Equals(Face other) => VA == other.VA && VB == other.VB && VC == other.VB;// && Mat == other.Mat;
 			public override bool Equals(object other) => other is Face ? this.Equals((Face)other) : false;
 			public static bool operator ==(Face c1, Face c2) => c1.Equals(c2);
 			public static bool operator !=(Face c1, Face c2) => !c1.Equals(c2);
@@ -253,6 +253,7 @@ namespace EditorCore.Common
 			foreach (var mat in other.Materials)
 				if (!HasMaterial(mat.Name))
 					Materials.Add(mat);
+			//TODO: Proper obj merging/exporting;
 			Faces.AddRange(other.Faces);
 		}
 	}
