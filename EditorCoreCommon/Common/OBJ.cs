@@ -278,6 +278,18 @@ namespace EditorCore.Common
 			using (StreamWriter f = new System.IO.StreamWriter(FileName + ".mtl"))
 				WriteMtl(f);
 		}
+		
+		public void WriteObj(string FileName, string mtlLibName)
+		{
+			using (StreamWriter f = new System.IO.StreamWriter(FileName))
+				WriteObj(f, Path.GetFileName(FileName + ".mtl"));
+
+			if (mtlLibName != null)
+			{
+				using (StreamWriter f = new System.IO.StreamWriter(mtlLibName))
+					WriteMtl(f);
+			}
+		}
 
 		public void WriteObj(StreamWriter s, string mtlLibName)
 		{

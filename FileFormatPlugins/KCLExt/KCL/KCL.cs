@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Drawing;
 using System.IO;
 using Syroot.BinaryData;
-using System.Numerics;
 using Syroot.NintenTools.MarioKart8.IO;
 using EditorCore.Common;
 using LibEveryFileExplorer._3D;
@@ -19,8 +15,8 @@ namespace MarioKart.MK7
 		KCLModel.KCLModelHeader GlobalHeader;
 		List<KCLModel> Models = new List<KCLModel>();
 
-		internal static readonly Vector3D MinOffset = new Vector3D(50, 80, 50);
-		internal static readonly Vector3D MaxOffset = new Vector3D(50, 50, 50);
+		internal static readonly Vector3D MinOffset = new Vector3D(1,1,1);//7new Vector3D(50, 80, 50);
+		internal static readonly Vector3D MaxOffset = new Vector3D(1,1,1);// new Vector3D(50, 50, 50);
 
 		public KCL() { }
 
@@ -65,6 +61,41 @@ namespace MarioKart.MK7
 					((~mod.Header.YMask >> (int)mod.Header.CoordShift) + 1) *
 					((~mod.Header.ZMask >> (int)mod.Header.CoordShift) + 1));
 				mod.Octree = new KCLOctree(er, nodes);
+				
+				//Generate a mesh from the octree
+				//List<OBJ.Face> OctreeNodeToMesh(KCLOctree.KCLOctreeNode node)
+				//{
+				//	List<OBJ.Face> res = new List<OBJ.Face>();
+				//	if (node.IsLeaf)
+				//	{
+				//		foreach (var tr in node.Triangles)
+				//		{
+				//			var t = mod.GetTriangle(mod.Planes[tr]);
+				//			res.Add(new OBJ.Face()
+				//			{
+				//				VA = new OBJ.Vertex(t.PointA, t.Normal),
+				//				VB = new OBJ.Vertex(t.PointB, t.Normal),
+				//				VC = new OBJ.Vertex(t.PointC, t.Normal),
+				//			});
+				//		}
+				//	}
+				//	else
+				//	{
+				//		for (int i = 0; i < node.SubNodes.Length; i++)
+				//			res.AddRange(OctreeNodeToMesh(node.SubNodes[i]));
+				//	}
+				//	return res;
+				//}
+
+				//var o = new OBJ();
+				//for (int i = 0; i < mod.Octree.RootNodes.Length; i++)
+				//{
+				//	var planes = OctreeNodeToMesh(mod.Octree.RootNodes[i]);
+				//	if (planes.Count == 0) continue;
+				//	o.Faces.AddRange(planes);
+				//}
+
+				//o.toWritableObj().WriteObj($"F:\\oct{ModelIndex}.obj", null);
 
 				Models.Add(mod);
 			}
@@ -76,15 +107,6 @@ namespace MarioKart.MK7
 				throw new Exception("The root octree is not complete");
 
 			var size = GlobalHeader.OctreeMax - GlobalHeader.OctreeOrigin;
-			int worldLengthExp = KCLOctree.next_exponent(Math.Min(Math.Min(size.X, size.Y), size.Z));
-			var exponents = new Vector3D(
-				KCLOctree.next_exponent(size.X),
-				KCLOctree.next_exponent(size.Y),
-				KCLOctree.next_exponent(size.Z));
-			var CoordinateShift = new Vector3D(
-				(float)KCLOctree.next_exponent(size.X),	//worldLengthExp,
-				(float)KCLOctree.next_exponent(size.Y),	//exponents.X - worldLengthExp,
-				(float)KCLOctree.next_exponent(size.Z));//exponents.X - worldLengthExp + exponents.Y - worldLengthExp);
 
 			using (MemoryStream m = new MemoryStream())
 			{
@@ -98,9 +120,9 @@ namespace MarioKart.MK7
 				er.Write((UInt32)Models.Count);
 				er.Write(GlobalHeader.OctreeOrigin);
 				er.Write(GlobalHeader.OctreeMax);
-				er.Write((UInt32)CoordinateShift.X);
-				er.Write((UInt32)CoordinateShift.Y);
-				er.Write((UInt32)CoordinateShift.Z);
+				er.Write((UInt32)GlobalHeader.CoordShift);
+				er.Write((UInt32)GlobalHeader.YShift);
+				er.Write((UInt32)GlobalHeader.ZShift);
 				er.Write((UInt32)GlobalHeader.Unknown1);
 				List<KCLModel> WriteModels = new List<KCLModel>();
 				uint modelCount = 0;
@@ -215,6 +237,7 @@ namespace MarioKart.MK7
 			res.GlobalHeader.OctreeOrigin = min;
 			res.GlobalHeader.OctreeMax = max;
 			var size = max - min;
+			
 			res.GlobalHeader.CoordShift = (uint)KCLOctree.next_exponent(size.X);
 			res.GlobalHeader.YShift = (uint)KCLOctree.next_exponent(size.Y);
 			res.GlobalHeader.ZShift = (uint)KCLOctree.next_exponent(size.Z);
@@ -267,12 +290,12 @@ namespace MarioKart.MK7
 		public OBJ ToOBJ()
 		{
 			//Debug only: export the models in different files
-			int count = 0;
-			foreach (var model in Models)
-			{
-				using (StreamWriter f = new System.IO.StreamWriter("F:\\m1" + (count++).ToString() + ".obj"))
-					model.ToOBJ().toWritableObj().WriteObj(f, null);
-			}
+			//int count = 0;
+			//foreach (var model in Models)
+			//{
+			//	using (StreamWriter f = new System.IO.StreamWriter("F:\\m1" + (count++).ToString() + ".obj"))
+			//		model.ToOBJ().toWritableObj().WriteObj(f, null);
+			//}
 			//return null;
 			var res = new OBJ();
 			foreach (var model in Models) res.Merge(model.ToOBJ());
