@@ -34,7 +34,6 @@
 			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
 			this.ObjectListPanel = new System.Windows.Forms.Panel();
 			this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-			this.ddmAdd = new System.Windows.Forms.ToolStripButton();
 			this.btnCopy = new System.Windows.Forms.ToolStripButton();
 			this.btnPaste = new System.Windows.Forms.ToolStripButton();
 			this.btnDuplicate = new System.Windows.Forms.ToolStripButton();
@@ -95,6 +94,7 @@
 			this.ObjectRightClickMenu_CopyScale = new System.Windows.Forms.ToolStripMenuItem();
 			this.ObjectRightClickMenu_PasteTransform = new System.Windows.Forms.ToolStripMenuItem();
 			this.ObjectRightClickMenu_Hide = new System.Windows.Forms.ToolStripMenuItem();
+			this.ddmAdd = new System.Windows.Forms.ToolStripButton();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
 			this.splitContainer1.Panel1.SuspendLayout();
 			this.splitContainer1.Panel2.SuspendLayout();
@@ -179,16 +179,6 @@
 			this.toolStrip1.Size = new System.Drawing.Size(263, 44);
 			this.toolStrip1.TabIndex = 22;
 			this.toolStrip1.Text = "toolStrip1";
-			// 
-			// ddmAdd
-			// 
-			this.ddmAdd.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-			this.ddmAdd.Image = ((System.Drawing.Image)(resources.GetObject("ddmAdd.Image")));
-			this.ddmAdd.ImageTransparentColor = System.Drawing.Color.Magenta;
-			this.ddmAdd.Name = "ddmAdd";
-			this.ddmAdd.Size = new System.Drawing.Size(33, 19);
-			this.ddmAdd.Text = "Add";
-			this.ddmAdd.Click += new System.EventHandler(this.Btn_AddObj_Click);
 			// 
 			// btnCopy
 			// 
@@ -734,6 +724,16 @@
 			this.ObjectRightClickMenu_Hide.Size = new System.Drawing.Size(159, 22);
 			this.ObjectRightClickMenu_Hide.Text = "Hide Object";
 			this.ObjectRightClickMenu_Hide.Click += new System.EventHandler(this.ObjectRightClickMenu_Hide_Click);
+			// 
+			// ddmAdd
+			// 
+			this.ddmAdd.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+			this.ddmAdd.Image = ((System.Drawing.Image)(resources.GetObject("ddmAdd.Image")));
+			this.ddmAdd.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.ddmAdd.Name = "ddmAdd";
+			this.ddmAdd.Size = new System.Drawing.Size(33, 19);
+			this.ddmAdd.Text = "Add";
+			this.ddmAdd.Click += new System.EventHandler(this.Btn_AddObj_Click);
 			// 
 			// EditorForm
 			// 
