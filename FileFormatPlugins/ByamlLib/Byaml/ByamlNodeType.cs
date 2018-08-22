@@ -8,6 +8,7 @@ namespace Syroot.NintenTools.Byaml
 	/// </summary>
 	internal enum ByamlNodeType : byte
 	{
+		EmptyByamlIndicator = 0x59,
 		/// <summary>
 		/// The node represents a <see cref="string"/> (internally referenced by index).
 		/// </summary>

@@ -119,6 +119,7 @@
     <Compile Include="OtherForms\Settings.Designer.cs">
       <DependentUpon>Settings.cs</DependentUpon>
     </Compile>
+    <Compile Include="Settings.cs" />
     <EmbeddedResource Include="EditorFroms\SearchResult.resx">
       <DependentUpon>SearchResult.cs</DependentUpon>
     </EmbeddedResource>

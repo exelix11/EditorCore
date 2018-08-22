@@ -90,6 +90,7 @@ namespace EditorCore
 			{ typeof(ulong) , (s) => (ulong.Parse(s)) },
 			{ typeof(double) , (s) =>(double.Parse(s)) },
 			{ typeof(float) , (s) => (float.Parse(s)) },
+			{ typeof(bool) , (s) => (bool.Parse(s)) },
 		};
 		public static dynamic ConvertValue(Type t, string value) => StringToNodeTable[t](value);
 	}

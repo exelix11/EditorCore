@@ -342,7 +342,9 @@ namespace Syroot.NintenTools.Byaml.Dynamic
 						return value;
 					case ByamlNodeType.Null:
                         reader.Seek(0x4);
-                        return null;
+						return null;
+					case ByamlNodeType.EmptyByamlIndicator:
+						return null;
                     default:
                         throw new ByamlException($"Unknown node type '{nodeType}'.");
                 }
