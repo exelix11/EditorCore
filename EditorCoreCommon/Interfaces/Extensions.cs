@@ -13,7 +13,7 @@ namespace EditorCore.Interfaces
 		string ModuleName { get; }
 		string Author { get; }
 		string ThanksTo { get; }
-		Version TargetVersion { get; }
+		//Version TargetVersion { get; }
 
 		bool HasGameModule { get; } 
 		IMenuExtension MenuExt { get; }

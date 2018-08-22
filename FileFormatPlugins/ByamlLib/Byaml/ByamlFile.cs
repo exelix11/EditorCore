@@ -249,6 +249,10 @@ namespace Syroot.NintenTools.Byaml.Dynamic
                     _pathArray = ReadNode(reader);
                 }
 
+				if (rootNodeOffset == 0) //empty byml
+				{
+					return new List<dynamic>();
+				}
                 
                 // Read the root node.
                 reader.Seek(rootNodeOffset, SeekOrigin.Begin);

@@ -38,6 +38,10 @@ namespace ByamlExt
 			}
 			else if (byml is List<dynamic>)
 			{
+				if (((List<dynamic>)byml).Count == 0)
+				{
+					MessageBox.Show("This byml is empty");
+				}
 				parseArrayNode(byml, treeView1.Nodes);
 			}
 			else if (byml is List<ByamlPathPoint>)
@@ -209,7 +213,7 @@ namespace ByamlExt
 			return MessageBox.Show("Does this game support paths ?", "", MessageBoxButtons.YesNo) == DialogResult.Yes;
 		}
 
-        public static void OpenByml(string Filename)
+		public static void OpenByml(string Filename)
         {
 			bool paths = SupportPaths();
 
@@ -256,15 +260,11 @@ namespace ByamlExt
 
 		private void addNodeToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			dynamic target = treeView1.SelectedNode.Tag;
-			var targetNodeCollection = treeView1.SelectedNode.Nodes;
+			dynamic target = treeView1.SelectedNode == null ? byml : treeView1.SelectedNode.Tag;
 
-			if (treeView1.SelectedNode == null)
-			{
-				target = byml;
-				targetNodeCollection = treeView1.Nodes;
-			}
-			else if (target is EditableNode)
+			var targetNodeCollection = treeView1.SelectedNode == null ? treeView1.Nodes : treeView1.SelectedNode.Nodes;
+			
+			if (target is EditableNode)
 			{
 				if (treeView1.SelectedNode.Parent == null)
 				{
