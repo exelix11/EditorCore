@@ -42,7 +42,7 @@ namespace KCLExt
 		public ToolStripMenuItem[] ToolsMenuExtensions => toolsExt;
 		public ToolStripMenuItem[] TitleBarExtensions => null;
 
-		ToolStripMenuItem[] toolsExt = new ToolStripMenuItem[2];
+		ToolStripMenuItem[] toolsExt = new ToolStripMenuItem[1];
 		public menuExt()
 		{
 			toolsExt[0] = new ToolStripMenuItem("KCL to OBJ");

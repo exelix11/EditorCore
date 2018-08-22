@@ -17,6 +17,11 @@ using System.Windows;
 
 namespace EditorCore
 {
+	public static class Constants
+	{
+		public const string LinkedListName = "____EditorInternalList___";
+	}
+
 	public static class InputDialog
     {
         public static DialogResult Show(string title, string promptText, ref string value)

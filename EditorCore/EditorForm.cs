@@ -53,11 +53,10 @@ namespace EditorCore
         public static ClipBoardItem StoredValue = null;
         public CustomStack<UndoAction> UndoList = new CustomStack<UndoAction>();
 		
-		const string LinkedListName = "____EditorInternalList___";
         public string CurListName
         {
             get {
-                if (EditingList) return LinkedListName;
+                if (EditingList) return Constants.LinkedListName;
                 return comboBox1.Text;
             }
             set {
@@ -440,7 +439,7 @@ namespace EditorCore
 		{
 			ListEditingStack.Push(path);
 			PopulateListBox();
-			LoadObjListModels(path, LinkedListName);
+			LoadObjListModels(path, Constants.LinkedListName);
 		}
 
 		public void EditList(IObjList objlist)
@@ -448,12 +447,12 @@ namespace EditorCore
 			ListEditingStack.Push(objlist);
 			PopulateListBox();
 			SelectedObjectChanged(null, null);
-			LoadObjListModels(objlist, LinkedListName);
+			LoadObjListModels(objlist, Constants.LinkedListName);
 		}
 
 		public void EditList(IList<dynamic> objList)
         {
-            IObjList list = GameModule.CreateObjList(LinkedListName, objList);
+            IObjList list = GameModule.CreateObjList(Constants.LinkedListName, objList);
 			EditList(list);
 		}
 
@@ -706,6 +705,7 @@ namespace EditorCore
 			if (obj != null)
 			{
 				obj.ModelView_Pos = render.GetPositionInView();
+				obj.ID_int = ++LoadedLevel.HighestID;
 				AddObj(obj, CurList);
 			}
 		}
@@ -1070,7 +1070,7 @@ namespace EditorCore
             {
                 ObjectsListBox.Items.Add(o);
             }
-            if (!(list.name == LinkedListName && EditingList))
+            if (!(list.name == Constants.LinkedListName && EditingList))
                 AddModel(o, list.name);
         }
 
