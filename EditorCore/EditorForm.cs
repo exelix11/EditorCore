@@ -517,7 +517,6 @@ namespace EditorCore
 		{
 			var o = GameModule.NewObject();
 			if (o == null) return;
-			o.ID_int = LoadedLevel.HighestID++;
             o.ModelView_Pos = render.GetPositionInView();
             AddObj(o, CurList);
             render.LookAt(o.ModelView_Pos);
@@ -705,7 +704,6 @@ namespace EditorCore
 			if (obj != null)
 			{
 				obj.ModelView_Pos = render.GetPositionInView();
-				obj.ID_int = ++LoadedLevel.HighestID;
 				AddObj(obj, CurList);
 			}
 		}
@@ -1060,7 +1058,8 @@ namespace EditorCore
 			if (list.ReadOnly)
 				return;
             AddToUndo((dynamic) => InternalDeleteObj(o, list), "Added object: " + o.ToString());
-            InternalAddObj(o, list);
+			o.ID_int = ++LoadedLevel.HighestID;
+			InternalAddObj(o, list);
         }
 
         void InternalAddObj(ILevelObj o, IObjList list)
@@ -1078,7 +1077,6 @@ namespace EditorCore
         {
             if (o == null || list.ReadOnly) return;
             var newobj = (ILevelObj)o.Clone();
-            newobj.ID_int = LoadedLevel.HighestID++;
             AddObj(newobj, list);
         }
 

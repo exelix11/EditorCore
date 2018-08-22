@@ -13,9 +13,7 @@ namespace ByamlExt
 	{
 		public string ModuleName => "ByamlExt";
 		public string Author => "Exelix11";
-		public string ThanksTo => "Syroot";
-
-		public Version TargetVersion => new Version(1, 0, 0, 0);
+		public string ExtraText => "Thanks to Syroot for his useful libs";
 
 		MenuExt _menuExt = new MenuExt();
 		public IMenuExtension MenuExt => _menuExt;
