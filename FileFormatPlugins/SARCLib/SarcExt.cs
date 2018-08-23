@@ -20,9 +20,7 @@ namespace SARCExt
 		public Version TargetVersion => new Version(1, 0, 0, 0);
 		
 		public IMenuExtension MenuExt { get; } = new MenuExt();
-
-		public IClipboardExtension ClipboardExt => null;
-
+		
 		public bool HasGameModule => false;
 		public IGameModule GetNewGameModule() => null;
 

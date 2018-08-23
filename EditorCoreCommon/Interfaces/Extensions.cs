@@ -31,11 +31,11 @@ namespace EditorCore.Interfaces
 		ToolStripMenuItem[] TitleBarExtensions { get; }
 	}
 
-	public interface IClipboardExtension
-	{
-		ToolStripMenuItem[] CopyExtensions { get; }
-		ToolStripMenuItem[] PasteExtensions { get; }
-	}
+	//public interface IClipboardExtension
+	//{
+	//	ToolStripMenuItem[] CopyExtensions { get; }
+	//	ToolStripMenuItem[] PasteExtensions { get; }
+	//}
 
 	public interface IFileHander
 	{

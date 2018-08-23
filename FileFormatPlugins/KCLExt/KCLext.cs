@@ -25,8 +25,6 @@ namespace KCLExt
 
 		public IMenuExtension MenuExt { get; } = new menuExt();
 
-		public IClipboardExtension ClipboardExt => null;
-
 		public IGameModule GetNewGameModule() => null;
 
 		public IFileHander[] Handlers => null;

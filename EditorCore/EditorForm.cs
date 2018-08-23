@@ -943,19 +943,23 @@ namespace EditorCore
         {
 			if (RenderIsDragging) return;
 
+			var obj = render.GetOBJ(sender, e) as ILevelObj;
+			if (obj == null || obj.ReadOnly)
+			{
+				return;
+			}
+
 			if (O_KeyHeld)
 			{
 				O_KeyHeld = false;
 
 				var pos = e.GetPosition(render);
-
-				var Obj = render.GetOBJ(sender, e) as ILevelObj;
-
-				ObjectRightClickMenu_Copy.Visible = (Obj != null);
+				
+				ObjectRightClickMenu_Copy.Visible = (obj != null);
 				ObjectRightClickMenu_Paste.Enabled = (StoredValue?.Type == ClipBoardItem.ClipboardType.Objects);
 
 				ObjectRightClickMenu_CopyTransform.Visible =
-				ObjectRightClickMenu_PasteTransform.Visible = (Obj != null);
+				ObjectRightClickMenu_PasteTransform.Visible = (obj != null);
 
 				ObjectRightClickMenu_PasteTransform.Enabled = (StoredValue?.Type == ClipBoardItem.ClipboardType.Transform) ||
 															  (StoredValue?.Type == ClipBoardItem.ClipboardType.Position) ||
@@ -964,21 +968,14 @@ namespace EditorCore
 
 				ObjectRightClickMenu_Delete.Visible =
 				ObjectRightClickMenu_EditChildren.Visible =
-				ObjectRightClickMenu_Hide.Visible = (Obj != null);
-				editingOptionsModule?.GetOptionsMenu(Obj);
-				ObjectRightClickMenu.Tag = Obj;
+				ObjectRightClickMenu_Hide.Visible = (obj != null);
+				editingOptionsModule?.OptionsMenuOpening(obj);
+				ObjectRightClickMenu.Tag = obj;
 
 				ObjectRightClickMenu.Show(RenderingCanvas, (int)pos.X, (int)pos.Y);
 
 				return;
 			}
-
-			var obj = render.GetOBJ(sender, e) as ILevelObj;
-			if (obj == null || obj.ReadOnly)
-			{
-				return;
-			}
-
 			
 			if (ModifierKeys.HasFlag(Keys.Shift) && CurList.Contains(obj)) //Shift add to selection, ctrl start drag as well <- thats retarded so how about no
 			{
@@ -1289,6 +1286,12 @@ namespace EditorCore
 		private void EditorForm_Activated(object sender, EventArgs e)
 		{
 			btnPaste.Enabled = (StoredValue != null && StoredValue.Type == ClipBoardItem.ClipboardType.Objects);
+		}
+
+		private void btnEditChildren_Click(object sender, EventArgs e)
+		{
+			if (SelectedObj != null)
+				GameModule.EditChildrenNode(SelectedObj);
 		}
 	}
 }

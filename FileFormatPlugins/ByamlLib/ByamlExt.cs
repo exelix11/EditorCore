@@ -17,9 +17,7 @@ namespace ByamlExt
 
 		MenuExt _menuExt = new MenuExt();
 		public IMenuExtension MenuExt => _menuExt;
-
-		public IClipboardExtension ClipboardExt => null;
-
+		
 		public bool HasGameModule => false;
 		public IGameModule GetNewGameModule() => null;
 		public IFileHander[] Handlers { get; } = new IFileHander[] { new BymlFileHandler() };
