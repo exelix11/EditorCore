@@ -444,6 +444,7 @@ namespace EditorCore
 
 		public void EditList(IObjList objlist)
 		{
+			UndoList.Clear();
 			ListEditingStack.Push(objlist);
 			PopulateListBox();
 			SelectedObjectChanged(null, null);
@@ -459,7 +460,8 @@ namespace EditorCore
         public void PreviousList()
         {
             if (!EditingList) return;
-            foreach (var obj in CurList) render.RemoveModel(obj);
+			UndoList.Clear();
+			foreach (var obj in CurList) render.RemoveModel(obj);
             ListEditingStack.Pop().ApplyChanges();
             SelectedObjectChanged(null, null);
             PopulateListBox();

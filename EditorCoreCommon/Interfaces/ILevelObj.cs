@@ -19,6 +19,7 @@ namespace EditorCore.Interfaces
 		[Browsable(false)]
 		bool ReadOnly { get; set; } //if this object is not actually part of the level, it can't be selected nor dragged
 
+		[TypeConverter(typeof(DictionaryConverter))]
 		Dictionary<string, dynamic> Prop { get; set; }
 
 		dynamic this[string name] { get; set; }
@@ -28,10 +29,7 @@ namespace EditorCore.Interfaces
 		string ID { get; set; }
 		string ModelName { get; }
 		string Name { get; set; }
-
-		[TypeConverter(typeof(DictionaryConverter))]
-		Dictionary<string, dynamic> Properties { get; set; }
-
+		
 		[Browsable(false)]
 		int ID_int { get; set; }
 		[Browsable(false)]
