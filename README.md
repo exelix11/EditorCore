@@ -41,6 +41,9 @@ C | Edit the links of the selected object
 B (while editing a links list) | Go back to the previous list
 Q | Switch camera mode
 
+## Custom plugins
+To know how to create custom plugins check the [wiki page](https://github.com/exelix11/EditorCore/wiki)
+
 ## Building
 This repo contains just the editor and its libs, to use it you also need a game module : \
 [Super Mario Odyssey module](https://github.com/exelix11/OdysseyEditor) \
