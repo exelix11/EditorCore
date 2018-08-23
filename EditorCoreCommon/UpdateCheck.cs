@@ -36,9 +36,16 @@ namespace EditorCore
 		
         public static async Task<GitHubRelease> CheckForUpdates(string owner, string name)
         {
-            var githubClient = new Octokit.GitHubClient(new Octokit.ProductHeaderValue("EditorCore"));
-            var ver = await githubClient.Repository.Release.GetAll(owner, name);
-			return new GitHubRelease(ver[ver.Count - 1],ver.Count -1);
+			try
+			{
+				var githubClient = new Octokit.GitHubClient(new Octokit.ProductHeaderValue("EditorCore"));
+				var ver = await githubClient.Repository.Release.GetAll(owner, name);
+				return new GitHubRelease(ver[ver.Count - 1], ver.Count - 1);
+			}
+			catch
+			{
+				return null;
+			}
         }
     }
 }

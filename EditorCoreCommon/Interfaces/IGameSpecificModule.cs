@@ -76,8 +76,7 @@ namespace EditorCore.Interfaces
 	public interface IEditingOptionsModule
 	{
 		void InitOptionsMenu(ref ContextMenuStrip baseMenu);
-
-		ContextMenuStrip GetOptionsMenu(ILevelObj clickedObj);
+		void OptionsMenuOpening(ILevelObj clickedObj);
 
 		void InitActionButtons(ref ToolStrip baseButtonStrip);
 		ToolStrip GetActionButtons(IObjList activeObjList, ILevelObj selectedObj);

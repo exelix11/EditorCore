@@ -12,12 +12,13 @@ namespace EditorCore.Interfaces
 	{
 		string ModuleName { get; }
 		string Author { get; }
-		string ThanksTo { get; }
-		//Version TargetVersion { get; }
+		string ExtraText { get; }
 
-		bool HasGameModule { get; } 
-		IMenuExtension MenuExt { get; }
+		bool HasGameModule { get; }
 		IGameModule GetNewGameModule();
+
+		//MenuExt and Handlers should be only instantiated once to save memory
+		IMenuExtension MenuExt { get; }
 		IFileHander[] Handlers { get; }
 
 		void CheckForUpdates();
@@ -30,11 +31,11 @@ namespace EditorCore.Interfaces
 		ToolStripMenuItem[] TitleBarExtensions { get; }
 	}
 
-	public interface IClipboardExtension
-	{
-		ToolStripMenuItem[] CopyExtensions { get; }
-		ToolStripMenuItem[] PasteExtensions { get; }
-	}
+	//public interface IClipboardExtension
+	//{
+	//	ToolStripMenuItem[] CopyExtensions { get; }
+	//	ToolStripMenuItem[] PasteExtensions { get; }
+	//}
 
 	public interface IFileHander
 	{

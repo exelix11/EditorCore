@@ -20,8 +20,8 @@ namespace EditorCore
 			foreach (var ext in extensions)
 			{
 				textBox1.Text += $"\r\n{ext.ModuleName} by {ext.Author}\r\n";
-				if (ext.ThanksTo != null)
-					textBox1.Text += $"Thanks to :\r\n{ext.ThanksTo}\r\n";
+				if (ext.ExtraText != null)
+					textBox1.Text += $"{ext.ExtraText}\r\n";
 
 			}
 		}

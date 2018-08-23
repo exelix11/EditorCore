@@ -15,14 +15,12 @@ namespace SARCExt
 	{
 		public string ModuleName => "Sarc Extension";
 		public string Author => "Exelix11";
-		public string ThanksTo => "Gericom for Every File Explorer";
+		public string ExtraText => "Thanks to Gericom for Every File Explorer";
 
 		public Version TargetVersion => new Version(1, 0, 0, 0);
 		
 		public IMenuExtension MenuExt { get; } = new MenuExt();
-
-		public IClipboardExtension ClipboardExt => null;
-
+		
 		public bool HasGameModule => false;
 		public IGameModule GetNewGameModule() => null;
 
