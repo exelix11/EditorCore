@@ -15,7 +15,7 @@ namespace SARCExt
 	{
 		public string ModuleName => "Sarc Extension";
 		public string Author => "Exelix11";
-		public string ExtraText => "Thanks to:\r\nGericom for Every File Explorer";
+		public string ExtraText => "Thanks to Gericom for Every File Explorer";
 
 		public Version TargetVersion => new Version(1, 0, 0, 0);
 		

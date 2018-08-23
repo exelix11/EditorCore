@@ -14,9 +14,11 @@ namespace EditorCore.Interfaces
 		string Author { get; }
 		string ExtraText { get; }
 
-		bool HasGameModule { get; } 
-		IMenuExtension MenuExt { get; }
+		bool HasGameModule { get; }
 		IGameModule GetNewGameModule();
+
+		//MenuExt and Handlers should be only instantiated once to save memory
+		IMenuExtension MenuExt { get; }
 		IFileHander[] Handlers { get; }
 
 		void CheckForUpdates();
