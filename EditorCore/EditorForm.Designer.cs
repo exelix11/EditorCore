@@ -42,6 +42,7 @@
 			this.btnHideSelected = new System.Windows.Forms.ToolStripButton();
 			this.btnShowSelected = new System.Windows.Forms.ToolStripButton();
 			this.btnShowAll = new System.Windows.Forms.ToolStripButton();
+			this.btnEditChildren = new System.Windows.Forms.ToolStripButton();
 			this.ListEditingPanel = new System.Windows.Forms.Panel();
 			this.linkLabel1 = new System.Windows.Forms.LinkLabel();
 			this.comboBox1 = new System.Windows.Forms.ComboBox();
@@ -96,7 +97,6 @@
 			this.ObjectRightClickMenu_PasteTransform = new System.Windows.Forms.ToolStripMenuItem();
 			this.ObjectRightClickMenu_Hide = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-			this.btnEditChildren = new System.Windows.Forms.ToolStripButton();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
 			this.splitContainer1.Panel1.SuspendLayout();
 			this.splitContainer1.Panel2.SuspendLayout();
@@ -223,7 +223,7 @@
 			this.btnDuplicate.Size = new System.Drawing.Size(61, 19);
 			this.btnDuplicate.Text = "Duplicate";
 			this.btnDuplicate.Visible = false;
-			this.btnDuplicate.Click += new System.EventHandler(this.DuplicateSelectedObj_btn);
+			this.btnDuplicate.Click += new System.EventHandler(this.DuplicateSelectedObjs_btn);
 			// 
 			// btnDelete
 			// 
@@ -264,6 +264,15 @@
 			this.btnShowAll.Size = new System.Drawing.Size(57, 19);
 			this.btnShowAll.Text = "Show All";
 			this.btnShowAll.Click += new System.EventHandler(this.btnShowAll_Click);
+			// 
+			// btnEditChildren
+			// 
+			this.btnEditChildren.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+			this.btnEditChildren.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.btnEditChildren.Name = "btnEditChildren";
+			this.btnEditChildren.Size = new System.Drawing.Size(77, 19);
+			this.btnEditChildren.Text = "Edit children";
+			this.btnEditChildren.Click += new System.EventHandler(this.btnEditChildren_Click);
 			// 
 			// ListEditingPanel
 			// 
@@ -707,21 +716,21 @@
 			// ObjectRightClickMenu_CopyPos
 			// 
 			this.ObjectRightClickMenu_CopyPos.Name = "ObjectRightClickMenu_CopyPos";
-			this.ObjectRightClickMenu_CopyPos.Size = new System.Drawing.Size(180, 22);
+			this.ObjectRightClickMenu_CopyPos.Size = new System.Drawing.Size(145, 22);
 			this.ObjectRightClickMenu_CopyPos.Text = "Only Position";
 			this.ObjectRightClickMenu_CopyPos.Click += new System.EventHandler(this.ObjectRightClickMenu_CopyPos_Click);
 			// 
 			// ObjectRightClickMenu_CopyRot
 			// 
 			this.ObjectRightClickMenu_CopyRot.Name = "ObjectRightClickMenu_CopyRot";
-			this.ObjectRightClickMenu_CopyRot.Size = new System.Drawing.Size(180, 22);
+			this.ObjectRightClickMenu_CopyRot.Size = new System.Drawing.Size(145, 22);
 			this.ObjectRightClickMenu_CopyRot.Text = "Only rotation";
 			this.ObjectRightClickMenu_CopyRot.Click += new System.EventHandler(this.ObjectRightClickMenu_CopyRot_Click);
 			// 
 			// ObjectRightClickMenu_CopyScale
 			// 
 			this.ObjectRightClickMenu_CopyScale.Name = "ObjectRightClickMenu_CopyScale";
-			this.ObjectRightClickMenu_CopyScale.Size = new System.Drawing.Size(180, 22);
+			this.ObjectRightClickMenu_CopyScale.Size = new System.Drawing.Size(145, 22);
 			this.ObjectRightClickMenu_CopyScale.Text = "Only Scale";
 			this.ObjectRightClickMenu_CopyScale.Click += new System.EventHandler(this.ObjectRightClickMenu_CopyScale_Click);
 			// 
@@ -743,15 +752,6 @@
 			// 
 			this.toolStripSeparator3.Name = "toolStripSeparator3";
 			this.toolStripSeparator3.Size = new System.Drawing.Size(156, 6);
-			// 
-			// btnEditChildren
-			// 
-			this.btnEditChildren.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-			this.btnEditChildren.ImageTransparentColor = System.Drawing.Color.Magenta;
-			this.btnEditChildren.Name = "btnEditChildren";
-			this.btnEditChildren.Size = new System.Drawing.Size(77, 19);
-			this.btnEditChildren.Text = "Edit children";
-			this.btnEditChildren.Click += new System.EventHandler(this.btnEditChildren_Click);
 			// 
 			// EditorForm
 			// 
