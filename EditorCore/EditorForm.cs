@@ -123,6 +123,8 @@ namespace EditorCore
 			KeyPreview = true;
 			RenderingCanvas.Child = render;
 			render.MouseMove += render_MouseMove;
+			render.PreviewMouseRightButtonUp += render_MouseRightButtonUp;
+			render.PreviewMouseRightButtonDown += render_MouseRightButtonDown;
 			render.MouseLeftButtonDown += render_MouseLeftButtonDown;
 			render.MouseLeftButtonUp += render_MouseLeftButtonUp;
 			render.KeyDown += render_KeyDown;
@@ -864,7 +866,6 @@ namespace EditorCore
 #region RendererEvents
             
         DragArgs DraggingArgs = null;
-		private bool O_KeyHeld = false;
 		private IEditingOptionsModule editingOptionsModule;
 
 		bool RenderIsDragging { get { return DraggingArgs != null && Mouse.LeftButton == MouseButtonState.Pressed && (ModifierKeys & Keys.Control) == Keys.Control; } }        
@@ -880,9 +881,7 @@ namespace EditorCore
             if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
             {
                 if (DraggingArgs != null) endDragging();
-            }
-
-			O_KeyHeld = false;
+            }			
         }        
 
         private void render_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
@@ -941,54 +940,72 @@ namespace EditorCore
             if (DraggingArgs != null) endDragging();
         }
 
-        private void render_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-			if (RenderIsDragging) return;
+		Point MousePos;
+		void render_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+		{
+			MousePos = CursorHelper.GetCursorPosition();
+		}
 
+		ILevelObj ClickSelect(object sender, MouseButtonEventArgs e)
+		{
 			var obj = render.GetOBJ(sender, e) as ILevelObj;
 			if (obj == null || obj.ReadOnly)
 			{
-				return;
+				return null;
 			}
 
-			if (O_KeyHeld)
-			{
-				O_KeyHeld = false;
+			return obj;
+		}
 
-				var pos = e.GetPosition(render);
-				
-				ObjectRightClickMenu_Copy.Visible = (obj != null);
-				ObjectRightClickMenu_Paste.Enabled = (StoredValue?.Type == ClipBoardItem.ClipboardType.Objects);
+		void render_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+		{
+			if (MousePos != CursorHelper.GetCursorPosition()) return;
 
-				ObjectRightClickMenu_CopyTransform.Visible =
-				ObjectRightClickMenu_PasteTransform.Visible = (obj != null);
+			var obj = ClickSelect(sender, e);
+			if (obj == null) return;
 
-				ObjectRightClickMenu_PasteTransform.Enabled = (StoredValue?.Type == ClipBoardItem.ClipboardType.Transform) ||
-															  (StoredValue?.Type == ClipBoardItem.ClipboardType.Position) ||
-															  (StoredValue?.Type == ClipBoardItem.ClipboardType.Rotation) ||
-															  (StoredValue?.Type == ClipBoardItem.ClipboardType.Scale);
+			var pos = e.GetPosition(render);
 
-				ObjectRightClickMenu_Delete.Visible =
-				ObjectRightClickMenu_EditChildren.Visible =
-				ObjectRightClickMenu_Hide.Visible = (obj != null);
-				editingOptionsModule?.OptionsMenuOpening(obj);
-				ObjectRightClickMenu.Tag = obj;
+			ObjectRightClickMenu_Copy.Visible = (obj != null);
+			ObjectRightClickMenu_Paste.Enabled = (StoredValue?.Type == ClipBoardItem.ClipboardType.Objects);
 
-				ObjectRightClickMenu.Show(RenderingCanvas, (int)pos.X, (int)pos.Y);
+			ObjectRightClickMenu_CopyTransform.Visible =
+			ObjectRightClickMenu_PasteTransform.Visible = (obj != null);
 
-				return;
-			}
-			
+			ObjectRightClickMenu_PasteTransform.Enabled = (StoredValue?.Type == ClipBoardItem.ClipboardType.Transform) ||
+														  (StoredValue?.Type == ClipBoardItem.ClipboardType.Position) ||
+														  (StoredValue?.Type == ClipBoardItem.ClipboardType.Rotation) ||
+														  (StoredValue?.Type == ClipBoardItem.ClipboardType.Scale);
+
+			ObjectRightClickMenu_Delete.Visible =
+			ObjectRightClickMenu_EditChildren.Visible =
+			ObjectRightClickMenu_Hide.Visible = (obj != null);
+			editingOptionsModule?.OptionsMenuOpening(obj);
+			ObjectRightClickMenu.Tag = obj;
+
+			ObjectRightClickMenu.Show(RenderingCanvas, (int)pos.X, (int)pos.Y);
+
+			ObjectRightClickMenu_Copy.ShowDropDown();
+		}
+
+
+		private void render_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+			if (RenderIsDragging) return;
+
+			var obj = ClickSelect(sender, e);
+			if (obj == null) return;
+
 			if (ModifierKeys.HasFlag(Keys.Shift) && CurList.Contains(obj)) //Shift add to selection, ctrl start drag as well <- thats retarded so how about no
 			{
-				if(ObjectsListBox.SelectedItems.Contains(obj))
+				if (ObjectsListBox.SelectedItems.Contains(obj))
 					ObjectsListBox.SelectedItems.Remove(obj);
 				else
 					ObjectsListBox.SelectedItems.Add(obj);
 			}
-			else if(!(ModifierKeys.HasFlag(Keys.Control) && ObjectsListBox.SelectedItems.Contains(obj)))
+			else if (!(ModifierKeys.HasFlag(Keys.Control) && ObjectsListBox.SelectedItems.Contains(obj)))
 				SelectedObj = obj;
-			
+
 			if (ModifierKeys.HasFlag(Keys.Control)) //User wants to drag
 			{
 				DraggingArgs = new DragArgs();
@@ -1004,7 +1021,6 @@ namespace EditorCore
         {
             if (RenderIsDragging) return;
             if (e.Key == Key.B && EditingList) PreviousList();
-			else if (e.Key == Key.O) O_KeyHeld = true;
 
 			if (SelectionCount == 0) return;
 			if (e.Key == Key.Space) render.LookAt(SelectedObj.ModelView_Pos);
