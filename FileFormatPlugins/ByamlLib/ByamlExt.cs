@@ -14,9 +14,8 @@ namespace ByamlExt
 		public string ModuleName => "ByamlExt";
 		public string Author => "Exelix11";
 		public string ExtraText => "Thanks to Syroot for his useful libs";
-
-		MenuExt _menuExt = new MenuExt();
-		public IMenuExtension MenuExt => _menuExt;
+		
+		public IMenuExtension MenuExt => new MenuExt();
 		
 		public bool HasGameModule => false;
 		public IGameModule GetNewGameModule() => null;
