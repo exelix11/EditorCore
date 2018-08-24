@@ -1161,7 +1161,7 @@ namespace EditorCore
 			gamePathToolStripItem.Text = "Game path: " + GameFolder;
             if (GameFolder == "" || !Directory.Exists(GameFolder))
             {
-                MessageBox.Show("Select the path of the game, it will be used to display the models from the game");
+                MessageBox.Show("Select the path of the game, it will be used to display the models and load the levels.");
                 changeToolStripMenuItem_Click(null, null);
                 MessageBox.Show("You can change it from the tools menu later");
                 this.Focus();

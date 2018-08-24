@@ -60,7 +60,7 @@ namespace EditorCore
 			Timer ApplicationExitCheck = new Timer()
 			{
 				Enabled = true,
-				Interval = 60000,
+				Interval = 30000,
 			};
 			ApplicationExitCheck.Tick += delegate (object sender, EventArgs e) { CheckForExit(); };
 			ApplicationExitCheck.Start(); //This is needed because closing every form won't close the application
