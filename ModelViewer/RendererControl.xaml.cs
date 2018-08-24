@@ -384,7 +384,7 @@ namespace ModelViewer
 			ModelView.UpdateLayout();
         }
 
-		private void ModelView_MouseEnter(object sender, MouseEventArgs e)
+		public void Focus()
 		{
 			ModelView.Focus();
 		}

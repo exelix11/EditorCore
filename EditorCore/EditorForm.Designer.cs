@@ -42,6 +42,7 @@
 			this.btnHideSelected = new System.Windows.Forms.ToolStripButton();
 			this.btnShowSelected = new System.Windows.Forms.ToolStripButton();
 			this.btnShowAll = new System.Windows.Forms.ToolStripButton();
+			this.btnEditChildren = new System.Windows.Forms.ToolStripButton();
 			this.ListEditingPanel = new System.Windows.Forms.Panel();
 			this.linkLabel1 = new System.Windows.Forms.LinkLabel();
 			this.comboBox1 = new System.Windows.Forms.ComboBox();
@@ -96,7 +97,9 @@
 			this.ObjectRightClickMenu_PasteTransform = new System.Windows.Forms.ToolStripMenuItem();
 			this.ObjectRightClickMenu_Hide = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-			this.btnEditChildren = new System.Windows.Forms.ToolStripButton();
+			this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
+			this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
+			this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
 			this.splitContainer1.Panel1.SuspendLayout();
 			this.splitContainer1.Panel2.SuspendLayout();
@@ -168,18 +171,21 @@
 			this.toolStrip1.Dock = System.Windows.Forms.DockStyle.Bottom;
 			this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ddmAdd,
+            this.btnDelete,
+            this.toolStripSeparator4,
             this.btnCopy,
             this.btnPaste,
             this.btnDuplicate,
-            this.btnDelete,
+            this.toolStripSeparator6,
             this.btnHideSelected,
             this.btnShowSelected,
             this.btnShowAll,
+            this.toolStripSeparator5,
             this.btnEditChildren});
 			this.toolStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
-			this.toolStrip1.Location = new System.Drawing.Point(0, 218);
+			this.toolStrip1.Location = new System.Drawing.Point(0, 238);
 			this.toolStrip1.Name = "toolStrip1";
-			this.toolStrip1.Size = new System.Drawing.Size(263, 66);
+			this.toolStrip1.Size = new System.Drawing.Size(263, 46);
 			this.toolStrip1.TabIndex = 22;
 			this.toolStrip1.Text = "toolStrip1";
 			// 
@@ -223,7 +229,7 @@
 			this.btnDuplicate.Size = new System.Drawing.Size(61, 19);
 			this.btnDuplicate.Text = "Duplicate";
 			this.btnDuplicate.Visible = false;
-			this.btnDuplicate.Click += new System.EventHandler(this.DuplicateSelectedObj_btn);
+			this.btnDuplicate.Click += new System.EventHandler(this.DuplicateSelectedObjs_btn);
 			// 
 			// btnDelete
 			// 
@@ -264,6 +270,15 @@
 			this.btnShowAll.Size = new System.Drawing.Size(57, 19);
 			this.btnShowAll.Text = "Show All";
 			this.btnShowAll.Click += new System.EventHandler(this.btnShowAll_Click);
+			// 
+			// btnEditChildren
+			// 
+			this.btnEditChildren.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+			this.btnEditChildren.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.btnEditChildren.Name = "btnEditChildren";
+			this.btnEditChildren.Size = new System.Drawing.Size(77, 19);
+			this.btnEditChildren.Text = "Edit children";
+			this.btnEditChildren.Click += new System.EventHandler(this.btnEditChildren_Click);
 			// 
 			// ListEditingPanel
 			// 
@@ -509,8 +524,8 @@
 			// newEditorInstanceToolStripMenuItem
 			// 
 			this.newEditorInstanceToolStripMenuItem.Name = "newEditorInstanceToolStripMenuItem";
-			this.newEditorInstanceToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
-			this.newEditorInstanceToolStripMenuItem.Text = "New editor instance";
+			this.newEditorInstanceToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.newEditorInstanceToolStripMenuItem.Text = "New editor window";
 			this.newEditorInstanceToolStripMenuItem.Click += new System.EventHandler(this.newEditorInstanceToolStripMenuItem_Click);
 			// 
 			// toolStripSeparator2
@@ -707,21 +722,21 @@
 			// ObjectRightClickMenu_CopyPos
 			// 
 			this.ObjectRightClickMenu_CopyPos.Name = "ObjectRightClickMenu_CopyPos";
-			this.ObjectRightClickMenu_CopyPos.Size = new System.Drawing.Size(180, 22);
+			this.ObjectRightClickMenu_CopyPos.Size = new System.Drawing.Size(145, 22);
 			this.ObjectRightClickMenu_CopyPos.Text = "Only Position";
 			this.ObjectRightClickMenu_CopyPos.Click += new System.EventHandler(this.ObjectRightClickMenu_CopyPos_Click);
 			// 
 			// ObjectRightClickMenu_CopyRot
 			// 
 			this.ObjectRightClickMenu_CopyRot.Name = "ObjectRightClickMenu_CopyRot";
-			this.ObjectRightClickMenu_CopyRot.Size = new System.Drawing.Size(180, 22);
+			this.ObjectRightClickMenu_CopyRot.Size = new System.Drawing.Size(145, 22);
 			this.ObjectRightClickMenu_CopyRot.Text = "Only rotation";
 			this.ObjectRightClickMenu_CopyRot.Click += new System.EventHandler(this.ObjectRightClickMenu_CopyRot_Click);
 			// 
 			// ObjectRightClickMenu_CopyScale
 			// 
 			this.ObjectRightClickMenu_CopyScale.Name = "ObjectRightClickMenu_CopyScale";
-			this.ObjectRightClickMenu_CopyScale.Size = new System.Drawing.Size(180, 22);
+			this.ObjectRightClickMenu_CopyScale.Size = new System.Drawing.Size(145, 22);
 			this.ObjectRightClickMenu_CopyScale.Text = "Only Scale";
 			this.ObjectRightClickMenu_CopyScale.Click += new System.EventHandler(this.ObjectRightClickMenu_CopyScale_Click);
 			// 
@@ -744,14 +759,20 @@
 			this.toolStripSeparator3.Name = "toolStripSeparator3";
 			this.toolStripSeparator3.Size = new System.Drawing.Size(156, 6);
 			// 
-			// btnEditChildren
+			// toolStripSeparator4
 			// 
-			this.btnEditChildren.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-			this.btnEditChildren.ImageTransparentColor = System.Drawing.Color.Magenta;
-			this.btnEditChildren.Name = "btnEditChildren";
-			this.btnEditChildren.Size = new System.Drawing.Size(77, 19);
-			this.btnEditChildren.Text = "Edit children";
-			this.btnEditChildren.Click += new System.EventHandler(this.btnEditChildren_Click);
+			this.toolStripSeparator4.Name = "toolStripSeparator4";
+			this.toolStripSeparator4.Size = new System.Drawing.Size(6, 23);
+			// 
+			// toolStripSeparator5
+			// 
+			this.toolStripSeparator5.Name = "toolStripSeparator5";
+			this.toolStripSeparator5.Size = new System.Drawing.Size(6, 23);
+			// 
+			// toolStripSeparator6
+			// 
+			this.toolStripSeparator6.Name = "toolStripSeparator6";
+			this.toolStripSeparator6.Size = new System.Drawing.Size(6, 23);
 			// 
 			// EditorForm
 			// 
@@ -858,6 +879,9 @@
 		private System.Windows.Forms.ToolStripButton ddmAdd;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
 		private System.Windows.Forms.ToolStripButton btnEditChildren;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
 	}
 }
 
