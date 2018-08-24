@@ -123,6 +123,7 @@ namespace EditorCore
 			KeyPreview = true;
 			RenderingCanvas.Child = render;
 			render.MouseMove += render_MouseMove;
+			render.MouseEnter += render_MouseEnter;
 			render.MouseLeftButtonDown += render_MouseLeftButtonDown;
 			render.MouseLeftButtonUp += render_MouseLeftButtonUp;
 			render.KeyDown += render_KeyDown;
@@ -202,6 +203,12 @@ namespace EditorCore
 
 			FileOpenArgs = args;
 
+		}
+
+		private void render_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+		{
+			if (ActiveForm != this) return;
+			render.Focus();
 		}
 
 		public void RegisterMenuExtension(IMenuExtension ext)
