@@ -123,6 +123,7 @@ namespace EditorCore
 			KeyPreview = true;
 			RenderingCanvas.Child = render;
 			render.MouseMove += render_MouseMove;
+			render.MouseEnter += render_MouseEnter;
 			render.MouseLeftButtonDown += render_MouseLeftButtonDown;
 			render.MouseLeftButtonUp += render_MouseLeftButtonUp;
 			render.KeyDown += render_KeyDown;
@@ -202,6 +203,12 @@ namespace EditorCore
 
 			FileOpenArgs = args;
 
+		}
+
+		private void render_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+		{
+			if (ActiveForm != this) return;
+			render.Focus();
 		}
 
 		public void RegisterMenuExtension(IMenuExtension ext)
@@ -307,9 +314,9 @@ namespace EditorCore
 
 		public void LoadLevel(ILevel lev)
 		{
+			if (lev == null) return;
 			UnloadLevel();
 			LoadedLevel = lev;
-			if (LoadedLevel == null) return;
 
 			if (LoadedLevel.LevelFiles != null)
 			{
@@ -352,10 +359,10 @@ namespace EditorCore
         //NewLevel
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            UnloadLevel();
 			LoadedLevel = GameModule.NewLevel();
 			if (LoadedLevel == null)
 				return;
+			UnloadLevel();
 			//Populate combobox
 			comboBox1.Items.AddRange(LoadedLevel.objs.Keys.ToArray());
             comboBox1.SelectedIndex = 0;
@@ -694,7 +701,9 @@ namespace EditorCore
         private void preferencesToolStripMenuItem_Click(object sender, EventArgs e) => new Settings().ShowDialog();
 
         private void DuplicateSelectedObj_btn(object sender, EventArgs e) => DuplicateObj(SelectedObj, CurList);
-        private void btn_delObj_Click(object sender, EventArgs e)
+
+		private void DuplicateSelectedObjs_btn(object sender, EventArgs e) => DuplicateObjs(SelectedObjs, CurList);
+		private void btn_delObj_Click(object sender, EventArgs e)
         {
             var list = SelectedObjs.ToArray();
             foreach (var o in list) DeleteObj(o, CurList);
@@ -811,12 +820,7 @@ namespace EditorCore
 				return;
 			}
 
-            if (SelectionCount > 1)
-            {
-                btnDuplicate.Visible = false;
-                btnCopy.Enabled = true;
-            }
-            else if (SelectionCount == 1)
+            if (SelectionCount >= 1)
             {
                 btnDuplicate.Visible = btnCopy.Enabled = true;
 
@@ -1009,7 +1013,7 @@ namespace EditorCore
 			if (SelectionCount == 0) return;
 			if (e.Key == Key.Space) render.LookAt(SelectedObj.ModelView_Pos);
 			//else if (e.Key == Key.OemPlus && Btn_AddObj.Enabled) Btn_AddObj_Click(null, null);
-			else if (e.Key == Key.D && SelectionCount == 1) DuplicateObj(SelectedObj, CurList);
+			else if (e.Key == Key.D && SelectionCount != 0) DuplicateObjs(SelectedObjs, CurList);
 			else if (e.Key == Key.Delete) btn_delObj_Click(null, null);
 			else if (e.Key == Key.F) FindMenu.ShowDropDown();
 			else if (e.Key == Key.H) btnHideSelected_Click(null, null);
@@ -1079,7 +1083,20 @@ namespace EditorCore
             AddObj(newobj, list);
         }
 
-        public void DeleteObj(ILevelObj o, IObjList list)
+		public void DuplicateObjs(ILevelObj[] objs, IObjList list)
+		{
+			if (objs == null || objs.Length==0 || list.ReadOnly) return;
+
+			ObjectsListBox.SelectedItems.Clear();
+			foreach (var obj in objs)
+			{
+				var newobj = (ILevelObj)obj.Clone();
+				InternalAddObj(newobj, list);
+				ObjectsListBox.SelectedItems.Add(newobj);
+			}
+		}
+
+		public void DeleteObj(ILevelObj o, IObjList list)
         {
             if (o == null || list.ReadOnly) return;
 			AddToUndo((dynamic) =>

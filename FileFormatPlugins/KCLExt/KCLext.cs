@@ -23,7 +23,7 @@ namespace KCLExt
 		
 		public bool HasGameModule => false;
 
-		public IMenuExtension MenuExt { get; } = new menuExt();
+		public IMenuExtension MenuExt => new MenuExt();
 
 		public IGameModule GetNewGameModule() => null;
 
@@ -32,14 +32,14 @@ namespace KCLExt
 		public void CheckForUpdates() { }
 	}
 
-	class menuExt : IMenuExtension
+	class MenuExt : IMenuExtension
 	{
 		public ToolStripMenuItem[] FileMenuExtensions => null;
 		public ToolStripMenuItem[] ToolsMenuExtensions => toolsExt;
 		public ToolStripMenuItem[] TitleBarExtensions => null;
 
 		ToolStripMenuItem[] toolsExt = new ToolStripMenuItem[1];
-		public menuExt()
+		public MenuExt()
 		{
 			toolsExt[0] = new ToolStripMenuItem("KCL to OBJ");
 			toolsExt[0].Click += KCLToObj;
