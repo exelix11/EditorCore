@@ -183,9 +183,9 @@
             this.toolStripSeparator5,
             this.btnEditChildren});
 			this.toolStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
-			this.toolStrip1.Location = new System.Drawing.Point(0, 216);
+			this.toolStrip1.Location = new System.Drawing.Point(0, 238);
 			this.toolStrip1.Name = "toolStrip1";
-			this.toolStrip1.Size = new System.Drawing.Size(263, 68);
+			this.toolStrip1.Size = new System.Drawing.Size(263, 46);
 			this.toolStrip1.TabIndex = 22;
 			this.toolStrip1.Text = "toolStrip1";
 			// 
@@ -524,8 +524,8 @@
 			// newEditorInstanceToolStripMenuItem
 			// 
 			this.newEditorInstanceToolStripMenuItem.Name = "newEditorInstanceToolStripMenuItem";
-			this.newEditorInstanceToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
-			this.newEditorInstanceToolStripMenuItem.Text = "New editor instance";
+			this.newEditorInstanceToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.newEditorInstanceToolStripMenuItem.Text = "New editor window";
 			this.newEditorInstanceToolStripMenuItem.Click += new System.EventHandler(this.newEditorInstanceToolStripMenuItem_Click);
 			// 
 			// toolStripSeparator2
