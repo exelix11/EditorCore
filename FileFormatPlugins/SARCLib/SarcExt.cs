@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using EveryFileExplorer;
 using System.IO;
 using EditorCore;
+using EditorCoreCommon;
 
 namespace SARCExt
 {
@@ -24,11 +25,28 @@ namespace SARCExt
 		public bool HasGameModule => false;
 		public IGameModule GetNewGameModule() => null;
 
-		public IFileHander[] Handlers { get; } = new IFileHander[] { new SzsHandler() };
+		public IFileHander[] Handlers { get; } = new IFileHander[] { new SarcHandler(), new SzsHandler() };
 
 		public void CheckForUpdates()
 		{
 			return;
+		}
+	}
+
+	class SarcHandler : IFileHander
+	{
+		public string HandlerName => "SARC file handler";
+
+		public bool IsFormatSupported(string filename, Stream file)
+		{
+			byte[] header = new byte[4];
+			file.Read(header, 0, 4);
+			return header[0] == 'S' && header[1] == 'A' && header[2] == 'R' && header[3] == 'C';
+		}
+
+		public void OpenFile(string filename, Stream file)
+		{
+			new SarcEditor(SARC.UnpackRam(file)).Show();
 		}
 	}
 
@@ -38,13 +56,9 @@ namespace SARCExt
 
 		public bool IsFormatSupported(string filename, Stream file)
 		{
-			if (filename.EndsWith(".szs") || filename.EndsWith(".sarc"))
-			{
-				byte[] header = new byte[4];
-				file.Read(header, 0, 4);
-				return (header[0] == 'Y' && header[1] == 'a' && header[1] == 'z' && header[1] == '0');
-			}
-			return false;
+			byte[] header = new byte[4];
+			file.Read(header, 0, 4);
+			return header[0] == 'Y' && header[1] == 'a' && header[2] == 'z' && header[3] == '0';
 		}
 
 		public void OpenFile(string filename, Stream file)
@@ -54,9 +68,12 @@ namespace SARCExt
 				data = ((MemoryStream)file).ToArray();
 			else
 			{
-				return; //unsupported stream
+				var s = new MemoryStream();
+				file.CopyTo(s);
+				data = s.ToArray();
+				s.Dispose();
 			}
-			new SarcEditor(SARC.UnpackRam(YAZ0.Decompress(data))).Show();
+			OpenFileHandler.OpenFile(filename, new MemoryStream(YAZ0.Decompress(data)));
 		}
 	}
 

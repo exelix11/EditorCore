@@ -35,13 +35,16 @@
 			this.ObjectListPanel = new System.Windows.Forms.Panel();
 			this.toolStrip1 = new System.Windows.Forms.ToolStrip();
 			this.ddmAdd = new System.Windows.Forms.ToolStripButton();
+			this.btnDelete = new System.Windows.Forms.ToolStripButton();
+			this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
 			this.btnCopy = new System.Windows.Forms.ToolStripButton();
 			this.btnPaste = new System.Windows.Forms.ToolStripButton();
 			this.btnDuplicate = new System.Windows.Forms.ToolStripButton();
-			this.btnDelete = new System.Windows.Forms.ToolStripButton();
+			this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
 			this.btnHideSelected = new System.Windows.Forms.ToolStripButton();
 			this.btnShowSelected = new System.Windows.Forms.ToolStripButton();
 			this.btnShowAll = new System.Windows.Forms.ToolStripButton();
+			this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
 			this.btnEditChildren = new System.Windows.Forms.ToolStripButton();
 			this.ListEditingPanel = new System.Windows.Forms.Panel();
 			this.linkLabel1 = new System.Windows.Forms.LinkLabel();
@@ -97,9 +100,6 @@
 			this.ObjectRightClickMenu_PasteTransform = new System.Windows.Forms.ToolStripMenuItem();
 			this.ObjectRightClickMenu_Hide = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-			this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
-			this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
-			this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
 			this.splitContainer1.Panel1.SuspendLayout();
 			this.splitContainer1.Panel2.SuspendLayout();
@@ -199,6 +199,21 @@
 			this.ddmAdd.Text = "Add";
 			this.ddmAdd.Click += new System.EventHandler(this.ddmAdd_Click);
 			// 
+			// btnDelete
+			// 
+			this.btnDelete.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+			this.btnDelete.Image = ((System.Drawing.Image)(resources.GetObject("btnDelete.Image")));
+			this.btnDelete.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.btnDelete.Name = "btnDelete";
+			this.btnDelete.Size = new System.Drawing.Size(44, 19);
+			this.btnDelete.Text = "Delete";
+			this.btnDelete.Click += new System.EventHandler(this.btn_delObj_Click);
+			// 
+			// toolStripSeparator4
+			// 
+			this.toolStripSeparator4.Name = "toolStripSeparator4";
+			this.toolStripSeparator4.Size = new System.Drawing.Size(6, 23);
+			// 
 			// btnCopy
 			// 
 			this.btnCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
@@ -231,15 +246,10 @@
 			this.btnDuplicate.Visible = false;
 			this.btnDuplicate.Click += new System.EventHandler(this.DuplicateSelectedObjs_btn);
 			// 
-			// btnDelete
+			// toolStripSeparator6
 			// 
-			this.btnDelete.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-			this.btnDelete.Image = ((System.Drawing.Image)(resources.GetObject("btnDelete.Image")));
-			this.btnDelete.ImageTransparentColor = System.Drawing.Color.Magenta;
-			this.btnDelete.Name = "btnDelete";
-			this.btnDelete.Size = new System.Drawing.Size(44, 19);
-			this.btnDelete.Text = "Delete";
-			this.btnDelete.Click += new System.EventHandler(this.btn_delObj_Click);
+			this.toolStripSeparator6.Name = "toolStripSeparator6";
+			this.toolStripSeparator6.Size = new System.Drawing.Size(6, 23);
 			// 
 			// btnHideSelected
 			// 
@@ -270,6 +280,11 @@
 			this.btnShowAll.Size = new System.Drawing.Size(57, 19);
 			this.btnShowAll.Text = "Show All";
 			this.btnShowAll.Click += new System.EventHandler(this.btnShowAll_Click);
+			// 
+			// toolStripSeparator5
+			// 
+			this.toolStripSeparator5.Name = "toolStripSeparator5";
+			this.toolStripSeparator5.Size = new System.Drawing.Size(6, 23);
 			// 
 			// btnEditChildren
 			// 
@@ -480,7 +495,7 @@
 			// 
 			this.saveAsToolStripMenuItem.Enabled = false;
 			this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-			this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
+			this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
 			this.saveAsToolStripMenuItem.Text = "Save as...";
 			this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.saveAsToolStripMenuItem_Click);
 			// 
@@ -488,21 +503,21 @@
 			// 
 			this.saveToolStripMenuItem.Enabled = false;
 			this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-			this.saveToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
+			this.saveToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
 			this.saveToolStripMenuItem.Text = "Save";
 			this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
 			// 
 			// openToolStripMenuItem
 			// 
 			this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-			this.openToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
+			this.openToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
 			this.openToolStripMenuItem.Text = "Open";
 			this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
 			// 
 			// newToolStripMenuItem
 			// 
 			this.newToolStripMenuItem.Name = "newToolStripMenuItem";
-			this.newToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
+			this.newToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
 			this.newToolStripMenuItem.Text = "New";
 			this.newToolStripMenuItem.Click += new System.EventHandler(this.newToolStripMenuItem_Click);
 			// 
@@ -524,24 +539,24 @@
 			// newEditorInstanceToolStripMenuItem
 			// 
 			this.newEditorInstanceToolStripMenuItem.Name = "newEditorInstanceToolStripMenuItem";
-			this.newEditorInstanceToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.newEditorInstanceToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
 			this.newEditorInstanceToolStripMenuItem.Text = "New editor window";
 			this.newEditorInstanceToolStripMenuItem.Click += new System.EventHandler(this.newEditorInstanceToolStripMenuItem_Click);
 			// 
 			// toolStripSeparator2
 			// 
 			this.toolStripSeparator2.Name = "toolStripSeparator2";
-			this.toolStripSeparator2.Size = new System.Drawing.Size(176, 6);
+			this.toolStripSeparator2.Size = new System.Drawing.Size(174, 6);
 			// 
 			// toolStripSeparator8
 			// 
 			this.toolStripSeparator8.Name = "toolStripSeparator8";
-			this.toolStripSeparator8.Size = new System.Drawing.Size(176, 6);
+			this.toolStripSeparator8.Size = new System.Drawing.Size(174, 6);
 			// 
 			// preferencesToolStripMenuItem
 			// 
 			this.preferencesToolStripMenuItem.Name = "preferencesToolStripMenuItem";
-			this.preferencesToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
+			this.preferencesToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
 			this.preferencesToolStripMenuItem.Text = "Settings";
 			this.preferencesToolStripMenuItem.Click += new System.EventHandler(this.preferencesToolStripMenuItem_Click);
 			// 
@@ -759,23 +774,9 @@
 			this.toolStripSeparator3.Name = "toolStripSeparator3";
 			this.toolStripSeparator3.Size = new System.Drawing.Size(156, 6);
 			// 
-			// toolStripSeparator4
-			// 
-			this.toolStripSeparator4.Name = "toolStripSeparator4";
-			this.toolStripSeparator4.Size = new System.Drawing.Size(6, 23);
-			// 
-			// toolStripSeparator5
-			// 
-			this.toolStripSeparator5.Name = "toolStripSeparator5";
-			this.toolStripSeparator5.Size = new System.Drawing.Size(6, 23);
-			// 
-			// toolStripSeparator6
-			// 
-			this.toolStripSeparator6.Name = "toolStripSeparator6";
-			this.toolStripSeparator6.Size = new System.Drawing.Size(6, 23);
-			// 
 			// EditorForm
 			// 
+			this.AllowDrop = true;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(788, 575);
@@ -786,8 +787,11 @@
 			this.Name = "EditorForm";
 			this.Text = "EditorCore";
 			this.Activated += new System.EventHandler(this.EditorForm_Activated);
+			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.EditorForm_Closing);
 			this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.EditorForm_Closed);
 			this.Load += new System.EventHandler(this.Form1_Load);
+			this.DragDrop += new System.Windows.Forms.DragEventHandler(this.FormDragDrop);
+			this.DragEnter += new System.Windows.Forms.DragEventHandler(this.FormDragEnter);
 			this.splitContainer1.Panel1.ResumeLayout(false);
 			this.splitContainer1.Panel2.ResumeLayout(false);
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();

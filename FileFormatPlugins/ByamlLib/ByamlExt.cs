@@ -33,12 +33,8 @@ namespace ByamlExt
 
 		public bool IsFormatSupported(string filename, Stream file)
 		{
-			if (filename.EndsWith(".byml") || filename.EndsWith(".byaml"))
-			{
-				byte[] header = new byte[2] { (byte)file.ReadByte(), (byte)file.ReadByte() };
-				return (header[0] == 0x42 && header[1] == 0x59) || (header[1] == 0x42 && header[0] == 0x59);
-			}
-			return false;
+			byte[] header = new byte[2] { (byte)file.ReadByte(), (byte)file.ReadByte() };
+			return (header[0] == 0x42 && header[1] == 0x59) || (header[1] == 0x42 && header[0] == 0x59);
 		}
 
 		public void OpenFile(string filename, Stream file)

@@ -341,7 +341,7 @@ namespace ModelViewer
 
 			ModelView.Children.Remove(ModelViewer);
             ModelViewer.Children.Clear();
-            ImportedModels = new Dictionary<string, Model3D>();
+			ImportedModels = new Dictionary<string, Model3D>();
             Models = new Dictionary<dynamic, ModelVisual3D>();
 			Paths = new Dictionary<dynamic, ModelVisual3D>();
             ModelViewer = new SortingVisual3D();
@@ -383,8 +383,8 @@ namespace ModelViewer
 			selectedPaths.Clear();
 			ModelView.UpdateLayout();
         }
-
-		public void Focus()
+		
+		public void FocusModelView()
 		{
 			ModelView.Focus();
 		}

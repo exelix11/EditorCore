@@ -15,12 +15,15 @@ namespace EditorCore
     {
 		List<RendererControl> renderList = new List<RendererControl>();
 
-        public Settings()
-        {
-            InitializeComponent();
+		public Settings()
+		{
+			InitializeComponent();
 
-			foreach (EditorForm f in Application.OpenForms)
-				renderList.Add(f.render);
+			foreach (var f in Application.OpenForms)
+			{
+				if (f is EditorForm)
+					renderList.Add(((EditorForm)f).render);
+			}
 
 		}
 

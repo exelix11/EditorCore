@@ -38,13 +38,13 @@ namespace KCLExt
 		public ToolStripMenuItem[] ToolsMenuExtensions => toolsExt;
 		public ToolStripMenuItem[] TitleBarExtensions => null;
 
-		ToolStripMenuItem[] toolsExt = new ToolStripMenuItem[1];
+		ToolStripMenuItem[] toolsExt = new ToolStripMenuItem[2];
 		public MenuExt()
 		{
 			toolsExt[0] = new ToolStripMenuItem("KCL to OBJ");
 			toolsExt[0].Click += KCLToObj;
-			//toolsExt[1] = new ToolStripMenuItem("OBJ to KCL");
-			//toolsExt[1].Click += ObjToKCL;
+			toolsExt[1] = new ToolStripMenuItem("OBJ to KCL");
+			toolsExt[1].Click += ObjToKCL;
 		}
 
 		private void ObjToKCL(object sender, EventArgs e)

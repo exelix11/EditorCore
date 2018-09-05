@@ -96,13 +96,13 @@ namespace ByamlExt
                 else if (node[k] is IList<dynamic>)
                 {
                     current.Text += " : <Array>";
-                    current.Tag = ((IList<dynamic>)node[k]).ToList();
+                    current.Tag = ((IList<dynamic>)node[k]);
                     current.Nodes.Add("✯✯dummy✯✯");
 				}
 				else if (node[k] is IList<ByamlPathPoint>)
 				{
 					current.Text += " : <PathPointArray>";
-					current.Tag = ((IList<ByamlPathPoint>)node[k]).ToList();
+					current.Tag = ((IList<ByamlPathPoint>)node[k]);
 					parsePathPointArray(node[k], current.Nodes);
 				}
 				else
@@ -139,13 +139,13 @@ namespace ByamlExt
                 else if (k is IList<dynamic>)
                 {
                     TreeNode current = addto.Add("<Array>");
-                    current.Tag = ((IList<dynamic>)k).ToList();
+                    current.Tag = ((IList<dynamic>)k);
                     current.Nodes.Add("✯✯dummy✯✯");
 				}
 				else if (k is IList<ByamlPathPoint>)
 				{
 					TreeNode current = addto.Add("<PathPointArray>");
-					current.Tag = ((IList<ByamlPathPoint>)k).ToList();
+					current.Tag = ((IList<ByamlPathPoint>)k);
 					parsePathPointArray(k, current.Nodes);
 				}
 				else
@@ -231,7 +231,7 @@ namespace ByamlExt
 
 		private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SaveFileDialog sav = new SaveFileDialog() { FileName = Name, Filter = "byml file | *.byml" };
+            SaveFileDialog sav = new SaveFileDialog() { FileName = FileName, Filter = "byml file | *.byml" };
             if (sav.ShowDialog() == DialogResult.OK)
             {
                 ByamlFile.Save(sav.FileName, byml, pathSupport, byteOrder);
@@ -278,22 +278,22 @@ namespace ByamlExt
 				}
 			}
 
-			var newProp = AddBymlPropertyDialog.newProperty(!(target is List<dynamic>));
+			var newProp = AddBymlPropertyDialog.newProperty(!(target is IList<dynamic>));
 			if (newProp == null) return;
-			bool clone = newProp.Item2 is Dictionary<string, dynamic> || newProp.Item2 is List<dynamic>; //reference types must be manually cloned
+			bool clone = newProp.Item2 is IDictionary<string, dynamic> || newProp.Item2 is IList<dynamic>; //reference types must be manually cloned
 			var toAdd = clone ? DeepCloneDictArr.DeepClone(newProp.Item2) : newProp.Item2;
 
 			targetNodeCollection.Clear();
 
-			if (target is List<dynamic>)
+			if (target is IList<dynamic>)
 			{
-				((List<dynamic>)target).Add(toAdd);
-				parseArrayNode((List<dynamic>)target, targetNodeCollection);
+				((IList<dynamic>)target).Insert(((IList<dynamic>)target).Count,toAdd);
+				parseArrayNode((IList<dynamic>)target, targetNodeCollection);
 			}
-			else if (target is Dictionary<string, dynamic>)
+			else if (target is IDictionary<string, dynamic>)
 			{
-				((Dictionary<string, dynamic>)target).Add(newProp.Item1, toAdd);
-				parseDictNode((Dictionary<string, dynamic>)target, targetNodeCollection);
+				((IDictionary<string, dynamic>)target).Add(newProp.Item1, toAdd);
+				parseDictNode((IDictionary<string, dynamic>)target, targetNodeCollection);
 			}
 			else throw new Exception();
 

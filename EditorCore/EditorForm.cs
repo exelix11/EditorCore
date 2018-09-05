@@ -210,7 +210,7 @@ namespace EditorCore
 		private void render_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
 		{
 			if (ActiveForm != this) return;
-			render.Focus();
+			render.FocusModelView();
 		}
 
 		public void RegisterMenuExtension(IMenuExtension ext)
@@ -307,6 +307,8 @@ namespace EditorCore
                     SkipModels = new List<string>();
             }
             else File.WriteAllLines($"{ModelsFolder}/SkipModels.txt", SkipModels.ToArray());
+
+			GC.Collect();
         }
 
         public void LoadLevel(string path = null)
@@ -705,6 +707,28 @@ namespace EditorCore
 			}
 		}
 
+
+		private void EditorForm_Activated(object sender, EventArgs e)
+		{
+			btnPaste.Enabled = (StoredValue != null && StoredValue.Type == ClipBoardItem.ClipboardType.Objects);
+		}
+
+		private void FormDragEnter(object sender, DragEventArgs e)
+		{
+			if (e.Data.GetDataPresent(DataFormats.FileDrop))
+				e.Effect = DragDropEffects.Copy;
+		}
+
+		private void FormDragDrop(object sender, DragEventArgs e)
+		{
+			var files = (string[])e.Data.GetData(DataFormats.FileDrop);
+			foreach (var file in files)
+			{
+				using (var s = new FileStream(file, FileMode.Open))
+					OpenFileHandler.OpenFile(Path.GetFileName(file), s);
+			}
+		}
+
 		#endregion
 
 		//Property grid change, listbox, combobox, show/hide
@@ -848,12 +872,18 @@ namespace EditorCore
         {
             HideList(CurList, HideGroup_CB.Checked);
         }
-#endregion
 
-        //Dragging, click
-#region RendererEvents
-            
-        DragArgs DraggingArgs = null;
+		private void btnEditChildren_Click(object sender, EventArgs e)
+		{
+			if (SelectedObj != null)
+				GameModule.EditChildrenNode(SelectedObj);
+		}
+		#endregion
+
+		//Dragging, click
+		#region RendererEvents
+
+		DragArgs DraggingArgs = null;
 		private IEditingOptionsModule editingOptionsModule;
 
 		bool RenderIsDragging { get { return DraggingArgs != null && Mouse.LeftButton == MouseButtonState.Pressed && (ModifierKeys & Keys.Control) == Keys.Control; } }        
@@ -1302,15 +1332,9 @@ namespace EditorCore
 			DeleteObj(ObjectRightClickMenu.Tag as ILevelObj, list);
 		}
 
-		private void EditorForm_Activated(object sender, EventArgs e)
+		private void EditorForm_Closing(object sender, FormClosingEventArgs e)
 		{
-			btnPaste.Enabled = (StoredValue != null && StoredValue.Type == ClipBoardItem.ClipboardType.Objects);
-		}
-
-		private void btnEditChildren_Click(object sender, EventArgs e)
-		{
-			if (SelectedObj != null)
-				GameModule.EditChildrenNode(SelectedObj);
+			UnloadLevel();
 		}
 	}
 }

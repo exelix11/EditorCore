@@ -46,20 +46,20 @@ namespace SARCExt
 			return res;
 		}
 
-		public static Tuple<uint, byte[]> packAlign(Dictionary<string, byte[]> files)
+		public static Tuple<uint, byte[]> packAlign(Dictionary<string, byte[]> files , ByteOrder endianness = ByteOrder.LittleEndian)
 		{
 			uint align = GuessAlignment(files);
-			return new Tuple<uint, byte[]>(align, pack(files, (int)align));
+			return new Tuple<uint, byte[]>(align, pack(files, (int)align, endianness));
 		}
 
-        public static byte[] pack(Dictionary<string, byte[]> files, int align = -1)
+        public static byte[] pack(Dictionary<string, byte[]> files, int align = -1, ByteOrder endianness = ByteOrder.LittleEndian)
         {
 			if (align < 0)
 				align = (int)GuessAlignment(files);
 
 			MemoryStream o = new MemoryStream();
             BinaryDataWriter bw = new BinaryDataWriter(o, false);
-            bw.ByteOrder = ByteOrder.LittleEndian;
+            bw.ByteOrder = endianness;
             bw.Write("SARC",BinaryStringFormat.NoPrefixOrTermination);
             bw.Write((UInt16)0x14); // Chunk length
             bw.Write((UInt16)0xFEFF); // BOM
@@ -120,10 +120,14 @@ namespace SARCExt
         {
             Dictionary<string, byte[]> res = new Dictionary<string, byte[]>();
             BinaryDataReader br = new BinaryDataReader(src, false);
-            br.BaseStream.Position = 0;
-            br.ByteOrder = ByteOrder.LittleEndian;
-            br.ReadUInt32(); // Header
-            br.ReadUInt16(); // Chunk length
+			br.ByteOrder = ByteOrder.LittleEndian;
+			br.BaseStream.Position = 6;
+			if (br.ReadUInt16() == 0xFFFE)
+				br.ByteOrder = ByteOrder.BigEndian;
+			br.BaseStream.Position = 0;
+			if (br.ReadUInt32() != 0x43524153)
+				throw new Exception("Wrong magic");
+			br.ReadUInt16(); // Chunk length
             br.ReadUInt16(); // BOM
             br.ReadUInt32(); // File size
             UInt32 startingOff = br.ReadUInt32();

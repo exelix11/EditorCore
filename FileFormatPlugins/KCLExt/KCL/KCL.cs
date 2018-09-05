@@ -15,8 +15,8 @@ namespace MarioKart.MK7
 		KCLModel.KCLModelHeader GlobalHeader;
 		List<KCLModel> Models = new List<KCLModel>();
 
-		internal static readonly Vector3D MinOffset = new Vector3D(1,1,1);//7new Vector3D(50, 80, 50);
-		internal static readonly Vector3D MaxOffset = new Vector3D(1,1,1);// new Vector3D(50, 50, 50);
+		internal static readonly Vector3D MinOffset = new Vector3D(50, 80, 50);
+		internal static readonly Vector3D MaxOffset = new Vector3D(50, 50, 50);
 
 		public KCL() { }
 
@@ -141,6 +141,11 @@ namespace MarioKart.MK7
 					throw new Exception("No models in the global octree");
 
 				uint ModelListOff = (uint)er.BaseStream.Position;
+
+				er.BaseStream.Position = 0xC;
+				er.Write((UInt32)modelCount);
+				er.BaseStream.Position = ModelListOff;
+
 				for (int i = 0; i < modelCount; i++) //Update offsets later
 					er.Write((UInt32)0);
 
@@ -249,17 +254,12 @@ namespace MarioKart.MK7
 					for (int m = 0; m < 2; m++)
 					{
 						var Boxmin = min + new Vector3D(BoxSize.X * m, BoxSize.Y * l, BoxSize.Z * k);
-						var mod = KCLModel.FromTriangles(Triangles, baseTriCount, Boxmin, BoxSize/2f);
+						var mod = KCLModel.FromTriangles(Triangles, baseTriCount, Boxmin, BoxSize/2);
 						res.Models.Add(mod);
-						if (mod != null) baseTriCount += (uint)mod.Planes.Length; 
+						if (mod != null) baseTriCount += (uint)mod.Planes.Length;
 					}
-
+			
 			res.GlobalHeader.Unknown1 = baseTriCount;
-			//resMod.Vertices = Vertex.ToArray();
-			//resMod.Normals = Normals.ToArray();
-			//resMod.Planes = planes.ToArray();
-			//resMod.Header = new KCLModel.KCLModelHeader();
-			//resMod.Octree = KCLOctree.FromTriangles(Triangles.ToArray(), resMod.Header, 128, 50);			
 
 			return res;
 		}
@@ -420,16 +420,16 @@ namespace MarioKart.MK7
 				return o;
 			}
 
-			internal static KCLModel FromTriangles(List<Triangle> triangles, uint baseTriCount, Vector3D BoxMin, Vector3D HalfSize)
+			internal static KCLModel FromTriangles(List<Triangle> triangles, uint baseTriCount, Vector3D BoxMin, Vector3D QuarterSize)
 			{
 				List<Triangle> modelTri = new List<Triangle>();
 				List<Vector3D> Vertices = new List<Vector3D>();
 				List<Vector3D> Normals = new List<Vector3D>();
 				List<KCLPlane> Planes = new List<KCLPlane>();
-
+				
 				for (int i = 0; i < triangles.Count; i++)
 				{
-					if (!KCLExt.KCL.TriangleBoxIntersect.triBoxOverlap(BoxMin + HalfSize, HalfSize, triangles[i]))
+					if (!KCLExt.KCL.TriangleBoxIntersect.triBoxOverlap(BoxMin + QuarterSize, QuarterSize , triangles[i]))
 						continue;
 
 					modelTri.Add(triangles[i]);
