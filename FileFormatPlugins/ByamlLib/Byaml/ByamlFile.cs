@@ -11,9 +11,11 @@ using EditorCore;
 
 namespace Syroot.NintenTools.Byaml.Dynamic
 {
-	public class BymlFileResult
+	public class BymlFileData
 	{
 		public ByteOrder byteOrder;
+		public ushort Version;
+		public bool SupportPaths;
 		public dynamic RootNode;
 	}
 
@@ -27,9 +29,9 @@ namespace Syroot.NintenTools.Byaml.Dynamic
         // ---- CONSTANTS ----------------------------------------------------------------------------------------------
 
         private const ushort _magicBytes = 0x4259; // "BY"
-        // ---- MEMBERS ------------------------------------------------------------------------------------------------
-
-        private bool _supportPaths;
+		// ---- MEMBERS ------------------------------------------------------------------------------------------------
+		private ushort _version;
+		private bool _supportPaths;
         private ByteOrder _byteOrder;
 
         private List<string> _nameArray;
@@ -39,8 +41,9 @@ namespace Syroot.NintenTools.Byaml.Dynamic
 
         // ---- CONSTRUCTORS & DESTRUCTOR ------------------------------------------------------------------------------
 
-        private ByamlFile(bool supportPaths, ByteOrder byteOrder,bool fastLoad = false)
+        private ByamlFile(bool supportPaths, ByteOrder byteOrder, ushort _ver , bool fastLoad = false)
         {
+			_version = _ver;
             _supportPaths = supportPaths;
             _byteOrder = byteOrder;
 			_fastLoad = fastLoad;
@@ -59,12 +62,11 @@ namespace Syroot.NintenTools.Byaml.Dynamic
         /// <param name="supportPaths">Whether to expect a path array offset. This must be enabled for Mario Kart 8
         /// files.</param>
         /// <param name="byteOrder">The <see cref="ByteOrder"/> to read data in.</param>
-        public static dynamic Load(string fileName, bool supportPaths = false,
-            ByteOrder byteOrder = ByteOrder.LittleEndian)
+        public static BymlFileData LoadN(string fileName, bool supportPaths = false, ByteOrder byteOrder = ByteOrder.LittleEndian)
         {
             using (FileStream stream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                return Load(stream, supportPaths, byteOrder);
+                return LoadN(stream, supportPaths, byteOrder);
             }
         }
         
@@ -75,11 +77,12 @@ namespace Syroot.NintenTools.Byaml.Dynamic
         /// <param name="supportPaths">Whether to expect a path array offset. This must be enabled for Mario Kart 8
         /// files.</param>
         /// <param name="byteOrder">The <see cref="ByteOrder"/> to read data in.</param>
-        public static dynamic Load(Stream stream, bool supportPaths = false, ByteOrder byteOrder = ByteOrder.LittleEndian)
+        public static BymlFileData LoadN(Stream stream, bool supportPaths = false, ByteOrder byteOrder = ByteOrder.LittleEndian)
         {
-            ByamlFile byamlFile = new ByamlFile(supportPaths, byteOrder);
-            return byamlFile.Read(stream);
-        }
+            ByamlFile byamlFile = new ByamlFile(supportPaths, byteOrder,3);
+			var r = byamlFile.Read(stream);
+			return new BymlFileData() { byteOrder = byamlFile._byteOrder, RootNode = r, Version = byamlFile._version, SupportPaths = supportPaths };
+		}
 
 		/// <summary>
 		/// Deserializes and returns the dynamic value of the BYAML node read from the specified stream keeping the references, do not use this if you intend to edit the byml.
@@ -88,50 +91,30 @@ namespace Syroot.NintenTools.Byaml.Dynamic
 		/// <param name="supportPaths">Whether to expect a path array offset. This must be enabled for Mario Kart 8
 		/// files.</param>
 		/// <param name="byteOrder">The <see cref="ByteOrder"/> to read data in.</param>
-		public static dynamic FastLoad(Stream stream, bool supportPaths = false, ByteOrder byteOrder = ByteOrder.LittleEndian)
+		public static BymlFileData FastLoadN(Stream stream, bool supportPaths = false, ByteOrder byteOrder = ByteOrder.LittleEndian)
 		{
-			ByamlFile byamlFile = new ByamlFile(supportPaths, byteOrder,true);
-			return byamlFile.Read(stream);
+			ByamlFile byamlFile = new ByamlFile(supportPaths, byteOrder, 3, true);
+			var r = byamlFile.Read(stream);
+			return new BymlFileData() { byteOrder = byamlFile._byteOrder, RootNode = r, Version = byamlFile._version, SupportPaths = supportPaths };
 		}
-
-		/// <summary>
-		/// Deserializes and returns the byte order and the dynamic value of the BYAML file read from the specified stream.
-		/// </summary>
-		/// <param name="stream">The <see cref="Stream"/> to read the data from.</param>
-		/// <param name="supportPaths">Whether to expect a path array offset. This must be enabled for Mario Kart 8
-		/// files.</param>
-		public static BymlFileResult LoadGetEndianness(Stream stream, bool supportPaths = false)
-		{
-			ByamlFile byamlFile = new ByamlFile(supportPaths, ByteOrder.LittleEndian);
-			dynamic rootNode = byamlFile.Read(stream);
-			return new BymlFileResult() { byteOrder = byamlFile._byteOrder, RootNode = rootNode };
-		}
-
+		
 		/// <summary>
 		/// Serializes the given dynamic value which requires to be an array or dictionary of BYAML compatible values
 		/// and stores it in the given file.
 		/// </summary>
-		/// <param name="fileName">The name of the file to store the data in.</param>
-		/// <param name="root">The dynamic value becoming the root of the BYAML file. Must be an array or dictionary of
-		/// BYAML compatible values.</param>
-		/// <param name="supportPaths">Whether to include a path array. This must be enabled for Mario Kart 8 files.
-		/// </param>
-		/// <param name="byteOrder">The <see cref="ByteOrder"/> to store data in.</param>
-		public static void Save(string fileName, dynamic root, bool supportPaths = false,
-            ByteOrder byteOrder = ByteOrder.LittleEndian)
+		public static void SaveN(string fileName, BymlFileData file)
         {
             using (FileStream stream = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None))
             {
-                Save(stream, root, supportPaths, byteOrder);
+                SaveN(stream, file);
             }
         }
 
-        public static byte[] Save(dynamic root, bool supportPaths = false,
-            ByteOrder byteOrder = ByteOrder.LittleEndian)
+        public static byte[] SaveN(BymlFileData file)
         {
             using (MemoryStream stream = new MemoryStream())
             {
-                Save(stream, root, supportPaths, byteOrder);
+                SaveN(stream, file);
                 return stream.ToArray();
             }
         }
@@ -140,17 +123,10 @@ namespace Syroot.NintenTools.Byaml.Dynamic
         /// Serializes the given dynamic value which requires to be an array or dictionary of BYAML compatible values
         /// and stores it in the specified stream.
         /// </summary>
-        /// <param name="stream">The <see cref="Stream"/> to store the data in.</param>
-        /// <param name="root">The dynamic value becoming the root of the BYAML file. Must be an array or dictionary of
-        /// BYAML compatible values.</param>
-        /// <param name="supportPaths">Whether to include a path array. This must be enabled for Mario Kart 8 files.
-        /// </param>
-        /// <param name="byteOrder">The <see cref="ByteOrder"/> to store data in.</param>
-        public static void Save(Stream stream, dynamic root, bool supportPaths = false,
-            ByteOrder byteOrder = ByteOrder.LittleEndian)
+        public static void SaveN(Stream stream, BymlFileData file)
         {
-			ByamlFile byamlFile = new ByamlFile(supportPaths, byteOrder);
-            byamlFile.Write(stream, root);
+			ByamlFile byamlFile = new ByamlFile(file.SupportPaths, file.byteOrder, file.Version);
+            byamlFile.Write(stream, file.RootNode);
         }
 
         // ---- Helper methods ----
@@ -217,8 +193,8 @@ namespace Syroot.NintenTools.Byaml.Dynamic
                     reader.BaseStream.Position = 0;
                     if (reader.ReadUInt16() != _magicBytes) throw new Exception("Header mismatch");
                 }
-				if (reader.ReadUInt16() != 0x0001) { } // System.Diagnostics.Debug.WriteLine("Unsupported BYAML version.");// throw new ByamlException("Unsupported BYAML version.");
-                uint nameArrayOffset = reader.ReadUInt32();
+				_version = reader.ReadUInt16();
+				uint nameArrayOffset = reader.ReadUInt32();
                 uint stringArrayOffset = reader.ReadUInt32();
                 uint pathArrayOffset = 0;
                 if (_supportPaths)
@@ -495,7 +471,7 @@ namespace Syroot.NintenTools.Byaml.Dynamic
 
                 // Write the header, specifying magic bytes, version and main node offsets.
                 writer.Write(_magicBytes);
-                writer.Write((short)0x0003); //Odyssey version
+                writer.Write(_version);
                 Offset nameArrayOffset = writer.ReserveOffset();
                 Offset stringArrayOffset = writer.ReserveOffset();
                 Offset pathArrayOffset = _supportPaths ? writer.ReserveOffset() : null;
