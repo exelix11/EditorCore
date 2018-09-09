@@ -130,7 +130,6 @@ namespace ByamlExt
 			int index = 0;
             foreach (dynamic k in list)
             {
-				index++;
 				if (k is IDictionary<string, dynamic>)
                 {
                     TreeNode current = addto.Add("<Dictionary>");
@@ -153,8 +152,9 @@ namespace ByamlExt
                 {
 					var n = addto.Add(k == null ? "<NULL>" : k.ToString());
 					if (k != null) n.Tag = new EditableNode(list, index);
-                }
-            }
+				}
+				index++;
+			}
         }
 
         private void BeforeExpand(object sender, TreeViewCancelEventArgs e)
