@@ -65,6 +65,7 @@
     <Compile Include="Byaml\BymlPathPointEditor.Designer.cs">
       <DependentUpon>BymlPathPointEditor.cs</DependentUpon>
     </Compile>
+    <Compile Include="Byaml\XmlConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

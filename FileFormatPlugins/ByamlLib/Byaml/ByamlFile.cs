@@ -9,7 +9,7 @@ using Syroot.Maths;
 using System.Diagnostics;
 using EditorCore;
 
-namespace Syroot.NintenTools.Byaml.Dynamic
+namespace ByamlExt.Byaml
 {
 	public class BymlFileData
 	{
@@ -803,7 +803,7 @@ namespace Syroot.NintenTools.Byaml.Dynamic
 
         // ---- Helper methods ----
 
-        private ByamlNodeType GetNodeType(dynamic node, bool isInternalNode = false)
+		static internal ByamlNodeType GetNodeType(dynamic node, bool isInternalNode = false)
         {
             if (isInternalNode)
             {

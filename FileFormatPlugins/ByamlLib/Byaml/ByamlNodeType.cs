@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Syroot.NintenTools.Byaml
+namespace ByamlExt.Byaml
 {
 	/// <summary>
 	/// Represents the type of which a dynamic BYAML node can be.

@@ -1,5 +1,4 @@
-﻿using Syroot.NintenTools.Byaml;
-using Syroot.NintenTools.Byaml.Dynamic;
+﻿using ByamlExt.Byaml;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -191,7 +190,10 @@ namespace ByamlExt
 
         private void exportJsonToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+			SaveFileDialog sav = new SaveFileDialog() {	Filter = "Xml file | *.xml"	};
+			if (sav.ShowDialog() != DialogResult.OK) return;
+			File.WriteAllText(sav.FileName, 
+				XmlConverter.ToXml(new BymlFileData { Version = bymlVer, byteOrder = byteOrder, SupportPaths = pathSupport, RootNode = byml }));
         }
 
         public static void ImportFromJson()
@@ -214,21 +216,20 @@ namespace ByamlExt
 			return MessageBox.Show("Does this game support paths ?", "", MessageBoxButtons.YesNo) == DialogResult.Yes;
 		}
 
-		public static void OpenByml(string Filename)
-        {
-			bool paths = SupportPaths();
+		public static void OpenByml(string Filename) =>
+			OpenByml(new FileStream(Filename, FileMode.Open), Filename);
 
-			var byml = ByamlFile.LoadN(new FileStream(Filename, FileMode.Open, FileAccess.Read), paths);
-            new ByamlViewer(byml.RootNode, paths, byml.Version, byml.byteOrder).Show();
-		}
+		public static void OpenByml(Stream file, string FileName = "") =>
+			OpenByml(file, FileName, SupportPaths());
 
-		public static void OpenByml(Stream file, string FileName = "")
+		public static void OpenByml(Stream file, string FileName, bool paths)
 		{
-			bool paths = SupportPaths();
-
 			var byml = ByamlFile.LoadN(file, paths);
-			new ByamlViewer(byml.RootNode, paths, byml.Version , byml.byteOrder, FileName).Show();
+			new ByamlViewer(byml.RootNode, paths, byml.Version, byml.byteOrder, FileName).Show();
 		}
+
+		public static void OpenByml(BymlFileData data, string filename) =>
+			new ByamlViewer(data.RootNode, data.SupportPaths, data.Version, data.byteOrder, filename).Show();
 
 		private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
         {

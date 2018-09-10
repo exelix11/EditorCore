@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using Syroot.Maths;
 
-namespace Syroot.NintenTools.Byaml
+namespace ByamlExt.Byaml
 {
     /// <summary>
     /// Represents a point in a BYAML path.

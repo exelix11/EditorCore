@@ -99,8 +99,7 @@
 			// 
 			this.exportJsonToolStripMenuItem.Name = "exportJsonToolStripMenuItem";
 			this.exportJsonToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-			this.exportJsonToolStripMenuItem.Text = "Export json";
-			this.exportJsonToolStripMenuItem.Visible = false;
+			this.exportJsonToolStripMenuItem.Text = "Export as xml";
 			this.exportJsonToolStripMenuItem.Click += new System.EventHandler(this.exportJsonToolStripMenuItem_Click);
 			// 
 			// toolStripSeparator1

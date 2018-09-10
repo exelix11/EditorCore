@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Syroot.NintenTools.Byaml
+namespace ByamlExt.Byaml
 {
     /// <summary>
     /// Represents errors that occur when trying to process invalid BYAML data.
