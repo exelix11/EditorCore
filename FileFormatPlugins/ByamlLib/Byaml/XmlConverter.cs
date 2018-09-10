@@ -67,8 +67,8 @@ namespace ByamlExt.Byaml
 			{
 				xr.WriteStartElement(GetNodeName(node));
 				if (name != null)
-					xr.WriteAttributeString("Name", name);
-				xr.WriteAttributeString("Value", node.ToString());
+					xr.WriteAttributeString("N", name);
+				xr.WriteAttributeString("V", node.ToString());
 				xr.WriteEndElement();
 			}
 		}
@@ -77,7 +77,7 @@ namespace ByamlExt.Byaml
 		{
 			xr.WriteStartElement(GetNodeName(node));
 			if (name != null)
-				xr.WriteAttributeString("Name", name);
+				xr.WriteAttributeString("N", name);
 			for (int i = 0; i < node.Count; i++)
 			{
 				WriteNode(node[i], null, xr);
@@ -89,7 +89,7 @@ namespace ByamlExt.Byaml
 		{
 			xr.WriteStartElement(GetNodeName(node));
 			if (name != null)
-				xr.WriteAttributeString("Name", name);
+				xr.WriteAttributeString("N", name);
 			var keys = node.Keys.ToArray();
 			for (int i = 0; i < keys.Length; i++)
 			{
@@ -116,7 +116,7 @@ namespace ByamlExt.Byaml
 				default:
 					{
 						Type T = nodeType.GetInstanceType();
-						return ByamlTypeHelper.ConvertValue(T,n.Attributes["Value"].Value);
+						return ByamlTypeHelper.ConvertValue(T,n.Attributes["V"].Value);
 					}
 			}
 		}
@@ -127,7 +127,7 @@ namespace ByamlExt.Byaml
 			for (int i = 0; i < n.ChildNodes.Count; i++)
 			{
 				var c = n.ChildNodes[i];
-				res.Add(c.Attributes["Name"].Value, ParseNode(c));
+				res.Add(c.Attributes["N"].Value, ParseNode(c));
 			}
 			return res;
 		}
