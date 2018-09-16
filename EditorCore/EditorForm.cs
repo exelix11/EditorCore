@@ -386,7 +386,7 @@ namespace EditorCore
 			string CachedModelPath = $"{ModelsFolder}\\{ObjName}.obj";
 			if (render.ImportedModels.ContainsKey(CachedModelPath) || //The model has aready been loaded or has been converted
 				File.Exists(CachedModelPath) ||
-				GameModule.ConvertModelFile(ObjName, CachedModelPath))
+				(GameModule.ConvertModelFile(ObjName, ModelsFolder) && File.Exists(CachedModelPath)))
 				return CachedModelPath;
 
 			SkipModels?.Add(ObjName);
