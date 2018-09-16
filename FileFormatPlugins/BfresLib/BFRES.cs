@@ -173,6 +173,8 @@ namespace Smash_Forge
                     };
                     int NextFMDL = f.pos();
 
+                    model.name = fmdl_info.name;
+
                     //Models.Nodes.Add(fmdl_info.name);
                     //   //Console.WriteLine($" Name {fmdl_info.name} eofString {fmdl_info.eofString} fsklOff {fmdl_info.fsklOff}");
                     //  //Console.WriteLine(fmdl_info.fvtxCount);
@@ -746,6 +748,7 @@ namespace Smash_Forge
 
         public class FMDL_Model
         {
+            public string name;
             public List<Mesh> poly = new List<Mesh>();
             public bool isVisible = true;
             public int[] Node_Array;
