@@ -17,14 +17,20 @@ namespace BfresLib
 {
     public class BfresConverter
     {
-
-        public static bool Convert(byte[] bfres, string outDir)
+		/// <summary>
+		/// Exports all models from the target bfres to the selected folder.
+		/// Returns array with the converted file names, it's NULL if no models were converted
+		/// </summary>
+		/// <param name="bfres">Source brfs</param>
+		/// <param name="outDir">Target directory</param>
+		/// <returns></returns>
+		public static string[] Convert(byte[] bfres, string outDir)
         {
-            if (bfres == null) return false;
+            if (bfres == null) return null;
             BFRES s = new BFRES();
             s.Read(bfres);
             Export(outDir, s);
-			bool res = s.models.Count != 0;
+			var res = s.models.Count == 0 ? null : s.models.Select(x => x.name).ToArray();
 			s = null;
             GC.Collect();
 			return res;
@@ -169,7 +175,7 @@ namespace BfresLib
                 {
                     Console.WriteLine("FAILED texture " + Tex.Name);
 #if DEBUG
-                    Debugger.Break();
+                    //Debugger.Break();
 #endif
                 }
 #if !FIRST_MIPMAP_ONLY
