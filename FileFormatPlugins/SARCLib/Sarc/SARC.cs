@@ -23,6 +23,42 @@ namespace SARCExt
             return result;
         }
 
+        public static string GuessFileExtension(byte[] f)
+        {
+            string Ext = ".bin";
+
+            if (f.Matches("SARC")) Ext = ".sarc";
+            else if (f.Matches("Yaz")) Ext = ".szs";
+            else if (f.Matches("YB") || f.Matches("BY")) Ext = ".byaml";
+            else if (f.Matches("FRES")) Ext = ".bfres";
+            else if (f.Matches("Gfx2")) Ext = ".gtx";
+            else if (f.Matches("FLYT")) Ext = ".bflyt";
+            else if (f.Matches("CLAN")) Ext = ".bclan";
+            else if (f.Matches("CLYT")) Ext = ".bclyt";
+            else if (f.Matches("FLIM")) Ext = ".bclim";
+            else if (f.Matches("FLAN")) Ext = ".bflan";
+            else if (f.Matches("FSEQ")) Ext = ".bfseq";
+            else if (f.Matches("VFXB")) Ext = ".pctl";
+            else if (f.Matches("AAHS")) Ext = ".sharc";
+            else if (f.Matches("BAHS")) Ext = ".sharcb";
+            else if (f.Matches("BNTX")) Ext = ".bntx";
+            else if (f.Matches("BNSH")) Ext = ".bnsh";
+            else if (f.Matches("FSHA")) Ext = ".bfsha";
+            else if (f.Matches("FFNT")) Ext = ".bffnt";
+            else if (f.Matches("CFNT")) Ext = ".bcfnt";
+            else if (f.Matches("CSTM")) Ext = ".bcstm";
+            else if (f.Matches("FSTM")) Ext = ".bfstm";
+            else if (f.Matches("STM")) Ext = ".bfsha";
+            else if (f.Matches("CWAV")) Ext = ".bcwav";
+            else if (f.Matches("FWAV")) Ext = ".bfwav";
+            else if (f.Matches("CTPK")) Ext = ".ctpk";
+            else if (f.Matches("CGFX")) Ext = ".bcres";
+            else if (f.Matches("AAMP")) Ext = ".aamp";
+            else if (f.Matches("MsgStdBn")) Ext = ".msbt";
+            else if (f.Matches("MsgPrjBn")) Ext = ".msbp";
+            return Ext;
+        }
+
 		public static uint GuessAlignment(Dictionary<string, byte[]> files) //From https://github.com/aboood40091/SarcLib/blob/master/src/FileArchive.py#L487
 		{
 			uint res = 4;
@@ -150,7 +186,10 @@ namespace SARCExt
                     int tempInt = (int)sfat.nodes[m].EON - (int)sfat.nodes[m].nodeOffset;
                     temp = br.ReadBytes(tempInt);
                 }
-                res.Add(sfnt.fileNames[m], temp);
+                if (sfat.nodes[m].fileBool == 1)
+                    res.Add(sfnt.fileNames[m], temp);
+                else
+                    res.Add(sfat.nodes[m].hash.ToString() + GuessFileExtension(temp), temp);
             }
 
             return res;
