@@ -15,9 +15,9 @@ namespace SARCExt
 {
 	public partial class SarcEditor : Form
 	{
-		public Dictionary<string, byte[]> loadedSarc;
+		public SarcData loadedSarc;
 		public Stream sourceStream;
-		public SarcEditor(Dictionary<string, byte[]> sarc, Stream source = null)
+		public SarcEditor(SarcData sarc, Stream source = null)
 		{
 			InitializeComponent();
 			loadedSarc = sarc;
@@ -35,13 +35,13 @@ namespace SARCExt
 			}
 			else
 			{
-				listBox1.Items.AddRange(loadedSarc.Keys.ToArray());
+				listBox1.Items.AddRange(loadedSarc.Files.Keys.ToArray());
 			}
 		}
 
 		private void extractAllFilesToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			ExtractMultipleFiles(loadedSarc.Keys.ToArray());
+			ExtractMultipleFiles(loadedSarc.Files.Keys.ToArray());
 		}
 
 		void ExtractMultipleFiles(IEnumerable<string> files)
@@ -51,7 +51,7 @@ namespace SARCExt
 				return;
 			foreach (string f in files)
 			{
-				File.WriteAllBytes(Path.Combine(dlg.SelectedPath, f), loadedSarc[f]);
+				File.WriteAllBytes(Path.Combine(dlg.SelectedPath, f), loadedSarc.Files[f]);
 			}
 		}
 
@@ -64,55 +64,65 @@ namespace SARCExt
 				var sav = new SaveFileDialog() { FileName = listBox1.SelectedItem.ToString()};
 				if (sav.ShowDialog() != DialogResult.OK)
 					return;
-				File.WriteAllBytes(sav.FileName, loadedSarc[listBox1.SelectedItem.ToString()]);
+				File.WriteAllBytes(sav.FileName, loadedSarc.Files[listBox1.SelectedItem.ToString()]);
 			}
 		}
 
 		private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
 		{
+			if (loadedSarc.HashOnly)
+			{
+				MessageBox.Show("Can't remove files from a hash only sarc");
+				return;
+			}
 			foreach (var item in listBox1.SelectedItems.Cast<string>())
-				loadedSarc.Remove(item);
+				loadedSarc.Files.Remove(item);
 			listBox1.Items.Clear();
-			listBox1.Items.AddRange(loadedSarc.Keys.ToArray());
+			listBox1.Items.AddRange(loadedSarc.Files.Keys.ToArray());
 		}
 
 		private void addFilesToolStripMenuItem_Click(object sender, EventArgs e)
 		{
+			if (loadedSarc.HashOnly)
+			{
+				MessageBox.Show("Can't add files to a hash only sarc");
+				return;
+			}
 			var opn = new OpenFileDialog() { Multiselect = true };
 			if (opn.ShowDialog() != DialogResult.OK)
 				return;
 			foreach (var f in opn.FileNames)
 			{
 				string name = Path.GetFileName(f);
-				if (loadedSarc.ContainsKey(name))
+				if (loadedSarc.Files.ContainsKey(name))
 				{
 					MessageBox.Show($"File {name} already in szs");
 					continue;
 				}
-				loadedSarc.Add(name, File.ReadAllBytes(f));
+				loadedSarc.Files.Add(name, File.ReadAllBytes(f));
 			}
 		}
 
 		private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			var sav = new SaveFileDialog() { Filter = "szs file|*.szs" };
+			var sav = new SaveFileDialog() { Filter = "szs file|*.szs|sarc file|*.sarc" };
 			if (sav.ShowDialog() != DialogResult.OK)
 				return;
 			if (numericUpDown1.Value == 0)
-				File.WriteAllBytes(sav.FileName, SARC.pack(loadedSarc));
+				File.WriteAllBytes(sav.FileName, SARC.PackN(loadedSarc).Item2);
 			else
 			{
-				var s = SARC.packAlign(loadedSarc);
-				File.WriteAllBytes(sav.FileName, YAZ0.Compress(s.Item2, (int)numericUpDown1.Value,s.Item1));
+				var s = SARC.PackN(loadedSarc);
+				File.WriteAllBytes(sav.FileName, YAZ0.Compress(s.Item2, (int)numericUpDown1.Value,(uint)s.Item1));
 			}
 		}
 
 		private void replaceToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			byte[] compressedSarc = null;
-			var s = SARC.packAlign(loadedSarc);
+			var s = SARC.PackN(loadedSarc);
 			if (numericUpDown1.Value != 0)
-				compressedSarc = YAZ0.Compress(s.Item2, (int)numericUpDown1.Value,s.Item1);
+				compressedSarc = YAZ0.Compress(s.Item2, (int)numericUpDown1.Value,(uint)s.Item1);
 			else
 				compressedSarc = s.Item2;
 			//sourceStream.Position = 0;
@@ -123,7 +133,7 @@ namespace SARCExt
 		{
 			if (listBox1.SelectedItem != null)
 				OpenFileHandler.OpenFile(listBox1.SelectedItem.ToString(), 
-					new MemoryStream(loadedSarc[listBox1.SelectedItem.ToString()]));
+					new MemoryStream(loadedSarc.Files[listBox1.SelectedItem.ToString()]));
 		}
 
 		private void replaceToolStripMenuItem1_Click(object sender, EventArgs e)
@@ -131,7 +141,7 @@ namespace SARCExt
 			if (listBox1.SelectedItem == null) return;
 			var opn = new OpenFileDialog();
 			if (opn.ShowDialog() != DialogResult.OK) return;
-			loadedSarc[listBox1.SelectedItem.ToString()] = File.ReadAllBytes(opn.FileName);
+			loadedSarc.Files[listBox1.SelectedItem.ToString()] = File.ReadAllBytes(opn.FileName);
 		}
 	}
 }

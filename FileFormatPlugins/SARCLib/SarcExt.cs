@@ -46,7 +46,7 @@ namespace SARCExt
 
 		public void OpenFile(string filename, Stream file)
 		{
-			new SarcEditor(SARC.UnpackRam(file)).Show();
+			new SarcEditor(SARC.UnpackRamN(file)).Show();
 		}
 	}
 
@@ -103,9 +103,9 @@ namespace SARCExt
 			if (opn.ShowDialog() != DialogResult.OK) return;
 			byte[] file = File.ReadAllBytes(opn.FileName);
 			if (file[0] == 'S' && file[1] == 'A' && file[2] == 'R' && file[3] == 'C')
-				new SarcEditor(SARC.UnpackRam(file)).Show();
+				new SarcEditor(SARC.UnpackRamN(file)).Show();
 			else if (file[0] == 'Y' && file[1] == 'a' && file[2] == 'z' && file[3] == '0')
-				new SarcEditor(SARC.UnpackRam(YAZ0.Decompress(file))).Show();
+				new SarcEditor(SARC.UnpackRamN(YAZ0.Decompress(file))).Show();
 			else
 				MessageBox.Show("Unknown file format");
 		}

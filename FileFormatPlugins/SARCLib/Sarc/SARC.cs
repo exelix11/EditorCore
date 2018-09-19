@@ -11,6 +11,13 @@ using ExtensionMethods;
 
 namespace SARCExt
 {
+	public class SarcData
+	{
+		public Dictionary<string, byte[]> Files;
+		public ByteOrder endianness;
+		public bool HashOnly;
+	}
+
     public static class SARC
     {
         static uint NameHash(string name)
@@ -23,7 +30,15 @@ namespace SARCExt
             return result;
         }
 
-        public static string GuessFileExtension(byte[] f)
+		static uint StringHashToUint(string name)
+		{
+			if (name.Contains("."))
+				name = name.Split('.')[0];
+			if (name.Length != 8) throw new Exception("Invalid hash length");
+			return Convert.ToUInt32(name, 16);
+		}
+
+		public static string GuessFileExtension(byte[] f)
         {
             string Ext = ".bin";
 
@@ -82,80 +97,77 @@ namespace SARCExt
 			return res;
 		}
 
-		public static Tuple<uint, byte[]> packAlign(Dictionary<string, byte[]> files , ByteOrder endianness = ByteOrder.LittleEndian)
+		public static Tuple<int, byte[]> PackN(SarcData data, int _align = -1)
 		{
-			uint align = GuessAlignment(files);
-			return new Tuple<uint, byte[]>(align, pack(files, (int)align, endianness));
-		}
-
-        public static byte[] pack(Dictionary<string, byte[]> files, int align = -1, ByteOrder endianness = ByteOrder.LittleEndian)
-        {
-			if (align < 0)
-				align = (int)GuessAlignment(files);
+			int align = _align >= 0 ? _align : (int)GuessAlignment(data.Files);
 
 			MemoryStream o = new MemoryStream();
-            BinaryDataWriter bw = new BinaryDataWriter(o, false);
-            bw.ByteOrder = endianness;
-            bw.Write("SARC",BinaryStringFormat.NoPrefixOrTermination);
-            bw.Write((UInt16)0x14); // Chunk length
-            bw.Write((UInt16)0xFEFF); // BOM
-            bw.Write((UInt32)0x00); //filesize update later
-            bw.Write((UInt32)0x00); //Beginning of data
-            bw.Write((UInt32)0x00000100);
-            bw.Write("SFAT", BinaryStringFormat.NoPrefixOrTermination);
-            bw.Write((UInt16)0xc);
-            bw.Write((UInt16)files.Keys.Count);
-            bw.Write((UInt32)0x00000065);
-            List<uint> offsetToUpdate = new List<uint>();
-            foreach (string k in files.Keys)
-            {
-                bw.Write(NameHash(k));
-                offsetToUpdate.Add((uint)bw.BaseStream.Position);                
-                bw.Write((UInt32)0);
-                bw.Write((UInt32)0);
-                bw.Write((UInt32)0);
-            }
-            bw.Write("SFNT", BinaryStringFormat.NoPrefixOrTermination);
-            bw.Write((UInt16)0x8);
-            bw.Write((UInt16)0);
-            List<uint> StringOffsets = new List<uint>();
-            foreach (string k in files.Keys)
-            {
-                StringOffsets.Add((uint)bw.BaseStream.Position);
-                bw.Write(k, BinaryStringFormat.ZeroTerminated);
-                bw.Align(4);
-            }
-            bw.Align(align);
-            List<uint> FileOffsets = new List<uint>();
-            foreach (string k in files.Keys)
-            {
-                FileOffsets.Add((uint)bw.BaseStream.Position);
-                bw.Write(files[k]);
-                bw.Align(align);
-            }
-            for (int i = 0; i < offsetToUpdate.Count; i++)
-            {
-                bw.BaseStream.Position = offsetToUpdate[i];
-                bw.Write((UInt16)((StringOffsets[i] - StringOffsets[0]) / 4));
-                bw.Write((UInt16)0x0100);
-                bw.Write((UInt32)(FileOffsets[i] - FileOffsets[0]));
-                bw.Write((UInt32)(FileOffsets[i] + files.Values.ToArray()[i].Length - FileOffsets[0]));
-            }
-            bw.BaseStream.Position = 0x08;
-            bw.Write((uint)bw.BaseStream.Length);
-            bw.Write((uint)FileOffsets[0]);
-            return o.ToArray();
-        }
+			BinaryDataWriter bw = new BinaryDataWriter(o, false);
+			bw.ByteOrder = data.endianness;
+			bw.Write("SARC", BinaryStringFormat.NoPrefixOrTermination);
+			bw.Write((UInt16)0x14); // Chunk length
+			bw.Write((UInt16)0xFEFF); // BOM
+			bw.Write((UInt32)0x00); //filesize update later
+			bw.Write((UInt32)0x00); //Beginning of data
+			bw.Write((UInt32)0x00000100);
+			bw.Write("SFAT", BinaryStringFormat.NoPrefixOrTermination);
+			bw.Write((UInt16)0xc);
+			bw.Write((UInt16)data.Files.Keys.Count);
+			bw.Write((UInt32)0x00000065);
+			List<uint> offsetToUpdate = new List<uint>();
+			foreach (string k in data.Files.Keys)
+			{
+				if (data.HashOnly)
+					bw.Write(StringHashToUint(k));
+				else
+					bw.Write(NameHash(k));
+				offsetToUpdate.Add((uint)bw.BaseStream.Position);
+				bw.Write((UInt32)0);
+				bw.Write((UInt32)0);
+				bw.Write((UInt32)0);
+			}
+			bw.Write("SFNT", BinaryStringFormat.NoPrefixOrTermination);
+			bw.Write((UInt16)0x8);
+			bw.Write((UInt16)0);
+			List<uint> StringOffsets = new List<uint>();
+			foreach (string k in data.Files.Keys)
+			{
+				StringOffsets.Add((uint)bw.BaseStream.Position);
+				bw.Write(k, BinaryStringFormat.ZeroTerminated);
+				bw.Align(4);
+			}
+			bw.Align(align);
+			List<uint> FileOffsets = new List<uint>();
+			foreach (string k in data.Files.Keys)
+			{
+				FileOffsets.Add((uint)bw.BaseStream.Position);
+				bw.Write(data.Files[k]);
+				bw.Align(align);
+			}
+			for (int i = 0; i < offsetToUpdate.Count; i++)
+			{
+				bw.BaseStream.Position = offsetToUpdate[i];
+				if (!data.HashOnly)
+					bw.Write(0x01000000 | ((StringOffsets[i] - StringOffsets[0]) / 4));
+				else
+					bw.Write((UInt32)0);
+				bw.Write((UInt32)(FileOffsets[i] - FileOffsets[0]));
+				bw.Write((UInt32)(FileOffsets[i] + data.Files.Values.ToArray()[i].Length - FileOffsets[0]));
+			}
+			bw.BaseStream.Position = 0x08;
+			bw.Write((uint)bw.BaseStream.Length);
+			bw.Write((uint)FileOffsets[0]);
 
-        public static Dictionary<string, byte[]> UnpackRam(byte[] src)
-        {
-            return UnpackRam(new MemoryStream(src));
-        }
+			return new Tuple<int, byte[]>(align, o.ToArray());
+		}
 
-        public static Dictionary<string, byte[]> UnpackRam(Stream src)
-        {
-            Dictionary<string, byte[]> res = new Dictionary<string, byte[]>();
-            BinaryDataReader br = new BinaryDataReader(src, false);
+		public static SarcData UnpackRamN(byte[] src) =>
+			UnpackRamN(new MemoryStream(src));
+
+		public static SarcData UnpackRamN(Stream src)
+		{
+			Dictionary<string, byte[]> res = new Dictionary<string, byte[]>();
+			BinaryDataReader br = new BinaryDataReader(src, false);
 			br.ByteOrder = ByteOrder.LittleEndian;
 			br.BaseStream.Position = 6;
 			if (br.ReadUInt16() == 0xFFFE)
@@ -164,43 +176,61 @@ namespace SARCExt
 			if (br.ReadUInt32() != 0x43524153)
 				throw new Exception("Wrong magic");
 			br.ReadUInt16(); // Chunk length
-            br.ReadUInt16(); // BOM
-            br.ReadUInt32(); // File size
-            UInt32 startingOff = br.ReadUInt32();
-            br.ReadUInt32(); // Unknown;
-            SFAT sfat = new SFAT();
-            sfat.parse(br, (int)br.BaseStream.Position);
-            SFNT sfnt = new SFNT();
-            sfnt.parse(br, (int)br.BaseStream.Position, sfat, (int)startingOff);
+			br.ReadUInt16(); // BOM
+			br.ReadUInt32(); // File size
+			UInt32 startingOff = br.ReadUInt32();
+			br.ReadUInt32(); // Unknown;
+			SFAT sfat = new SFAT();
+			sfat.parse(br, (int)br.BaseStream.Position);
+			SFNT sfnt = new SFNT();
+			sfnt.parse(br, (int)br.BaseStream.Position, sfat, (int)startingOff);
 
-            for (int m = 0; m < sfat.nodeCount; m++)
-            {
-                br.Seek(sfat.nodes[m].nodeOffset + startingOff, 0);
-                byte[] temp;
-                if (m == 0)
-                {
-                    temp = br.ReadBytes((int)sfat.nodes[m].EON);
-                }
-                else
-                {
-                    int tempInt = (int)sfat.nodes[m].EON - (int)sfat.nodes[m].nodeOffset;
-                    temp = br.ReadBytes(tempInt);
-                }
-                if (sfat.nodes[m].fileBool == 1)
-                    res.Add(sfnt.fileNames[m], temp);
-                else
-                    res.Add(sfat.nodes[m].hash.ToString() + GuessFileExtension(temp), temp);
-            }
+			bool HashOnly = false;
+			if (sfat.nodeCount > 0)
+			{
+				if (sfat.nodes[0].fileBool != 1) HashOnly = true;
+			}
 
-            return res;
-        }
+			for (int m = 0; m < sfat.nodeCount; m++)
+			{
+				br.Seek(sfat.nodes[m].nodeOffset + startingOff, 0);
+				byte[] temp;
+				if (m == 0)
+				{
+					temp = br.ReadBytes((int)sfat.nodes[m].EON);
+				}
+				else
+				{
+					int tempInt = (int)sfat.nodes[m].EON - (int)sfat.nodes[m].nodeOffset;
+					temp = br.ReadBytes(tempInt);
+				}
+				if (sfat.nodes[m].fileBool == 1)
+					res.Add(sfnt.fileNames[m], temp);
+				else
+					res.Add(sfat.nodes[m].hash.ToString("X8") + GuessFileExtension(temp), temp);
+			}
 
-        public static void UnpackToDisk(string file)
+			return new SarcData() {endianness = br.ByteOrder, HashOnly = HashOnly, Files = res };
+		}
+
+		[Obsolete("This has been kept for compatibility, use PackN instead")]
+		public static byte[] pack(Dictionary<string, byte[]> files, int align = -1, ByteOrder endianness = ByteOrder.LittleEndian) =>
+			PackN(new SarcData() { Files = files, endianness = endianness, HashOnly = false }, align).Item2;
+
+		[Obsolete("This has been kept for compatibility, use UnpackRamN instead")]
+		public static Dictionary<string, byte[]> UnpackRam(byte[] src) =>
+			UnpackRamN(new MemoryStream(src)).Files;
+
+		[Obsolete("This has been kept for compatibility, use UnpackRamN instead")]
+		public static Dictionary<string, byte[]> UnpackRam(Stream src) =>
+			UnpackRamN(src).Files;
+
+		public static void UnpackToDisk(string file)
         {
             try
             {
                 Stream src = new MemoryStream(File.ReadAllBytes(file + ".sarc"));
-                var files = UnpackRam(src);
+                var files = UnpackRamN(src).Files;
                 Write(files.Keys.ToList(), files.Values.ToList(), file);
             }
             catch (Exception e)
@@ -296,10 +326,14 @@ namespace SARCExt
                 {
                     Node node;
                     node.hash = br.ReadUInt32();
-                    node.fileBool = br.ReadByte();
-                    node.unknown1 = br.ReadByte();
-                    node.fileNameOffset = br.ReadUInt16();
-                    node.nodeOffset = br.ReadUInt32();
+					//node.fileBool = br.ReadByte();
+					//node.unknown1 = br.ReadByte();
+					//node.fileNameOffset = br.ReadUInt16();
+					var attributes = br.ReadUInt32();
+					node.fileBool = (byte)(attributes >> 24);
+					node.unknown1 = (byte)((attributes >> 16) & 0xFF);
+					node.fileNameOffset = (UInt16)(attributes & 0xFFFF);
+					node.nodeOffset = br.ReadUInt32();
                     node.EON = br.ReadUInt32();
                     nodes.Add(node);
                 }
