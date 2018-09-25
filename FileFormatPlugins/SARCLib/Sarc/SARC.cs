@@ -79,22 +79,27 @@ namespace SARCExt
 			uint res = 4;
 			foreach (var f in files.Values)
 			{
-				uint fileRes = 0;
-				if (f.Matches("SARC")) fileRes = 0x2000;
-				else if (f.Matches("Yaz")) fileRes = 0x80;
-				else if (f.Matches("YB") || f.Matches("BY")) fileRes = 0x80;
-				else if (f.Matches("FRES") || f.Matches("Gfx2") || f.Matches("AAHS") || f.Matches("BAHS")) fileRes = 0x2000;
-				else if (f.Matches("BNTX") || f.Matches("BNSH") || f.Matches("FSHA")) fileRes = 0x1000;
-				else if (f.Matches("FFNT")) fileRes = 0x2000;
-				else if (f.Matches("CFNT")) fileRes = 0x80;
-				else if (f.Matches(1, "STM") /* *STM */ || f.Matches(1, "WAV") || f.Matches("FSTP")) fileRes = 0x20;
-				else if (f.Matches("CTPK")) fileRes = 0x10;
-				else if (f.Matches("CGFX")) fileRes = 0x80;
-				else if (f.Matches("AAMP")) fileRes = 8;
-				else if (f.Matches("MsgStdBn") || f.Matches("MsgPrjBn")) fileRes = 0x80;
+				uint fileRes = GuessFileAlignment(f);				
 				res = fileRes > res ? fileRes : res;
 			}
 			return res;
+		}
+
+		public static uint GuessFileAlignment(byte[] f)
+		{
+			if (f.Matches("SARC")) return 0x2000;
+			else if (f.Matches("Yaz")) return 0x80;
+			else if (f.Matches("YB") || f.Matches("BY")) return 0x80;
+			else if (f.Matches("FRES") || f.Matches("Gfx2") || f.Matches("AAHS") || f.Matches("BAHS")) return 0x2000;
+			else if (f.Matches("BNTX") || f.Matches("BNSH") || f.Matches("FSHA")) return 0x1000;
+			else if (f.Matches("FFNT")) return 0x2000;
+			else if (f.Matches("CFNT")) return 0x80;
+			else if (f.Matches(1, "STM") /* *STM */ || f.Matches(1, "WAV") || f.Matches("FSTP")) return 0x20;
+			else if (f.Matches("CTPK")) return 0x10;
+			else if (f.Matches("CGFX")) return 0x80;
+			else if (f.Matches("AAMP")) return 8;
+			else if (f.Matches("MsgStdBn") || f.Matches("MsgPrjBn")) return 0x80;
+			else return 0x10;
 		}
 
 		public static Tuple<int, byte[]> PackN(SarcData data, int _align = -1)
@@ -136,13 +141,13 @@ namespace SARCExt
 				bw.Write(k, BinaryStringFormat.ZeroTerminated);
 				bw.Align(4);
 			}
-			bw.Align(align);
+			bw.Align(0x1000); //TODO: check if works in odyssey
 			List<uint> FileOffsets = new List<uint>();
 			foreach (string k in data.Files.Keys)
 			{
+				bw.Align((int)GuessFileAlignment(data.Files[k]));
 				FileOffsets.Add((uint)bw.BaseStream.Position);
 				bw.Write(data.Files[k]);
-				bw.Align(align);
 			}
 			for (int i = 0; i < offsetToUpdate.Count; i++)
 			{
@@ -173,8 +178,9 @@ namespace SARCExt
 			if (br.ReadUInt16() == 0xFFFE)
 				br.ByteOrder = ByteOrder.BigEndian;
 			br.BaseStream.Position = 0;
-			if (br.ReadUInt32() != 0x43524153)
+			if (br.ReadString(4) != "SARC")
 				throw new Exception("Wrong magic");
+
 			br.ReadUInt16(); // Chunk length
 			br.ReadUInt16(); // BOM
 			br.ReadUInt32(); // File size

@@ -94,6 +94,9 @@ namespace SARCExt
 			foreach (var f in opn.FileNames)
 			{
 				string name = Path.GetFileName(f);
+				if (EditorCore.InputDialog.Show("File name", "Write the name for this file, use / to place it in a folder", ref name) != DialogResult.OK)
+					return;
+
 				if (loadedSarc.Files.ContainsKey(name))
 				{
 					MessageBox.Show($"File {name} already in szs");
@@ -142,6 +145,12 @@ namespace SARCExt
 			var opn = new OpenFileDialog();
 			if (opn.ShowDialog() != DialogResult.OK) return;
 			loadedSarc.Files[listBox1.SelectedItem.ToString()] = File.ReadAllBytes(opn.FileName);
+		}
+
+		private void copyNameToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			if (listBox1.SelectedItem == null) return;
+			Clipboard.SetText(listBox1.SelectedItem.ToString());
 		}
 	}
 }
