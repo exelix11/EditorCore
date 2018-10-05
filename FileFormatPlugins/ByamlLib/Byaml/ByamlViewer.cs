@@ -52,7 +52,7 @@ namespace ByamlExt
         }
 
 		Stream saveStream = null;
-		public ByamlViewer(System.Collections.IEnumerable by, bool _pathSupport, Stream saveTo, ushort _ver , ByteOrder defaultOrder = ByteOrder.LittleEndian) : this(by, _pathSupport,_ver,defaultOrder)
+		public ByamlViewer(System.Collections.IEnumerable by, bool _pathSupport, Stream saveTo, ushort _ver , ByteOrder defaultOrder = ByteOrder.LittleEndian, string name = "") : this(by, _pathSupport,_ver,defaultOrder, name)
 		{
 			saveStream = saveTo;
 			saveToolStripMenuItem.Visible = true;
@@ -222,14 +222,28 @@ namespace ByamlExt
 		public static void OpenByml(Stream file, string FileName = "") =>
 			OpenByml(file, FileName, SupportPaths());
 
-		public static void OpenByml(Stream file, string FileName, bool paths)
+		public static void OpenByml(Stream file, string FileName, bool paths) =>
+			OpenByml(file, FileName, paths, null, false);
+
+		public static void OpenByml(Stream file, string FileName, bool? paths, Stream saveStream, bool AsDialog)
 		{
-			var byml = ByamlFile.LoadN(file, paths);
-			new ByamlViewer(byml.RootNode, paths, byml.Version, byml.byteOrder, FileName).Show();
+			bool _paths = paths == null ? SupportPaths() : paths.Value;
+			var byml = ByamlFile.LoadN(file, _paths);
+			OpenByml(byml, FileName, saveStream, AsDialog);
 		}
 
-		public static void OpenByml(BymlFileData data, string filename) =>
-			new ByamlViewer(data.RootNode, data.SupportPaths, data.Version, data.byteOrder, filename).Show();
+		public static void OpenByml(BymlFileData data, string FileName, Stream saveStream = null, bool AsDialog = false)
+		{
+			if (saveStream != null)
+			{
+				saveStream.Position = 0;
+				saveStream.SetLength(0);
+			}
+			if (AsDialog)
+				new ByamlViewer(data.RootNode, data.SupportPaths, saveStream, data.Version, data.byteOrder, FileName).ShowDialog();
+			else
+				new ByamlViewer(data.RootNode, data.SupportPaths, saveStream, data.Version, data.byteOrder, FileName).Show();
+		}			
 
 		private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
         {

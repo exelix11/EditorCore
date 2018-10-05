@@ -71,7 +71,7 @@ namespace EditorCore
 		public static void CheckForExit()
 		{
 			if (Application.OpenForms.Count == 0)
-				Environment.Exit(0);
+				Application.Exit();//Environment.Exit(0);
 		}
     }	
 }

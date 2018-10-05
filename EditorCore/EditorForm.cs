@@ -647,10 +647,14 @@ namespace EditorCore
         private void OpenSzsFile_click(object sender, EventArgs e)
         {
             string name = ((ToolStripMenuItem)sender).Text;
-			var stream = new MemoryStream(LoadedLevel.LevelFiles[name]);
+			var stream = new MemoryStream();
+			stream.Write(LoadedLevel.LevelFiles[name], 0, LoadedLevel.LevelFiles[name].Length);
+			stream.Position = 0;
 			if (!GameModule.OpenLevelFile(name, stream))
 				OpenFileHandler.OpenFile(name, stream);
-        }
+			if (stream.Length != 0)
+				LoadedLevel.LevelFiles[name] = stream.ToArray();
+		}
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
 		{
