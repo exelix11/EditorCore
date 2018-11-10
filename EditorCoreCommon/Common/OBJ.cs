@@ -221,6 +221,11 @@ namespace EditorCore.Common
 			return Materials.Count - 1 ;
 		}
 
+		public string[] MaterialNames
+		{
+			get => Materials.Select(x => x.Name).ToArray();
+		}
+
 		public List<Material> Materials = new List<Material>();
 		public List<Face> Faces = new List<Face>();
 

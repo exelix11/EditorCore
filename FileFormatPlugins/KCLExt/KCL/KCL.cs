@@ -7,6 +7,7 @@ using EditorCore.Common;
 using LibEveryFileExplorer._3D;
 using System.Windows.Media.Media3D;
 using ExtensionMethods;
+using KCLExt;
 
 namespace MarioKart.MK7
 {
@@ -205,12 +206,16 @@ namespace MarioKart.MK7
 
 			Vector3D min = new Vector3D(float.MaxValue, float.MaxValue, float.MaxValue);
 			Vector3D max = new Vector3D(float.MinValue, float.MinValue, float.MinValue);
-			
+
+			var MatDictionary = MaterialSetForm.ShowForm(o.MaterialNames);
+
 			List<Triangle> Triangles = new List<Triangle>();
 			foreach (var v in o.Faces)
 			{
 				Triangle t = new Triangle(v.VA.pos, v.VB.pos, v.VC.pos);
-
+				
+				t.Collision = MatDictionary.ContainsKey(v.Mat) ? MatDictionary[v.Mat] : (ushort)0;
+				
 				#region FindMaxMin
 				if (t.PointA.X < min.X) min.X = t.PointA.X;
 				if (t.PointA.Y < min.Y) min.Y = t.PointA.Y;
@@ -437,7 +442,7 @@ namespace MarioKart.MK7
 					var tri = triangles[i];
 
 					KCLModel.KCLPlane p = new KCLModel.KCLPlane();
-					p.CollisionType = 0;// Mapping[v.Material];
+					p.CollisionType = triangles[i].Collision;
 
 					p.VertexIndex = AddIfNotContainsVector3D(tri.PointA, Vertices);
 					var direction = (tri.PointB - tri.PointA).Cross(tri.PointC - tri.PointA).GetNormalize();

@@ -17,6 +17,8 @@ namespace LibEveryFileExplorer._3D
 			PointC = C;
 		}
 
+		public ushort Collision { get; set; }
+
 		public Vector3D PointA { get; internal set; }
 		public Vector3D PointB { get; internal set; }
 		public Vector3D PointC { get; internal set; }

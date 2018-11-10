@@ -52,11 +52,11 @@ namespace KCLExt
 			OpenFileDialog opn = new OpenFileDialog();
 			if (opn.ShowDialog() != DialogResult.OK) return;
 			var mod = OBJ.Read(new MemoryStream(File.ReadAllBytes(opn.FileName)),null);
-			if (mod.Faces.Count > 65535)
-			{
-				MessageBox.Show("this model has too many faces, only models with less than 65535 triangles can be converted");
-				return;
-			}
+			//if (mod.Faces.Count > 65535)
+			//{
+			//	MessageBox.Show("this model has too many faces, only models with less than 65535 triangles can be converted");
+			//	return;
+			//}
 			var f = MarioKart.MK7.KCL.FromOBJ(mod);
 			File.WriteAllBytes(opn.FileName + ".kcl", f.Write(Syroot.BinaryData.ByteOrder.LittleEndian));
 		}

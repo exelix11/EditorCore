@@ -58,6 +58,12 @@
     <Compile Include="BinaryDataWriterExtensions.cs" />
     <Compile Include="KCLExt.cs" />
     <Compile Include="KCL\TriangleBoxIntersect.cs" />
+    <Compile Include="MaterialSetForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MaterialSetForm.Designer.cs">
+      <DependentUpon>MaterialSetForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="MathUtil.cs" />
     <Compile Include="KCL\KCL.cs" />
     <Compile Include="KCL\KCLColors.cs" />
@@ -78,6 +84,11 @@
       <Name>EditorCoreCommon</Name>
       <Private>False</Private>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="MaterialSetForm.resx">
+      <DependentUpon>MaterialSetForm.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
