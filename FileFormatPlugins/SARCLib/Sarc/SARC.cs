@@ -103,7 +103,7 @@ namespace SARCExt
 		}
 
 		public static Tuple<int, byte[]> PackN(SarcData data, int _align = -1)
-		{
+		{			
 			int align = _align >= 0 ? _align : (int)GuessAlignment(data.Files);
 
 			MemoryStream o = new MemoryStream();
@@ -121,7 +121,10 @@ namespace SARCExt
 			bw.Write((UInt16)data.Files.Keys.Count);
 			bw.Write((UInt32)0x00000065);
 			List<uint> offsetToUpdate = new List<uint>();
-			foreach (string k in data.Files.Keys)
+			
+			//Sort files by hash
+			string[] Keys = data.Files.Keys.OrderBy(x => data.HashOnly ? StringHashToUint(x) : NameHash(x)).ToArray();
+			foreach (string k in Keys)
 			{
 				if (data.HashOnly)
 					bw.Write(StringHashToUint(k));
@@ -136,7 +139,7 @@ namespace SARCExt
 			bw.Write((UInt16)0x8);
 			bw.Write((UInt16)0);
 			List<uint> StringOffsets = new List<uint>();
-			foreach (string k in data.Files.Keys)
+			foreach (string k in Keys)
 			{
 				StringOffsets.Add((uint)bw.BaseStream.Position);
 				bw.Write(k, BinaryStringFormat.ZeroTerminated);
@@ -144,7 +147,7 @@ namespace SARCExt
 			}
 			bw.Align(0x1000); //TODO: check if works in odyssey
 			List<uint> FileOffsets = new List<uint>();
-			foreach (string k in data.Files.Keys)
+			foreach (string k in Keys)
 			{
 				bw.Align((int)GuessFileAlignment(data.Files[k]));
 				FileOffsets.Add((uint)bw.BaseStream.Position);
@@ -158,7 +161,7 @@ namespace SARCExt
 				else
 					bw.Write((UInt32)0);
 				bw.Write((UInt32)(FileOffsets[i] - FileOffsets[0]));
-				bw.Write((UInt32)(FileOffsets[i] + data.Files.Values.ToArray()[i].Length - FileOffsets[0]));
+				bw.Write((UInt32)(FileOffsets[i] + data.Files[Keys[i]].Length - FileOffsets[0]));
 			}
 			bw.BaseStream.Position = 0x08;
 			bw.Write((uint)bw.BaseStream.Length);

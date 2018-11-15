@@ -55,7 +55,7 @@ namespace ByamlExt
 		public ByamlViewer(System.Collections.IEnumerable by, bool _pathSupport, Stream saveTo, ushort _ver , ByteOrder defaultOrder = ByteOrder.LittleEndian, string name = "") : this(by, _pathSupport,_ver,defaultOrder, name)
 		{
 			saveStream = saveTo;
-			saveToolStripMenuItem.Visible = true;
+			saveToolStripMenuItem.Visible = saveTo != null && saveStream.CanWrite;
 		}
 
 		//get a reference to the value to change
@@ -234,15 +234,18 @@ namespace ByamlExt
 
 		public static void OpenByml(BymlFileData data, string FileName, Stream saveStream = null, bool AsDialog = false)
 		{
-			if (saveStream != null)
+			var form = new ByamlViewer(data.RootNode, data.SupportPaths, saveStream, data.Version, data.byteOrder, FileName);
+
+			if (saveStream != null && saveStream.CanWrite)
 			{
 				saveStream.Position = 0;
 				saveStream.SetLength(0);
 			}
+
 			if (AsDialog)
-				new ByamlViewer(data.RootNode, data.SupportPaths, saveStream, data.Version, data.byteOrder, FileName).ShowDialog();
+				form.ShowDialog();
 			else
-				new ByamlViewer(data.RootNode, data.SupportPaths, saveStream, data.Version, data.byteOrder, FileName).Show();
+				form.Show();
 		}			
 
 		private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)

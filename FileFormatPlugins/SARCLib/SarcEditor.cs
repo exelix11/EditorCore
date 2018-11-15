@@ -75,10 +75,12 @@ namespace SARCExt
 				MessageBox.Show("Can't remove files from a hash only sarc");
 				return;
 			}
-			foreach (var item in listBox1.SelectedItems.Cast<string>())
+			string[] Targets = listBox1.SelectedItems.Cast<string>().ToArray();
+			foreach (var item in Targets) 
+			{
 				loadedSarc.Files.Remove(item);
-			listBox1.Items.Clear();
-			listBox1.Items.AddRange(loadedSarc.Files.Keys.ToArray());
+				listBox1.Items.Remove(item);
+			}
 		}
 
 		private void addFilesToolStripMenuItem_Click(object sender, EventArgs e)
@@ -103,6 +105,7 @@ namespace SARCExt
 					continue;
 				}
 				loadedSarc.Files.Add(name, File.ReadAllBytes(f));
+				listBox1.Items.Add(name);
 			}
 		}
 
@@ -134,9 +137,13 @@ namespace SARCExt
 
 		private void ListBoxDoubleClick(object sender, EventArgs e)
 		{
-			if (listBox1.SelectedItem != null)
-				OpenFileHandler.OpenFile(listBox1.SelectedItem.ToString(), 
-					new MemoryStream(loadedSarc.Files[listBox1.SelectedItem.ToString()]));
+			if (listBox1.SelectedItem == null)
+				return;
+			var Fname = listBox1.SelectedItem.ToString();
+			var stream = new EditableStream(loadedSarc.Files[Fname]); //This should work with just a memoryStream but a custom class lets us know if something has been written to it.
+			OpenFileHandler.OpenFile(Fname, stream);
+			if (stream.HasBeenEdited)
+				loadedSarc.Files[Fname] = stream.ToArray();
 		}
 
 		private void replaceToolStripMenuItem1_Click(object sender, EventArgs e)
@@ -151,6 +158,64 @@ namespace SARCExt
 		{
 			if (listBox1.SelectedItem == null) return;
 			Clipboard.SetText(listBox1.SelectedItem.ToString());
+		}
+
+		private void renameToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			if (listBox1.SelectedItem == null) return;
+			string originalName = listBox1.SelectedItem.ToString();
+			string name = Path.GetFileName(originalName);
+			if (EditorCore.InputDialog.Show("File name", "Write the name for this file, use / to place it in a folder", ref name) != DialogResult.OK)
+				return;
+
+			if (loadedSarc.Files.ContainsKey(name))
+			{
+				MessageBox.Show($"File {name} already in szs");
+				return;
+			}
+			loadedSarc.Files.Add(name, loadedSarc.Files[originalName]);
+			loadedSarc.Files.Remove(originalName);
+			listBox1.Items.Add(name);
+			listBox1.Items.Remove(originalName);
+		}
+
+		private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
+		{
+
+		}
+	}
+
+	class EditableStream : Stream
+	{
+		MemoryStream _mem = new MemoryStream();
+		public bool HasBeenEdited;
+
+		public byte[] ToArray() => _mem.ToArray();
+
+		public EditableStream(byte[] data)
+		{
+			_mem.Write(data, 0, data.Length);
+		}
+
+		public override bool CanRead => _mem.CanRead;
+		public override bool CanSeek => _mem.CanSeek;
+		public override bool CanWrite => _mem.CanWrite;
+		public override long Length => _mem.Length;
+		public override long Position { get => _mem.Position; set => _mem.Position = value; }
+		public override void Flush() => _mem.Flush();
+		public override int Read(byte[] buffer, int offset, int count) =>
+			_mem.Read(buffer, offset, count);
+
+		public override long Seek(long offset, SeekOrigin origin) =>
+			_mem.Seek(offset, origin);
+
+		public override void SetLength(long value) =>
+			_mem.SetLength(value);
+
+		public override void Write(byte[] buffer, int offset, int count)
+		{
+			if (count != 0) HasBeenEdited = true;
+			_mem.Write(buffer, offset, count);
 		}
 	}
 }
