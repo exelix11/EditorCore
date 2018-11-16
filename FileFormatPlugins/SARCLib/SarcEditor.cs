@@ -140,10 +140,10 @@ namespace SARCExt
 			if (listBox1.SelectedItem == null)
 				return;
 			var Fname = listBox1.SelectedItem.ToString();
-			var stream = new EditableStream(loadedSarc.Files[Fname]); //This should work with just a memoryStream but a custom class lets us know if something has been written to it.
-			OpenFileHandler.OpenFile(Fname, stream);
-			if (stream.HasBeenEdited)
-				loadedSarc.Files[Fname] = stream.ToArray();
+			var saveStream = new MemoryStream();
+			OpenFileHandler.OpenFileEditable(Fname, new MemoryStream(loadedSarc.Files[Fname]), saveStream);
+			if (saveStream.Length != 0)
+				loadedSarc.Files[Fname] = saveStream.ToArray();
 		}
 
 		private void replaceToolStripMenuItem1_Click(object sender, EventArgs e)
@@ -177,45 +177,6 @@ namespace SARCExt
 			loadedSarc.Files.Remove(originalName);
 			listBox1.Items.Add(name);
 			listBox1.Items.Remove(originalName);
-		}
-
-		private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
-		{
-
-		}
-	}
-
-	class EditableStream : Stream
-	{
-		MemoryStream _mem = new MemoryStream();
-		public bool HasBeenEdited;
-
-		public byte[] ToArray() => _mem.ToArray();
-
-		public EditableStream(byte[] data)
-		{
-			_mem.Write(data, 0, data.Length);
-		}
-
-		public override bool CanRead => _mem.CanRead;
-		public override bool CanSeek => _mem.CanSeek;
-		public override bool CanWrite => _mem.CanWrite;
-		public override long Length => _mem.Length;
-		public override long Position { get => _mem.Position; set => _mem.Position = value; }
-		public override void Flush() => _mem.Flush();
-		public override int Read(byte[] buffer, int offset, int count) =>
-			_mem.Read(buffer, offset, count);
-
-		public override long Seek(long offset, SeekOrigin origin) =>
-			_mem.Seek(offset, origin);
-
-		public override void SetLength(long value) =>
-			_mem.SetLength(value);
-
-		public override void Write(byte[] buffer, int offset, int count)
-		{
-			if (count != 0) HasBeenEdited = true;
-			_mem.Write(buffer, offset, count);
 		}
 	}
 }

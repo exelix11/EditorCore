@@ -25,5 +25,22 @@ namespace EditorCoreCommon
 				}
 			}
 		}
+
+		public static void OpenFileEditable(string filename, Stream FileStream, Stream SaveStream, int BasePositionInStream = 0)
+		{
+			foreach (var h in handlers)
+			{
+				FileStream.Position = BasePositionInStream;
+				if (h.IsFormatSupported(filename, FileStream))
+				{
+					FileStream.Position = BasePositionInStream;
+					if (h is IEditableFileHandler)
+						((IEditableFileHandler)h).OpenFileEdit(filename, FileStream, SaveStream);
+					else
+						h.OpenFile(filename, FileStream);
+					break;
+				}
+			}
+		}
 	}
 }

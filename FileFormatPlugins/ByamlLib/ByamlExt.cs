@@ -52,7 +52,7 @@ namespace ByamlExt
 		}
 	}
 
-	class BymlFileHandler : IFileHander
+	class BymlFileHandler : IEditableFileHandler
 	{
 		public string HandlerName => "BymlFileHandler";
 
@@ -62,10 +62,12 @@ namespace ByamlExt
 			return (header[0] == 0x42 && header[1] == 0x59) || (header[1] == 0x42 && header[0] == 0x59);
 		}
 
-		public void OpenFile(string filename, Stream file)
-		{
-			ByamlViewer.OpenByml(file,filename,null,file,true);
-		}
+		public void OpenFile(string filename, Stream file) =>
+			ByamlViewer.OpenByml(file,filename);
+		
+		public void OpenFileEdit(string filename, Stream file, Stream saveStream)=>
+			ByamlViewer.OpenByml(file, filename, null, saveStream,true);
+		
 	}
 
 	class MenuExt : IMenuExtension

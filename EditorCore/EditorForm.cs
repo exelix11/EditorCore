@@ -282,7 +282,10 @@ namespace EditorCore
 
             HideGroup_CB.CheckedChanged -= HideGroup_CB_CheckedChanged;
             LevelFilesMenu.DropDownItems.Clear();
-            render.UnloadLevel();
+
+			if ((ModifierKeys & Keys.Control) == 0) //Skip unloading the models, this is useful to overlay a Design.szs to a Map.szs
+				render.UnloadLevel();
+
             LoadedLevel = null;
 
             ListEditingStack.Clear();
@@ -505,12 +508,14 @@ namespace EditorCore
         {
             if (SelectionCount < 0) { MessageBox.Show("No object selected in the list"); return; }
             {
-                string name = e.ChangedItem.Label;				
-                if (GameModule.ModelFieldPropNames.Contains(name) || name == "Name")
-                {
-                    string path = GetModelName(SelectedObj.ModelName);
-                    if (path == null) path = $"{ModelsFolder}/{GameModule.GetPlaceholderModel(SelectedObj.Name,CurListName)}";
-                    foreach (var i in SelectedObjs) render.ChangeModel(i, path);
+                string name = e.ChangedItem.Label;
+				if (GameModule.ModelFieldPropNames.Contains(name) || name == "Name")
+				{
+					string path = GetModelName(SelectedObj.ModelName);
+					if (path == null) path = $"{ModelsFolder}/{GameModule.GetPlaceholderModel(SelectedObj.Name, CurListName)}";
+					foreach (var i in SelectedObjs)
+						render.ChangeModel(i, path);
+					ObjectsListBox.Refresh();
                 }
                 foreach (var i in SelectedObjs)
                 {

@@ -43,4 +43,9 @@ namespace EditorCore.Interfaces
 		bool IsFormatSupported(string filename, Stream file);
 		void OpenFile(string filename, Stream file);
 	}
+
+	public interface IEditableFileHandler : IFileHander
+	{
+		void OpenFileEdit(string filename, Stream file, Stream saveStream);
+	}
 }
