@@ -96,9 +96,8 @@ namespace EditorCore
                 return new PropertyDescriptorCollection(props);
             }
 
-            public override bool CanConvertFrom(System.ComponentModel.ITypeDescriptorContext context, Type sourceType) => false;
-
-            /*
+            public override bool CanConvertFrom(System.ComponentModel.ITypeDescriptorContext context, Type sourceType) => sourceType == typeof(string);
+			           
             public override object ConvertFrom(System.ComponentModel.ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
             {
                 string[] tokens = ((string)value).Split(';');
@@ -108,12 +107,19 @@ namespace EditorCore
                 dict["Z"] = Single.Parse(tokens[2]);
                 return dict;
             }
-            */
 
             public override object ConvertTo(System.ComponentModel.ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
             {
-                var v = (IDictionary<string, dynamic>)value;
-                return $"({Math.Round(v["X"], 2)}, {Math.Round(v["Y"], 2)}, {Math.Round(v["Z"], 2)})";
+				var v = value as IDictionary<string, dynamic>;
+				if (v == null) //MultiMergeCollection workaround
+				{
+					var values = new float[3];
+					int count = 0;
+					foreach (object o in (ICollection)value)
+						values[count++] = ((KeyValuePair<string,dynamic>)o).Value;
+					return $"{Math.Round(values[0], 2)}; {Math.Round(values[1], 2)}; {Math.Round(values[2], 2)}";
+				}
+				return $"{Math.Round(v["X"], 2)}; {Math.Round(v["Y"], 2)}; {Math.Round(v["Z"], 2)}";
             }
         }
 

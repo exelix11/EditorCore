@@ -1111,7 +1111,7 @@ namespace EditorCore
             {
                 ObjectsListBox.Items.Add(o);
             }
-            if (!(list.name == Constants.LinkedListName && EditingList))
+            if (!(list.name == Constants.LinkedListName && !EditingList))
                 AddModel(o, list.name);
         }
 

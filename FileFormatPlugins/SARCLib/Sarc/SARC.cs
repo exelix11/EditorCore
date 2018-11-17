@@ -7,8 +7,6 @@ using System.IO;
 using Syroot.BinaryData;
 using ExtensionMethods;
 
-/* My SARC library. Packing is not yet supported. */
-
 namespace SARCExt
 {
 	public class SarcData
@@ -38,6 +36,7 @@ namespace SARCExt
 			return Convert.ToUInt32(name, 16);
 		}
 
+		//From https://github.com/aboood40091/SarcLib/
 		public static string GuessFileExtension(byte[] f)
         {
             string Ext = ".bin";
@@ -74,7 +73,7 @@ namespace SARCExt
             return Ext;
         }
 
-		public static uint GuessAlignment(Dictionary<string, byte[]> files) //From https://github.com/aboood40091/SarcLib/blob/master/src/FileArchive.py#L487
+		public static uint GuessAlignment(Dictionary<string, byte[]> files)
 		{
 			uint res = 4;
 			foreach (var f in files.Values)

@@ -75,3 +75,4 @@ This editor contains code or libraries from:
 - [gdkchan's BnTxx ](https://github.com/gdkchan/BnTxx)
 - [Gericom's EveryFileExplorer](https://github.com/Gericom/EveryFileExplorer)
 - [masterf0x's RedCarpet](https://github.com/masterf0x/RedCarpet)
+- [AboodXD's SarcLib](https://github.com/aboood40091/SarcLib/)
