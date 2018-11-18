@@ -212,9 +212,12 @@ namespace MarioKart.MK7
 			List<Triangle> Triangles = new List<Triangle>();
 			foreach (var v in o.Faces)
 			{
+				var coll = MatDictionary.ContainsKey(v.Mat) ? MatDictionary[v.Mat] : (ushort)0;
+				if (coll == ushort.MaxValue)
+					continue;
+
 				Triangle t = new Triangle(v.VA.pos, v.VB.pos, v.VC.pos);
-				
-				t.Collision = MatDictionary.ContainsKey(v.Mat) ? MatDictionary[v.Mat] : (ushort)0;
+				t.Collision = coll;
 				
 				#region FindMaxMin
 				if (t.PointA.X < min.X) min.X = t.PointA.X;

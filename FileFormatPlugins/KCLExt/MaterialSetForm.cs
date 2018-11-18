@@ -33,7 +33,8 @@ namespace KCLExt
 			Result = new Dictionary<string, ushort>();
 			for (int i = 0; i < dataGridView1.Rows.Count; i++)
 			{
-				Result.Add(dataGridView1[0, i].Value.ToString(), ushort.Parse(dataGridView1[1, i].Value.ToString()));
+				var v = dataGridView1[1, i].Value.ToString();
+				Result.Add(dataGridView1[0, i].Value.ToString(), v == "-1" ? ushort.MaxValue : ushort.Parse(v));
 			}
 		}
 	}

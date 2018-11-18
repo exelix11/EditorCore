@@ -185,11 +185,13 @@ namespace EditorCore
 			GameModule.InitModule(this);
 
 			editingOptionsModule = GameModule as IEditingOptionsModule;
-
 			if (editingOptionsModule != null)
 			{
 				editingOptionsModule.InitOptionsMenu(ref ObjectRightClickMenu);
 			}
+
+			if (GameModule is IActionButtonsModule)
+				((IActionButtonsModule)GameModule).InitActionButtons(ref toolStrip1);
 
 			ModelsFolder = GameModule.ModelsFolder;
 			CustomModelsFolder = "Custom" + GameModule.ModelsFolder;

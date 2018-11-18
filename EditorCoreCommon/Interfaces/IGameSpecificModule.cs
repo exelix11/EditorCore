@@ -11,6 +11,7 @@ namespace EditorCore.Interfaces
 {
 	public interface IEditorFormContext
 	{
+		ILevel LoadedLevel { get; }
 		IObjList CurList { get; }
 		ILevelObj SelectedObj { get; set; }
 		ILevelObj[] SelectedObjs { get; }
@@ -77,8 +78,10 @@ namespace EditorCore.Interfaces
 	{
 		void InitOptionsMenu(ref ContextMenuStrip baseMenu);
 		void OptionsMenuOpening(ILevelObj clickedObj);
+	}
 
+	public interface IActionButtonsModule
+	{
 		void InitActionButtons(ref ToolStrip baseButtonStrip);
-		ToolStrip GetActionButtons(IObjList activeObjList, ILevelObj selectedObj);
 	}
 }
