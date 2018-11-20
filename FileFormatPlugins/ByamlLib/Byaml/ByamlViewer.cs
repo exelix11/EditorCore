@@ -31,6 +31,11 @@ namespace ByamlExt
 			bymlVer = _ver;
 
 			if (byml == null) return;
+			ParseBymlFirstNode();
+        }
+
+		void ParseBymlFirstNode()
+		{
 			//the first node should always be a dictionary node
 			if (byml is Dictionary<string, dynamic>)
 			{
@@ -48,8 +53,8 @@ namespace ByamlExt
 			{
 				MessageBox.Show("Unsupported root node");
 			}
-			else throw new Exception($"Unsupported root node type {by.GetType()}");
-        }
+			else throw new Exception($"Unsupported root node type {byml.GetType()}");
+		}
 
 		Stream saveStream = null;
 		public ByamlViewer(System.Collections.IEnumerable by, bool _pathSupport, Stream saveTo, ushort _ver , ByteOrder defaultOrder = ByteOrder.LittleEndian, string name = "") : this(by, _pathSupport,_ver,defaultOrder, name)
@@ -354,6 +359,18 @@ namespace ByamlExt
 			saveStream.Position = 0;
 			saveStream.SetLength(0);
 			ByamlFile.SaveN(saveStream, new BymlFileData { Version = bymlVer, byteOrder = byteOrder, SupportPaths = pathSupport, RootNode = byml });
+		}
+
+		private void importFromXmlToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			OpenFileDialog openFile = new OpenFileDialog();
+			openFile.Filter = "xml file |*.xml| every file | *.*";
+			if (openFile.ShowDialog() != DialogResult.OK) return;
+
+			StreamReader t = new StreamReader(new FileStream(openFile.FileName, FileMode.Open), UnicodeEncoding.Unicode);
+			treeView1.Nodes.Clear();
+			byml = Byaml.XmlConverter.ToByml(t.ReadToEnd()).RootNode;
+			ParseBymlFirstNode();
 		}
 	}
 }

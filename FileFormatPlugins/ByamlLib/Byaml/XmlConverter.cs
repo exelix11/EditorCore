@@ -14,9 +14,9 @@ namespace ByamlExt.Byaml
 	{
 		public static string ToXml(BymlFileData data)
 		{
-			CustomStringWriter str = new CustomStringWriter(Encoding.GetEncoding(932));
+			var stream = new MemoryStream();
 			XmlTextWriter xr;
-			xr = new XmlTextWriter(str);
+			xr = new XmlTextWriter(stream, UnicodeEncoding.Unicode);
 			xr.Formatting = System.Xml.Formatting.Indented;
 			xr.WriteStartDocument();
 			xr.WriteStartElement("Root");
@@ -36,7 +36,7 @@ namespace ByamlExt.Byaml
 
 			xr.WriteEndElement();
 			xr.Close();
-			return str.ToString();
+			return UnicodeEncoding.Unicode.GetString(stream.ToArray());
 		}
 
 		public static BymlFileData ToByml(string xmlString)
@@ -61,7 +61,14 @@ namespace ByamlExt.Byaml
 		#region XmlWriting
 		static void WriteNode(dynamic node, string name, XmlTextWriter xr)
 		{
-			if (node is IList<dynamic>) WriteArrNode((IList<dynamic>)node, name, xr);
+			if (node == null)
+			{
+				if (name == null) return;
+				xr.WriteStartElement("NULL");
+				xr.WriteAttributeString("N", name);
+				xr.WriteEndElement();
+			}
+			else if (node is IList<dynamic>) WriteArrNode((IList<dynamic>)node, name, xr);
 			else if (node is IDictionary<string, dynamic>) WriteDictNode((IDictionary<string, dynamic>)node, name, xr);
 			else
 			{
@@ -106,6 +113,7 @@ namespace ByamlExt.Byaml
 
 		static dynamic ParseNode(XmlNode n)
 		{
+			if (n.Name == "NULL") return null;
 			ByamlNodeType nodeType = (ByamlNodeType)byte.Parse(n.Name.Substring(1));
 			switch (nodeType)
 			{

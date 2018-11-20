@@ -177,20 +177,20 @@ namespace EditorCore
         }
     }
 
-	public class CustomStringWriter : System.IO.StringWriter
-    {
-        private readonly Encoding encoding;
+	//public class CustomStringWriter : System.IO.StringWriter
+ //   {
+ //       private readonly Encoding encoding;
 
-        public CustomStringWriter(Encoding encoding)
-        {
-            this.encoding = encoding;
-        }
+ //       public CustomStringWriter(Encoding encoding)
+ //       {
+ //           this.encoding = encoding;
+ //       }
 
-        public override Encoding Encoding
-        {
-            get { return encoding; }
-        }
-    }
+ //       public override Encoding Encoding
+ //       {
+ //           get { return encoding; }
+ //       }
+ //   }
 
     public class CustomStack<T> : IEnumerable<T>
     {

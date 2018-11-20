@@ -89,7 +89,7 @@ namespace ByamlExt
 			OpenFileDialog openFile = new OpenFileDialog();
 			openFile.Filter = "xml file |*.xml| every file | *.*";
 			if (openFile.ShowDialog() != DialogResult.OK) return;
-			StreamReader t = new StreamReader(new FileStream(openFile.FileName, FileMode.Open), Encoding.GetEncoding(932));
+			StreamReader t = new StreamReader(new FileStream(openFile.FileName, FileMode.Open), UnicodeEncoding.Unicode);
 			ByamlViewer.OpenByml(Byaml.XmlConverter.ToByml(t.ReadToEnd()), Path.GetFileName(openFile.FileName));
 		}
 

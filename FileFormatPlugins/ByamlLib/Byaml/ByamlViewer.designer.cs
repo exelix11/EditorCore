@@ -39,6 +39,8 @@
 			this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
 			this.saveAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+			this.importFromXmlToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextMenuStrip1.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -62,9 +64,11 @@
             this.exportJsonToolStripMenuItem,
             this.toolStripSeparator1,
             this.saveAsToolStripMenuItem,
-            this.saveToolStripMenuItem});
+            this.saveToolStripMenuItem,
+            this.toolStripSeparator2,
+            this.importFromXmlToolStripMenuItem});
 			this.contextMenuStrip1.Name = "contextMenuStrip1";
-			this.contextMenuStrip1.Size = new System.Drawing.Size(181, 186);
+			this.contextMenuStrip1.Size = new System.Drawing.Size(181, 214);
 			this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.ContextMenuOpening);
 			// 
 			// CopyNode
@@ -122,6 +126,18 @@
 			this.saveToolStripMenuItem.Visible = false;
 			this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
 			// 
+			// toolStripSeparator2
+			// 
+			this.toolStripSeparator2.Name = "toolStripSeparator2";
+			this.toolStripSeparator2.Size = new System.Drawing.Size(177, 6);
+			// 
+			// importFromXmlToolStripMenuItem
+			// 
+			this.importFromXmlToolStripMenuItem.Name = "importFromXmlToolStripMenuItem";
+			this.importFromXmlToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.importFromXmlToolStripMenuItem.Text = "Import from xml";
+			this.importFromXmlToolStripMenuItem.Click += new System.EventHandler(this.importFromXmlToolStripMenuItem_Click);
+			// 
 			// ByamlViewer
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -148,5 +164,7 @@
 		private System.Windows.Forms.ToolStripMenuItem addNodeToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem deleteNodeToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+		private System.Windows.Forms.ToolStripMenuItem importFromXmlToolStripMenuItem;
 	}
 }
