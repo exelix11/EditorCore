@@ -37,5 +37,11 @@ namespace KCLExt
 				Result.Add(dataGridView1[0, i].Value.ToString(), v == "-1" ? ushort.MaxValue : ushort.Parse(v));
 			}
 		}
+
+		private void applyToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			dataGridView1.EndEdit();
+			this.Close();
+		}
 	}
 }

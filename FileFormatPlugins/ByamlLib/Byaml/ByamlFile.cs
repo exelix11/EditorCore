@@ -867,8 +867,6 @@ namespace ByamlExt.Byaml
         }
     }
 
-
-
 	public static class IEnumerableCompare
 	{
 

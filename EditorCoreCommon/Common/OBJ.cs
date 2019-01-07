@@ -22,6 +22,7 @@ namespace EditorCore.Common
 			List<Vector3D> vn = new List<Vector3D>();
 			List<Vector3D> vt = new List<Vector3D>();
 
+			Material usingMaterial = null;
 			using (var f = new StreamReader(mesh, Encoding.UTF8))
 			{
 				string line;
@@ -31,7 +32,6 @@ namespace EditorCore.Common
 					string[] parts = line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 					if (parts.Length < 1) continue;
 
-					Material usingMaterial = null;
 					switch (parts[0])
 					{
 						case "v":
@@ -75,8 +75,8 @@ namespace EditorCore.Common
 
 				}
 			}
-
-
+			
+			usingMaterial = null;
 			if (mtl != null)
 			{
 				using (var f = new StreamReader(mtl, Encoding.UTF8))
@@ -88,7 +88,6 @@ namespace EditorCore.Common
 						string[] parts = line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 						if (parts.Length < 1) continue;
 
-						Material usingMaterial = null;
 						switch (parts[0])
 						{
 							case "newmtl":

@@ -266,7 +266,9 @@ namespace EditorCore
 
 		void UnloadLevel()
         {
-            List<Form> ToClose = new List<Form>();
+			this.Text = "EditorCore - " + GameModule.ModuleName;
+
+			List<Form> ToClose = new List<Form>();
 			foreach (Form frm in Application.OpenForms)
 			{
 				if (frm is IEditorChild && ((IEditorChild)frm).ParentEditor == this)
@@ -326,6 +328,7 @@ namespace EditorCore
 			if (lev == null) return;
 			UnloadLevel();
 			LoadedLevel = lev;
+			this.Text = GameModule.ModuleName + " - " + lev.FilePath;
 
 			if (LoadedLevel.LevelFiles != null)
 			{
