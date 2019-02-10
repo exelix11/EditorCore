@@ -37,7 +37,7 @@ namespace EditorCore.Drawing
 				if (Selected.Count == 0)
 				{
 					DoSelectObj = true;
-					return REPICK | /*FORCE_REPICK |*/ NO_CAMERA_ACTION;
+					return REPICK | FORCE_REPICK | NO_CAMERA_ACTION;
 				}
 				else
 				{
@@ -72,12 +72,12 @@ namespace EditorCore.Drawing
 				float deltaY = e.Y - control.DragStartPos.Y;
 
 				float Depth = control.PickingDepth;
-				if (Depth >= control.ZFar)
+				if (Depth >= control.ZFar || Depth == -1)
 					return REPICK | NO_CAMERA_ACTION;
 
 				deltaX *= Depth * control.FactorX;
 				deltaY *= Depth * control.FactorY;
-				Console.WriteLine(Depth);
+				//Console.WriteLine(Depth);
 				
 				Translate += Vector3.UnitX * deltaX * (float)Math.Cos(control.CamRotX);
 				Translate -= Vector3.UnitX * deltaY * (float)Math.Sin(control.CamRotX) * (float)Math.Sin(control.CamRotY);
@@ -99,8 +99,9 @@ namespace EditorCore.Drawing
 			if (e.Button == MouseButtons.Left)
 			{
 				DoSelectObj = true;
-				return REPICK;//| FORCE_REPICK;
+				return REPICK | FORCE_REPICK;
 			}
+			DoSelectObj = false;
 			return 0;
 		}
 
@@ -116,11 +117,20 @@ namespace EditorCore.Drawing
 				ClearSelection(true);
 			if (index >= 0)
 			{
-				if (!InbokeClickSelection(glDrawables[index], multiSelect))
-					return 0;
+				if (!InvokeClickSelection(glDrawables[index], multiSelect))
+					return REDRAW | NO_CAMERA_ACTION;
 				ToggleSelected(index);
 			}
 			else ClearSelection();
+			return REDRAW | NO_CAMERA_ACTION;
+		}
+
+		public override uint MouseLeaveEntirely(I3DControl control)
+		{
+			if (!DoSelectObj) return 0;
+			bool multiSelect = KDown(OpenTK.Input.Key.ShiftLeft);
+			if (!multiSelect)
+				ClearSelection();
 			return REDRAW | NO_CAMERA_ACTION;
 		}
 

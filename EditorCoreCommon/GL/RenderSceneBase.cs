@@ -121,7 +121,7 @@ namespace EditorCore.Drawing
 		}
 
 		protected void InvokeObjectMoved() => ObjectMoved?.Invoke(Selected);
-		protected bool InbokeClickSelection(ILevelObj item, bool MultiSelect)
+		protected bool InvokeClickSelection(ILevelObj item, bool MultiSelect)
 		{
 			bool Cancel = false;
 			ClickSelection?.Invoke(item, MultiSelect, ref Cancel);
