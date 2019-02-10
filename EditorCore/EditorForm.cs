@@ -1,5 +1,5 @@
-﻿using ModelViewer;
-using EditorCore;
+﻿using EditorCore;
+using EditorCore.Drawing;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -18,6 +18,9 @@ using System.Diagnostics;
 using EditorCore.Interfaces;
 using ExtensionMethods;
 using EditorCoreCommon;
+using GL_EditorFramework.EditorDrawables;
+using GL_EditorFramework.GL_Core;
+using OpenTK;
 
 namespace EditorCore
 {
@@ -45,9 +48,9 @@ namespace EditorCore
         string ModelsFolder = null;
 		string CustomModelsFolder = null;
 
-		public RendererControl render  = new RendererControl();
+		public RenderSceneBase render = null;
 
-        public ILevel LoadedLevel { get; set; }
+		public ILevel LoadedLevel { get; set; }
         public CustomStack<IObjList> ListEditingStack { get; set; } = new CustomStack<IObjList>();
 
         public static ClipBoardItem StoredValue = null;
@@ -121,22 +124,41 @@ namespace EditorCore
 			splitContainer2.Enabled = false;
 #endif
 			KeyPreview = true;
-			RenderingCanvas.Child = render;
-			render.MouseMove += render_MouseMove;
-			render.PreviewMouseRightButtonUp += render_MouseRightButtonUp;
-			render.PreviewMouseRightButtonDown += render_MouseRightButtonDown;
-			render.MouseEnter += render_MouseEnter;
-			render.MouseLeftButtonDown += render_MouseLeftButtonDown;
-			render.MouseLeftButtonUp += render_MouseLeftButtonUp;
-			render.KeyDown += render_KeyDown;
-			render.KeyUp += render_KeyUP;
-			render.CameraInertiaFactor = Properties.Settings.Default.CameraInertia;
-			render.ShowFps = Properties.Settings.Default.ShowFps;
-			render.ShowTriangleCount = Properties.Settings.Default.ShowTriCount;
-			render.ShowDebugInfo = Properties.Settings.Default.ShowDbgInfo;
-			render.CamMode = Properties.Settings.Default.CameraMode == 0 ? HelixToolkit.Wpf.CameraMode.Inspect : HelixToolkit.Wpf.CameraMode.WalkAround;
-			render.ZoomSensitivity = Properties.Settings.Default.ZoomSen;
-			render.RotationSensitivity = Properties.Settings.Default.RotSen;
+
+			var renderControl = new GL_ControlModern();
+			renderControl.ActiveCamera = null;
+			renderControl.BackColor = System.Drawing.Color.Black;
+			renderControl.CameraDistance = -10F;
+			renderControl.CamRotX = 0F;
+			renderControl.CamRotY = 0F;
+			renderControl.CurrentShader = null;
+			renderControl.DragStartPos = new System.Drawing.Point(0, 0);
+			renderControl.Fov = 0.7853982F;
+			renderControl.MainDrawable = null;
+			renderControl.Name = "gL_ControlModern1";
+			renderControl.Dock = DockStyle.Fill;
+			renderControl.Stereoscopy = false;
+			renderControl.TabIndex = 1;
+			renderControl.VSync = false;
+			renderControl.ZFar = 1000F;
+			renderControl.ZNear = 0.01F;
+			splitContainer2.Panel2.Controls.Add(renderControl);
+
+			//render.MouseMove += render_MouseMove;
+			//render.PreviewMouseRightButtonUp += render_MouseRightButtonUp;
+			//render.PreviewMouseRightButtonDown += render_MouseRightButtonDown;
+			//render.MouseEnter += render_MouseEnter;
+			//render.MouseLeftButtonDown += render_MouseLeftButtonDown;
+			//render.MouseLeftButtonUp += render_MouseLeftButtonUp;
+			//render.KeyDown += render_KeyDown;
+			//render.KeyUp += render_KeyUP;
+			//render.CameraInertiaFactor = Properties.Settings.Default.CameraInertia;
+			//render.ShowFps = Properties.Settings.Default.ShowFps;
+			//render.ShowTriangleCount = Properties.Settings.Default.ShowTriCount;
+			//render.ShowDebugInfo = Properties.Settings.Default.ShowDbgInfo;
+			//render.CamMode = Properties.Settings.Default.CameraMode == 0 ? HelixToolkit.Wpf.CameraMode.Inspect : HelixToolkit.Wpf.CameraMode.WalkAround;
+			//render.ZoomSensitivity = Properties.Settings.Default.ZoomSen;
+			//render.RotationSensitivity = Properties.Settings.Default.RotSen;
 
 #if DEBUG
 			if (Debugger.IsAttached) this.Text += " - Debugger.IsAttached";
@@ -147,7 +169,7 @@ namespace EditorCore
 			foreach (var module in Modules)
 			{
 				if (module.HasGameModule) ExtensionsWithGameModules.Add(module);
-				//if (module.ClipboardExt != null)
+				//if (module.ClipboardExt != null) TODO
 				//{
 				//	if (module.ClipboardExt.PasteExtensions != null) RegisterMenuExt(ClipBoardMenu, module.ClipboardExt.PasteExtensions);
 				//	if (module.ClipboardExt.CopyExtensions != null) RegisterMenuExtIndex(ClipBoardMenu, module.ClipboardExt.PasteExtensions);
@@ -183,12 +205,16 @@ namespace EditorCore
 			}
 
 			GameModule.InitModule(this);
+			render = GameModule.GetRenderer();
+			renderControl.MainDrawable = render;
+			render.ClickSelection += Render_ClickSelection;
+			render.ObjectMoved += Render_ObjectMoved;
 
-			editingOptionsModule = GameModule as IEditingOptionsModule;
-			if (editingOptionsModule != null)
-			{
-				editingOptionsModule.InitOptionsMenu(ref ObjectRightClickMenu);
-			}
+			//TODO editingOptionsModule = GameModule as IEditingOptionsModule;
+			//if (editingOptionsModule != null)
+			//{
+			//	editingOptionsModule.InitOptionsMenu(ref ObjectRightClickMenu);
+			//}
 
 			if (GameModule is IActionButtonsModule)
 				((IActionButtonsModule)GameModule).InitActionButtons(ref toolStrip1);
@@ -209,10 +235,30 @@ namespace EditorCore
 
 		}
 
+		private void Render_ClickSelection(ILevelObj item, bool MultiSelect, ref bool Cancel)
+		{
+			if (item == null)
+			{
+				SelectedObj = null;
+				return;
+			}
+			if (MultiSelect && SelectedObj != null && !ObjectsListBox.Items.Contains(item))
+			{
+				Cancel = true;
+				return;
+			}
+			else if (!MultiSelect || SelectedObj == null)
+				SelectedObj = item;
+			else
+				ObjectsListBox.SelectedItems.Add(item);
+		}
+
+		private void Render_ObjectMoved(IReadOnlyList<ILevelObj> Selected) => propertyGrid1.Refresh();
+
 		private void render_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
 		{
 			if (ActiveForm != this) return;
-			render.FocusModelView();
+			render.Focus();
 		}
 
 		public void RegisterMenuExtension(IMenuExtension ext)
@@ -288,7 +334,7 @@ namespace EditorCore
             LevelFilesMenu.DropDownItems.Clear();
 
 			if ((ModifierKeys & Keys.Control) == 0) //Skip unloading the models, this is useful to overlay a Design.szs to a Map.szs
-				render.UnloadLevel();
+				render.Clear();
 
             LoadedLevel = null;
 
@@ -305,15 +351,6 @@ namespace EditorCore
             propertyGrid1.SelectedObject = null;
 
 			ListEditingPanel.Visible = false;
-
-			if (SkipModels == null)
-            {
-                if (File.Exists($"{ModelsFolder}/SkipModels.txt"))
-                    SkipModels = new List<string>(File.ReadAllLines($"{ModelsFolder}/SkipModels.txt"));
-                else
-                    SkipModels = new List<string>();
-            }
-            else File.WriteAllLines($"{ModelsFolder}/SkipModels.txt", SkipModels.ToArray());
 
 			GC.Collect();
         }
@@ -351,7 +388,7 @@ namespace EditorCore
 			LoadingForm.ShowLoading(this, "Loading models...\r\nOpening a Level for the first time will take longer");
 			foreach (string k in LoadedLevel.objs.Keys.ToArray())
 			{
-				LoadObjListModels(LoadedLevel.objs[k], k);
+				LoadObjListModels(LoadedLevel.objs[k]);
 			}
 
 			foreach (string l in GameModule.AutoHideList)
@@ -376,67 +413,43 @@ namespace EditorCore
 		}
 
         bool NoModels = false; //Debug only
-        List<string> SkipModels = null;
-        string GetModelName(string ObjName) //convert bfres to obj and cache in models folder
-        {
-#if DEBUG
-			if (NoModels && Debugger.IsAttached)
-                return null;
-#endif
-			if (Properties.Settings.Default.CustomModels)
-			{
-				string name = $"{CustomModelsFolder}\\{ObjName}.obj";
-				if (File.Exists(name)) return name;
-			}
+   //     string GetModelName(string ObjName) //convert bfres to obj and cache in models folder
+   //     {
 
-			if (SkipModels?.Contains(ObjName) ?? false) return null;
+			//if (Properties.Settings.Default.CustomModels)
+			//{
+			//	string name = $"{CustomModelsFolder}\\{ObjName}.obj";
+			//	if (File.Exists(name)) return name;
+			//}
 
-			string CachedModelPath = $"{ModelsFolder}\\{ObjName}.obj";
-			if (render.ImportedModels.ContainsKey(CachedModelPath) || //The model has aready been loaded or has been converted
-				File.Exists(CachedModelPath) ||
-				(GameModule.ConvertModelFile(ObjName, ModelsFolder) && File.Exists(CachedModelPath)))
-				return CachedModelPath;
+			//if (SkipModels?.Contains(ObjName) ?? false) return null;
 
-			SkipModels?.Add(ObjName);
-            return null;
-        }
+			//string CachedModelPath = $"{ModelsFolder}\\{ObjName}.obj";
+			//if (render.LoadedModels.ContainsKey(CachedModelPath) || //The model has aready been loaded or has been converted
+			//	File.Exists(CachedModelPath) ||
+			//	(GameModule.ConvertModelFile(ObjName, ModelsFolder) && File.Exists(CachedModelPath)))
+			//	return CachedModelPath;
 
-        public void LoadObjListModels(IList<ILevelObj> list, string listName)
+			//SkipModels?.Add(ObjName);
+   //         return null;
+   //     }
+
+        public void LoadObjListModels(IObjList list)
         {
             foreach (var obj in list)
             {
-                AddModel(obj, listName);
-            }
-        }
-
-        public void AddModel(ILevelObj obj, string listName)
-        {
-			if (obj is IPathObj)
-			{
-				render.AddPath(obj, ((IPathObj)obj).Points);
-				return;
+                AddModel(obj, list);
 			}
+		}
 
-			string PlaceholderModel = ModelsFolder + "\\" + GameModule.GetPlaceholderModel(obj.Name, listName);
-
-			string ModelFile = GetModelName(obj.ModelName);
-
-            if (ModelFile == null) ModelFile = PlaceholderModel;
-            render.AddModel(ModelFile, obj, obj.ModelView_Pos, obj.ModelView_Scale, obj.ModelView_Rot);
-        }
-
-		public void AddModelObj(string path, object reference, Vector3D Pos, Vector3D Scale, Vector3D Rot ) =>
-			render.AddModel(path, reference, Pos, Scale, Rot);
-
-		public void UpdateModelPosition(ILevelObj o)
-        {
-			if (CurList is IPathObj)
-				render.AddPath(CurList, ((IPathObj)CurList).Points);
-
-			if (o is IPathObj)
-				render.AddPath(o, ((IPathObj)o).Points);
-			else
-				render.ChangeTransform(o, o.ModelView_Pos, o.ModelView_Scale, o.ModelView_Rot);
+        public void AddModel(ILevelObj obj, IObjList list)
+		{
+#if DEBUG
+			if (NoModels && Debugger.IsAttached)
+				return;
+#endif
+			//TODO handle path
+            render.Add(obj);
         }
 
         void PopulateListBox()
@@ -451,7 +464,7 @@ namespace EditorCore
 		{
 			ListEditingStack.Push(path);
 			PopulateListBox();
-			LoadObjListModels(path, Constants.LinkedListName);
+			LoadObjListModels(path);
 		}
 
 		public void EditList(IObjList objlist)
@@ -460,7 +473,7 @@ namespace EditorCore
 			ListEditingStack.Push(objlist);
 			PopulateListBox();
 			SelectedObjectChanged(null, null);
-			LoadObjListModels(objlist, Constants.LinkedListName);
+			LoadObjListModels(objlist);
 		}
 
 		public void EditList(IList<dynamic> objList)
@@ -473,7 +486,7 @@ namespace EditorCore
         {
             if (!EditingList) return;
 			UndoList.Clear();
-			foreach (var obj in CurList) render.RemoveModel(obj);
+			foreach (var obj in CurList) render.Remove(obj);
             ListEditingStack.Pop().ApplyChanges();
             SelectedObjectChanged(null, null);
             PopulateListBox();
@@ -516,16 +529,14 @@ namespace EditorCore
                 string name = e.ChangedItem.Label;
 				if (GameModule.ModelFieldPropNames.Contains(name) || name == "Name")
 				{
-					string path = GetModelName(SelectedObj.ModelName);
-					if (path == null) path = $"{ModelsFolder}/{GameModule.GetPlaceholderModel(SelectedObj.Name, CurListName)}";
-					foreach (var i in SelectedObjs)
-						render.ChangeModel(i, path);
+					//foreach (var i in SelectedObjs) TODO
+					//	GameModule.UpdateMesh(i,CurList);
 					ObjectsListBox.Refresh();
                 }
-                foreach (var i in SelectedObjs)
-                {
-                    UpdateModelPosition(i);
-                }
+                //foreach (var i in SelectedObjs)
+                //{
+                //    UpdateModelPosition(i);
+                //}
             }
         }
         
@@ -587,7 +598,6 @@ namespace EditorCore
                    foreach (var a in _args)
                    {
                        a.Item1.transform = a.Item2;
-                       UpdateModelPosition(a.Item1);
                    }
                }, $"Pasted value to {SelectionCount} Object(s)");
 
@@ -608,7 +618,6 @@ namespace EditorCore
                             o.transform = StoredValue.transform;
                             break;
                     }
-                    UpdateModelPosition(o);
                 }
             }
         }
@@ -739,7 +748,7 @@ namespace EditorCore
 			foreach (var file in files)
 			{
 				using (var s = new FileStream(file, FileMode.Open))
-					OpenFileHandler.OpenFile(Path.GetFileName(file), s);
+					OpenFileHandler.OpenFile(System.IO.Path.GetFileName(file), s);
 			}
 		}
 
@@ -866,14 +875,14 @@ namespace EditorCore
             if (CurList.IsHidden)
             {
                 foreach (var o in CurList)
-                    render.RemoveModel(o);
+                    render.Remove(o);
                 foreach (var o in SelectedObjs)
-                    AddModel(o, CurList.name);
+                    AddModel(o, CurList);
             }
 
-			var selection = SelectedObjs.Cast<dynamic>().ToList();
-			if (CurList is IPathObj) selection.Add(CurList);
-			render.SelectObjs(selection);
+			var selection = SelectedObjs.Cast<ILevelObj>().ToList();
+			if (CurList is IPathObj) selection.Add((IPathObj)CurList);
+			render.SetSelected(selection);
         }        
 
         private void ObjectsList_DoubleClick(object sender, EventArgs e)
@@ -893,165 +902,10 @@ namespace EditorCore
 				GameModule.EditChildrenNode(SelectedObj);
 		}
 		#endregion
-
-		//Dragging, click
-		#region RendererEvents
-
-		DragArgs DraggingArgs = null;
-		private IEditingOptionsModule editingOptionsModule;
-
-		bool RenderIsDragging { get { return DraggingArgs != null && Mouse.LeftButton == MouseButtonState.Pressed && (ModifierKeys & Keys.Control) == Keys.Control; } }        
 		
-        private void render_KeyDown(object sender, System.Windows.Input.KeyEventArgs e) //Render hotkeys
-        {
-            if (RenderIsDragging) return;
-            HandleHotKey(e);
-        }
-        
-        private void render_KeyUP(object sender, System.Windows.Input.KeyEventArgs e)
-        {
-            if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
-            {
-                if (DraggingArgs != null) endDragging();
-            }			
-        }        
-
-        private void render_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
-        {
-            if (!RenderIsDragging) return;
-            int roundTo = (ModifierKeys & Keys.Alt) == Keys.Alt ? 100 : ((ModifierKeys & Keys.Shift) == Keys.Shift ? 50 : 0);
-
-            Vector3D DeltaPos = render.DeltaDrag(DraggingArgs, e);
-			if (DeltaPos == null) return;
-			DraggingArgs.DeltaPos = DeltaPos;
-            DraggingArgs.position += DeltaPos;
-
-			Vector3D vec = DraggingArgs.position + DraggingArgs.DeltaPos;
-			if (roundTo != 0)
-			{
-				vec.X = Math.Round(vec.X / roundTo, 0) * roundTo;
-				vec.Y = Math.Round(vec.Y / roundTo, 0) * roundTo;
-				vec.Z = Math.Round(vec.Z / roundTo, 0) * roundTo;
-			}
-			else
-			{
-				vec.X = (int)vec.X;
-				vec.Y = (int)vec.Y;
-				vec.Z = (int)vec.Z;
-			}
-			
-			Vector3D translation = Vector3D.Subtract(vec, DraggingArgs.obj.ModelView_Pos);
-			foreach (var obj in SelectedObjs)
-			{
-				obj.ModelView_Pos = Vector3D.Add(obj.ModelView_Pos, translation);
-				UpdateModelPosition(obj);
-			}
-		}
-
-        void endDragging()
-        {
-			Vector3D TotalDelta = DraggingArgs.position - DraggingArgs.StartPos;
-
-			AddToUndo((dynamic args) =>
-			{
-				foreach (var o in args[0])
-				{
-					o.ModelView_Pos -= args[1];
-					UpdateModelPosition(o);
-				}
-			}, 
-			SelectionCount == 1 ? $"Moved object {SelectedObj}" : $"Moved {SelectionCount} objects",
-			new dynamic[] { SelectedObjs, TotalDelta }); //SelectedObjs doesn't need to be cloned as every time it's called it returns a new array
-
-			DraggingArgs = null;
-            propertyGrid1.Refresh();
-        }
-
-        private void render_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            if (DraggingArgs != null) endDragging();
-        }
-		
-		ILevelObj ClickSelect(object sender, MouseButtonEventArgs e)
-		{
-			var obj = render.GetOBJ(sender, e) as ILevelObj;
-			if (obj == null || obj.ReadOnly)
-			{
-				return null;
-			}
-
-			return obj;
-		}
-
-		Point MousePos;
-		void render_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
-		{
-			MousePos = CursorHelper.GetCursorPosition();
-		}
-
-		void render_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
-		{
-			if (MousePos != CursorHelper.GetCursorPosition()) return;
-
-			var obj = ClickSelect(sender, e);
-			if (obj == null) return;
-
-			var pos = e.GetPosition(render);
-
-			ObjectRightClickMenu_Copy.Visible = (obj != null);
-			ObjectRightClickMenu_Paste.Enabled = (StoredValue?.Type == ClipBoardItem.ClipboardType.Objects);
-
-			ObjectRightClickMenu_CopyTransform.Visible =
-			ObjectRightClickMenu_PasteTransform.Visible = (obj != null);
-
-			ObjectRightClickMenu_PasteTransform.Enabled = (StoredValue?.Type == ClipBoardItem.ClipboardType.Transform) ||
-														  (StoredValue?.Type == ClipBoardItem.ClipboardType.Position) ||
-														  (StoredValue?.Type == ClipBoardItem.ClipboardType.Rotation) ||
-														  (StoredValue?.Type == ClipBoardItem.ClipboardType.Scale);
-
-			ObjectRightClickMenu_Delete.Visible =
-			ObjectRightClickMenu_EditChildren.Visible =
-			ObjectRightClickMenu_Hide.Visible = (obj != null);
-			editingOptionsModule?.OptionsMenuOpening(obj);
-			ObjectRightClickMenu.Tag = obj;
-
-			ObjectRightClickMenu.Show(RenderingCanvas, (int)pos.X, (int)pos.Y);
-
-			ObjectRightClickMenu_Copy.ShowDropDown();
-		}
-
-
-		private void render_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-			if (RenderIsDragging) return;
-
-			var obj = ClickSelect(sender, e);
-			if (obj == null) return;
-
-			if (ModifierKeys.HasFlag(Keys.Shift) && CurList.Contains(obj)) //Shift add to selection, ctrl start drag as well <- thats retarded so how about no
-			{
-				if (ObjectsListBox.SelectedItems.Contains(obj))
-					ObjectsListBox.SelectedItems.Remove(obj);
-				else
-					ObjectsListBox.SelectedItems.Add(obj);
-			}
-			else if (!(ModifierKeys.HasFlag(Keys.Control) && ObjectsListBox.SelectedItems.Contains(obj)))
-				SelectedObj = obj;
-
-			if (ModifierKeys.HasFlag(Keys.Control)) //User wants to drag
-			{
-				DraggingArgs = new DragArgs();
-				DraggingArgs.StartPos = obj.ModelView_Pos;
-				DraggingArgs.position = DraggingArgs.StartPos;
-				DraggingArgs.obj = obj;
-			}
-		}
-
-#endregion
 
         void HandleHotKey(System.Windows.Input.KeyEventArgs e)
         {
-            if (RenderIsDragging) return;
             if (e.Key == Key.B && EditingList) PreviousList();
 
 			if (SelectionCount == 0) return;
@@ -1063,15 +917,15 @@ namespace EditorCore
 			else if (e.Key == Key.H) btnHideSelected_Click(null, null);
 			else if (e.Key == Key.S) btnShowSelected_Click(null, null);
 			else if (e.Key == Key.Z && UndoList.Count > 0) UndoList.Pop().Undo();
-			else if (e.Key == Key.Q) render.CamMode = render.CamMode == HelixToolkit.Wpf.CameraMode.Inspect ? HelixToolkit.Wpf.CameraMode.WalkAround : HelixToolkit.Wpf.CameraMode.Inspect;
+			//else if (e.Key == Key.Q) render.CamMode = render.CamMode == HelixToolkit.Wpf.CameraMode.Inspect ? HelixToolkit.Wpf.CameraMode.WalkAround : HelixToolkit.Wpf.CameraMode.Inspect;
 			else if (e.Key == Key.C && SelectionCount == 1)
 			{
 				GameModule.EditChildrenNode(SelectedObj);
 			}
 #if DEBUG
-			else if (e.Key == Key.P)
-				foreach (IObjList l in LoadedLevel.objs.Values)
-					foreach (ILevelObj o in l) UpdateModelPosition(o);
+			//else if (e.Key == Key.P)
+			//	foreach (IObjList l in LoadedLevel.objs.Values)
+			//		foreach (ILevelObj o in l) UpdateModelPosition(o);
 #endif
 			else return;
         }
@@ -1091,12 +945,12 @@ namespace EditorCore
             if (hide)
             {
                 foreach (var o in list)
-                    render.RemoveModel(o);
+                    render.Remove(o);
             }
             else
             {
                 foreach (var o in list)
-                    AddModel(o, list.name);
+                    AddModel(o, list);
             }
         }
 
@@ -1117,7 +971,7 @@ namespace EditorCore
                 ObjectsListBox.Items.Add(o);
             }
             if (!(list.name == Constants.LinkedListName && !EditingList))
-                AddModel(o, list.name);
+                AddModel(o, list);
         }
 
         public void DuplicateObj(ILevelObj o, IObjList list)
@@ -1154,7 +1008,7 @@ namespace EditorCore
             if (list == CurList)
                 ObjectsListBox.Items.RemoveAt(CurList.IndexOf(o));
 
-			render.RemoveModel(o);
+			render.Remove(o);
 			list.Remove(o);
         }
 
@@ -1235,7 +1089,7 @@ namespace EditorCore
         {
             if (StoredValue.Type == ClipBoardItem.ClipboardType.Objects)
             {
-                Vector3D offset = new Vector3D();
+                Vector3 offset = new Vector3();
                 if (SelectedObj != null)
                     offset = StoredValue.Objs.First().ModelView_Pos - SelectedObj.ModelView_Pos;
                 ObjectsListBox.SelectedIndices.Clear();
@@ -1275,12 +1129,12 @@ namespace EditorCore
 
 		private void ObjectRightClickMenu_CopyTransform_Click(object sender, EventArgs e)
 		{
-			StoredValue = new ClipBoardItem() { Type = ClipBoardItem.ClipboardType.Transform, transform = (ObjectRightClickMenu.Tag as ILevelObj).transform };
+			StoredValue = new ClipBoardItem() { Type = ClipBoardItem.ClipboardType.Transform, transform = (ObjectRightClickMenu.Tag as ILevelObj).transform};
 		}
 
 		private void ObjectRightClickMenu_CopyPos_Click(object sender, EventArgs e)
 		{
-			StoredValue = new ClipBoardItem() { Type = ClipBoardItem.ClipboardType.Position,  transform = (ObjectRightClickMenu.Tag as ILevelObj).transform };
+			StoredValue = new ClipBoardItem() { Type = ClipBoardItem.ClipboardType.Position,  transform = (ObjectRightClickMenu.Tag as ILevelObj).transform};
 		}
 
 		private void ObjectRightClickMenu_CopyRot_Click(object sender, EventArgs e)
@@ -1295,21 +1149,21 @@ namespace EditorCore
 
 		private void ObjectRightClickMenu_Hide_Click(object sender, EventArgs e)
 		{
-			render.RemoveModel(ObjectRightClickMenu.Tag as ILevelObj);
+			render.Remove(ObjectRightClickMenu.Tag as ILevelObj);
 		}
 
 		private void btnHideSelected_Click(object sender, EventArgs e)
 		{
 			if (CurList.IsHidden) return;
 			foreach (var o in SelectedObjs)
-				render.RemoveModel(o);
+				render.Remove(o);
 		}
 
 		private void btnShowSelected_Click(object sender, EventArgs e)
 		{
 			if (CurList.IsHidden) return;
 			foreach (var o in SelectedObjs)
-				AddModel(o, CurListName);
+				AddModel(o, CurList);
 		}
 
 		private void btnShowAll_Click(object sender, EventArgs e)
@@ -1318,13 +1172,13 @@ namespace EditorCore
 			{
 				if (list.IsHidden) continue;
 				foreach (var o in list)
-					AddModel(o, list.name);
+					AddModel(o, list);
 			}
 			foreach (var list in LoadedLevel.objs.Values)
 			{
 				if (list.IsHidden) continue;
 				foreach (var o in list)
-					AddModel(o, list.name);
+					AddModel(o, list);
 			}
 		}
 

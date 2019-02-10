@@ -16,7 +16,7 @@ namespace EditorCore
         public FrmCredits(IGameModule module, ExtensionManifest[] extensions)
         {
             InitializeComponent();
-			textBox1.Text = $"Loaded extensions:\r\nGame module : {module.ModuleName}\r\n";
+			textBox1.Text = $"Thanks to Jupahe64 for Gl_EditorFramework\r\nhttps://github.com/jupahe64/GL_EditorFramework/\r\n\r\nLoaded extensions:\r\nGame module : {module.ModuleName}\r\n";
 			foreach (var ext in extensions)
 			{
 				textBox1.Text += $"\r\n{ext.ModuleName} by {ext.Author}\r\n";

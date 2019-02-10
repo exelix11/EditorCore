@@ -9,6 +9,7 @@ using System.Windows.Media.Media3D;
 using ExtensionMethods;
 using LibEveryFileExplorer.Math;
 using System.Diagnostics;
+using OpenTK;
 
 namespace MarioKart
 {
@@ -214,14 +215,14 @@ namespace MarioKart
 			public KCLOctreeNode[] SubNodes;
 			public ushort[] Triangles;
 
-			public static KCLOctreeNode Generate(Dictionary<ushort, Triangle> Triangles, Vector3D Position, float BoxSize, int MaxTris, int MinSize)
+			public static KCLOctreeNode Generate(Dictionary<ushort, Triangle> Triangles, Vector3 Position, float BoxSize, int MaxTris, int MinSize)
 			{
 				KCLOctreeNode n = new KCLOctreeNode();
 				//Pump this box a little up, to prevent glitches
 
-				Vector3D midpos = Position + new Vector3D(BoxSize / 2f, BoxSize / 2f, BoxSize / 2f);
+				Vector3 midpos = Position + new Vector3(BoxSize / 2f, BoxSize / 2f, BoxSize / 2f);
 				float newsize = BoxSize + 50;// 60;
-				Vector3D newpos = midpos - new Vector3D(newsize / 2f, newsize / 2f, newsize / 2f);
+				Vector3 newpos = midpos - new Vector3(newsize / 2f, newsize / 2f, newsize / 2f);
 				Dictionary<ushort, Triangle> t = new Dictionary<ushort, Triangle>();
 
 				foreach (var v in Triangles)
@@ -241,7 +242,7 @@ namespace MarioKart
 						{
 							for (int x = 0; x < 2; x++)
 							{
-								Vector3D pos = Position + childsize * new Vector3D(x, y, z);
+								Vector3 pos = Position + childsize * new Vector3(x, y, z);
 								n.SubNodes[i] = KCLOctreeNode.Generate(t, pos, childsize, MaxTris, MinSize);
 								i++;
 							}
@@ -264,14 +265,14 @@ namespace MarioKart
 				return Math.Min(p, q) > r || Math.Max(p, q) < -r;
 			}
 			//Based on this algorithm: http://jgt.akpeters.com/papers/AkenineMoller01/tribox.html
-			private static bool tricube_overlap(Triangle t, Vector3D Position, float BoxSize)
+			private static bool tricube_overlap(Triangle t, Vector3 Position, float BoxSize)
 			{
 				float half = BoxSize / 2f;
 				//Position is the min pos, so add half the box size
-				Position += new Vector3D(half, half, half);
-				Vector3D v0 = t.PointA - Position;
-				Vector3D v1 = t.PointB - Position;
-				Vector3D v2 = t.PointC - Position;
+				Position += new Vector3(half, half, half);
+				Vector3 v0 = t.PointA - Position;
+				Vector3 v1 = t.PointB - Position;
+				Vector3 v2 = t.PointC - Position;
 
 				if (Math.Min(Math.Min(v0.X, v1.X), v2.X) > half || Math.Max(Math.Max(v0.X, v1.X), v2.X) < -half) return false;
 				if (Math.Min(Math.Min(v0.Y, v1.Y), v2.Y) > half || Math.Max(Math.Max(v0.Y, v1.Y), v2.Y) < -half) return false;
@@ -281,7 +282,7 @@ namespace MarioKart
 				double r = half * (Math.Abs(t.Normal.X) + Math.Abs(t.Normal.Y) + Math.Abs(t.Normal.Z));
 				if (d > r || d < -r) return false;
 
-				Vector3D e = v1 - v0;
+				Vector3 e = v1 - v0;
 				if (axis_test(e.Z, -e.Y, v0.Y, v0.Z, v2.Y, v2.Z, half)) return false;
 				if (axis_test(-e.Z, e.X, v0.X, v0.Z, v2.X, v2.Z, half)) return false;
 				if (axis_test(e.Y, -e.X, v1.X, v1.Y, v2.X, v2.Y, half)) return false;
@@ -303,8 +304,8 @@ namespace MarioKart
 
 		public static KCLOctree FromTriangles(Triangle[] Triangles, KCLHeader Header,  int MinCubeSize = 32, int MaxNrTris = 50,uint MaxRootSize = 4096, uint MinRootSize = 128)//35)
 		{
-			Vector3D min = new Vector3D(float.MaxValue, float.MaxValue, float.MaxValue);
-			Vector3D max = new Vector3D(float.MinValue, float.MinValue, float.MinValue);
+			Vector3 min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+			Vector3 max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
 			Dictionary<ushort, Triangle> tt = new Dictionary<ushort, Triangle>();
 			ushort index = 0;
 			foreach (var t in Triangles)
@@ -341,7 +342,7 @@ namespace MarioKart
 			//TODO: +30
 			Header.OctreeOrigin = min;
 			Header.OctreeMax = max;
-			Vector3D size = max - min;
+			Vector3 size = max - min;
 			float mincomp = (float)Math.Min(Math.Min(size.X, size.Y), size.Z);
 			int CoordShift = next_exponent(mincomp);
 
@@ -373,7 +374,7 @@ namespace MarioKart
 				{
 					for (int x = 0; x < NrX; x++)
 					{
-						Vector3D pos = min + ((float)cubesize) * new Vector3D(x, y, z);
+						Vector3 pos = min + ((float)cubesize) * new Vector3(x, y, z);
 						k.RootNodes[i] = KCLOctreeNode.Generate(tt, pos, cubesize, MaxNrTris, MinCubeSize);
 						i++;
 					}

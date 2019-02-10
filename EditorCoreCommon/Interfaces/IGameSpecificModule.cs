@@ -1,12 +1,13 @@
-﻿using System;
+﻿using EditorCore.Drawing;
+using EditorCoreCommon.Interfaces.GL;
+using OpenTK;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Windows.Media.Media3D;
-
 namespace EditorCore.Interfaces
 {
 	public interface IEditorFormContext
@@ -31,7 +32,7 @@ namespace EditorCore.Interfaces
 		void AddObj(ILevelObj o, IObjList list);
 		void DeleteObj(ILevelObj o, IObjList list);
 
-		void AddModelObj(string path, object reference, Vector3D Pos, Vector3D Scale, Vector3D Rot);
+		void AddModel(ILevelObj obj, IObjList list);
 
 		IEditorFormContext NewInstance(params string[] args);
 	}
@@ -55,6 +56,7 @@ namespace EditorCore.Interfaces
 		void InitModule(IEditorFormContext currentView);
 		void FormLoaded(); //for startup checks
 		void ParseArgs(string[] Args);
+		RenderSceneBase GetRenderer();
 
 		ILevel LoadLevel(string path = null); 
 		ILevel NewLevel(string path = null);
@@ -63,9 +65,6 @@ namespace EditorCore.Interfaces
 
 		void SaveLevel(ILevel level);
 		void SaveLevelAs(ILevel level);
-
-		bool ConvertModelFile(string ObjName, string path);
-		string GetPlaceholderModel(string ObjName, string ListName);
 
 		bool OpenLevelFile(string name, Stream file); //if it fails the editor will try using OpenFileHandler
 		string AddObjList(ILevel level);

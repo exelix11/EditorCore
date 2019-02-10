@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenTK;
+using System;
 using System.Windows.Media.Media3D;
 
 namespace MarioKart
@@ -10,8 +11,8 @@ namespace MarioKart
 		public UInt32 PlanesOffset;//-0x10
 		public UInt32 OctreeOffset;
 		public Single Unknown1;
-		public Vector3D OctreeOrigin;
-		public Vector3D OctreeMax;
+		public Vector3 OctreeOrigin;
+		public Vector3 OctreeMax;
 		//public float n_x;
 		//public float n_y;
 		//public float n_z;

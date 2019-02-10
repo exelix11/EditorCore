@@ -1,3 +1,4 @@
+using OpenTK;
 using Syroot.BinaryData;
 using Syroot.NintenTools.MarioKart8.Collisions;
 using System.Windows.Media.Media3D;
@@ -38,27 +39,27 @@ namespace Syroot.NintenTools.MarioKart8.IO
         }
 
         /// <summary>
-        /// Reads a <see cref="Vector3D"/> instance from the current stream and returns it.
+        /// Reads a <see cref="Vector3"/> instance from the current stream and returns it.
         /// </summary>
         /// <param name="self">The extended <see cref="BinaryDataReader"/>.</param>
-        /// <returns>The <see cref="Vector3D"/> instance.</returns>
-        internal static Vector3D ReadVector3D(this BinaryDataReader self)
+        /// <returns>The <see cref="Vector3"/> instance.</returns>
+        internal static Vector3 ReadVector3(this BinaryDataReader self)
         {
-            return new Vector3D(self.ReadSingle(), self.ReadSingle(), self.ReadSingle());
+            return new Vector3(self.ReadSingle(), self.ReadSingle(), self.ReadSingle());
         }
 
         /// <summary>
-        /// Reads <see cref="Vector3D"/> instances from the current stream and returns them.
+        /// Reads <see cref="Vector3"/> instances from the current stream and returns them.
         /// </summary>
         /// <param name="self">The extended <see cref="BinaryDataReader"/>.</param>
         /// <param name="count">The number of instances to read.</param>
-        /// <returns>The <see cref="Vector3D"/> instances.</returns>
-        internal static Vector3D[] ReadVector3Ds(this BinaryDataReader self, int count)
+        /// <returns>The <see cref="Vector3"/> instances.</returns>
+        internal static Vector3[] ReadVector3s(this BinaryDataReader self, int count)
         {
-            Vector3D[] values = new Vector3D[count];
+            Vector3[] values = new Vector3[count];
             for (int i = 0; i < count; i++)
             {
-                values[i] = ReadVector3D(self);
+                values[i] = ReadVector3(self);
             }
             return values;
         }

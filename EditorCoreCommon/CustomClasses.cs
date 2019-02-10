@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Windows.Media.Media3D;
 using System.IO;
 using System.Xml;
 using System.Diagnostics;
@@ -15,6 +14,7 @@ using EditorCore.Interfaces;
 using System.Configuration;
 using System.Windows;
 using System.Runtime.InteropServices;
+using OpenTK;
 
 namespace EditorCore
 {
@@ -320,10 +320,10 @@ namespace ExtensionMethods
 {
 	public static class Extensions
 	{
-		public static float Dot(this Vector3D v, Vector3D v2) => (float)Vector3D.DotProduct(v, v2);
-		public static Vector3D Cross(this Vector3D v, Vector3D v2) => Vector3D.CrossProduct(v, v2);
+		public static float Dot(this Vector3 a, Vector3 b) => Vector3.Dot(a, b);
+		public static Vector3 Cross(this Vector3 a, Vector3 b) => Vector3.Cross(a, b);
 
-		public static float Get(this Vector3D v, int id)
+		public static float Get(this Vector3 v, int id)
 		{
 			switch (id)
 			{
@@ -337,7 +337,7 @@ namespace ExtensionMethods
 			throw new Exception();
 		}
 
-		public static void Set(this Vector3D v, int id, double val)
+		public static void Set(this Vector3 v, int id, float val)
 		{
 			switch (id)
 			{
@@ -352,7 +352,7 @@ namespace ExtensionMethods
 			throw new Exception();
 		}
 
-		public static Vector3D GetNormalize(this Vector3D v)
+		public static Vector3 GetNormalize(this Vector3 v)
 		{
 			var vv = v;
 			vv.Normalize();
@@ -386,17 +386,7 @@ namespace ExtensionMethods
 				return index;
 		}
 
-        public static Vector3D ToVect(this Point3D p)
-        {
-            return new Vector3D(p.X, p.Y, p.Z);
-		}
-
-		public static Point3D ToPoint3D(this Vector3D p)
-		{
-			return new Point3D(p.X, p.Y, p.Z);
-		}
-
-		public static void Add<T>(this ApplicationSettingsBase settings, string propertyName, T val)
+       	public static void Add<T>(this ApplicationSettingsBase settings, string propertyName, T val)
 		{
 			if (settings.Properties[propertyName] != null)
 				return;

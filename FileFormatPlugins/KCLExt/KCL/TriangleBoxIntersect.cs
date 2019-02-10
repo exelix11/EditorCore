@@ -1,5 +1,6 @@
 ﻿using ExtensionMethods;
 using LibEveryFileExplorer._3D;
+using OpenTK;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,10 +16,10 @@ namespace KCLExt.KCL
 		private const int X = 0;
 		private const int Y = 1;
 		private const int Z = 2;
-		private static bool planeBoxOverlap(Vector3D normal, Vector3D vert, Vector3D maxbox)    
+		private static bool planeBoxOverlap(Vector3 normal, Vector3 vert, Vector3 maxbox)    
 		{
 			int q;
-			Vector3D vmin = new Vector3D(), vmax = new Vector3D();
+			Vector3 vmin = new Vector3(), vmax = new Vector3();
 			float v;
 			for (q = X; q <= Z; q++)
 			{
@@ -39,7 +40,7 @@ namespace KCLExt.KCL
 			return false;
 		}
 
-		public static bool triBoxOverlap(Vector3D boxcenter, Vector3D boxhalfsize, Triangle tri)
+		public static bool triBoxOverlap(Vector3 boxcenter, Vector3 boxhalfsize, Triangle tri)
 		{
 			/*    use separating axis theorem to test overlap between triangle and box */
 			/*    need to test for overlap in these directions: */
@@ -48,10 +49,10 @@ namespace KCLExt.KCL
 			/*    2) normal of the triangle */
 			/*    3) crossproduct(edge from tri, {x,y,z}-directin) */
 			/*       this gives 3x3=9 more tests */
-			Vector3D v0, v1, v2;
+			Vector3 v0, v1, v2;
 			//   float axis[3];
 			double min, max, p0, p1, p2, rad, fex, fey, fez;     // -NJMP- "d" local variable removed
-			Vector3D normal, e0, e1, e2;
+			Vector3 normal, e0, e1, e2;
 
 			bool AXISTEST_X01(double a, double b, double fa, double fb)
 			{

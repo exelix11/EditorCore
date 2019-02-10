@@ -37,11 +37,11 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="HelixToolkit, Version=2.2.0.0, Culture=neutral, PublicKeyToken=52aa3500039caf0d, processorArchitecture=MSIL">
-      <HintPath>..\packages\HelixToolkit.2.2.0\lib\netstandard1.1\HelixToolkit.dll</HintPath>
+    <Reference Include="OpenTK, Version=3.0.1.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenTK.3.0.1\lib\net20\OpenTK.dll</HintPath>
     </Reference>
-    <Reference Include="HelixToolkit.Wpf, Version=2.2.0.0, Culture=neutral, PublicKeyToken=52aa3500039caf0d, processorArchitecture=MSIL">
-      <HintPath>..\packages\HelixToolkit.Wpf.2.2.0\lib\net45\HelixToolkit.Wpf.dll</HintPath>
+    <Reference Include="OpenTK.GLControl, Version=3.0.1.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenTK.GLControl.3.0.1\lib\net20\OpenTK.GLControl.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -123,6 +123,7 @@
     <EmbeddedResource Include="OtherForms\Settings.resx">
       <DependentUpon>Settings.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="OpenTK.dll.config" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -143,9 +144,9 @@
       <Project>{ee9882d0-f7a7-45e1-971a-1527b7e399f5}</Project>
       <Name>EditorCoreCommon</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ModelViewer\ModelViewerCore.csproj">
-      <Project>{44045645-B2AB-43D0-A1B7-A67A9D00DC4B}</Project>
-      <Name>ModelViewerCore</Name>
+    <ProjectReference Include="..\GL_EditorFramework\Gl_EditorFramework\Gl_EditorFramework.csproj">
+      <Project>{d593a72d-554d-40fb-9967-503cb15a744f}</Project>
+      <Name>Gl_EditorFramework</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

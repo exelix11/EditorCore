@@ -8,6 +8,7 @@ using LibEveryFileExplorer._3D;
 using System.Windows.Media.Media3D;
 using ExtensionMethods;
 using KCLExt;
+using OpenTK;
 
 namespace MarioKart.MK7
 {
@@ -16,8 +17,8 @@ namespace MarioKart.MK7
 		KCLModel.KCLModelHeader GlobalHeader;
 		List<KCLModel> Models = new List<KCLModel>();
 
-		internal static readonly Vector3D MinOffset = new Vector3D(50, 80, 50);
-		internal static readonly Vector3D MaxOffset = new Vector3D(50, 50, 50);
+		internal static readonly Vector3 MinOffset = new Vector3(50, 80, 50);
+		internal static readonly Vector3 MaxOffset = new Vector3(50, 50, 50);
 
 		public KCL() { }
 
@@ -43,13 +44,13 @@ namespace MarioKart.MK7
 				mod.Header = new KCLModel.KCLModelHeader(er);
 				er.BaseStream.Position = mod.Header.VerticesOffset + CurModelOffset;
 				uint nr = (mod.Header.NormalsOffset - mod.Header.VerticesOffset) / 0xC;
-				mod.Vertices = new Vector3D[nr];
-				for (int i = 0; i < nr; i++) mod.Vertices[i] = er.ReadVector3D();
+				mod.Vertices = new Vector3[nr];
+				for (int i = 0; i < nr; i++) mod.Vertices[i] = er.ReadVector3();
 
 				er.BaseStream.Position = mod.Header.NormalsOffset + CurModelOffset;
 				nr = (mod.Header.PlanesOffset - mod.Header.NormalsOffset) / 0xC;
-				mod.Normals = new Vector3D[nr];
-				for (int i = 0; i < nr; i++) mod.Normals[i] = er.ReadVector3D();
+				mod.Normals = new Vector3[nr];
+				for (int i = 0; i < nr; i++) mod.Normals[i] = er.ReadVector3();
 
 				er.BaseStream.Position = mod.Header.PlanesOffset + CurModelOffset;
 				nr = (mod.Header.OctreeOffset - mod.Header.PlanesOffset) / 0x14;
@@ -173,14 +174,14 @@ namespace MarioKart.MK7
 			er.BaseStream.Position = HeaderPos;
 			er.Write((uint)(curpos - HeaderPos));
 			er.BaseStream.Position = curpos;
-			foreach (Vector3D v in mod.Vertices) er.Write(v);
+			foreach (Vector3 v in mod.Vertices) er.Write(v);
 			er.Align(4);
 			curpos = er.BaseStream.Position;
 			//Write normal array position
 			er.BaseStream.Position = HeaderPos + 4;
 			er.Write((uint)(curpos - HeaderPos));
 			er.BaseStream.Position = curpos;
-			foreach (Vector3D v in mod.Normals) er.Write(v);
+			foreach (Vector3 v in mod.Normals) er.Write(v);
 			er.Align(4);
 			curpos = er.BaseStream.Position;
 			//Write Triangles offset
@@ -197,15 +198,15 @@ namespace MarioKart.MK7
 			mod.Octree.Write(er);
 		}
 
-		public static Vector3D NormalAvg(OBJ.Face face) => (face.VA.normal + face.VB.normal + face.VC.normal)/3;
+		public static Vector3 NormalAvg(OBJ.Face face) => (face.VA.normal + face.VB.normal + face.VC.normal)/3;
 		
 		public static KCL FromOBJ(OBJ o)
 		{
 			KCL res = new KCL();
 			res.GlobalHeader = new KCLModel.KCLModelHeader();
 
-			Vector3D min = new Vector3D(float.MaxValue, float.MaxValue, float.MaxValue);
-			Vector3D max = new Vector3D(float.MinValue, float.MinValue, float.MinValue);
+			Vector3 min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+			Vector3 max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
 
 			var MatDictionary = MaterialSetForm.ShowForm(o.MaterialNames);
 
@@ -261,7 +262,7 @@ namespace MarioKart.MK7
 				for (int l = 0; l < 2; l++)
 					for (int m = 0; m < 2; m++)
 					{
-						var Boxmin = min + new Vector3D(BoxSize.X * m, BoxSize.Y * l, BoxSize.Z * k);
+						var Boxmin = min + new Vector3(BoxSize.X * m, BoxSize.Y * l, BoxSize.Z * k);
 						var mod = KCLModel.FromTriangles(Triangles, baseTriCount, Boxmin, BoxSize/2);
 						res.Models.Add(mod);
 						if (mod != null) baseTriCount += (uint)mod.Planes.Length;
@@ -272,9 +273,9 @@ namespace MarioKart.MK7
 			return res;
 		}
 
-		private static ushort AddIfNotContainsVector3D(Vector3D a, List<Vector3D> b)
+		private static ushort AddIfNotContainsVector3(Vector3 a, List<Vector3> b)
 		{
-			var i = ContainsVector3D(a, b);
+			var i = ContainsVector3(a, b);
 			if (i == -1)
 			{
 				i = b.Count;
@@ -283,7 +284,7 @@ namespace MarioKart.MK7
 			return (ushort)i;
 		}
 
-		private static int ContainsVector3D(Vector3D a, List<Vector3D> b)
+		private static int ContainsVector3(Vector3 a, List<Vector3> b)
 		{
 			for (int i = 0; i < b.Count; i++)
 			{
@@ -328,7 +329,7 @@ namespace MarioKart.MK7
 					PlanesOffset = er.ReadUInt32();
 					OctreeOffset = er.ReadUInt32();
 					Unknown1 = er.ReadSingle();
-					OctreeOrigin = er.ReadVector3D();
+					OctreeOrigin = er.ReadVector3();
 					XMask = er.ReadUInt32();
 					YMask = er.ReadUInt32();
 					ZMask = er.ReadUInt32();
@@ -355,8 +356,8 @@ namespace MarioKart.MK7
 				}
 			}
 
-			public Vector3D[] Vertices;
-			public Vector3D[] Normals;
+			public Vector3[] Vertices;
+			public Vector3[] Normals;
 
 			public KCLPlane[] Planes;
 			public class KCLPlane
@@ -396,15 +397,15 @@ namespace MarioKart.MK7
 
 			public KCLOctree Octree;
 
-			Vector3D NormalAvg(KCLPlane Plane) => (Normals[Plane.NormalAIndex] + Normals[Plane.NormalBIndex] + Normals[Plane.NormalCIndex]) / 3;
+			Vector3 NormalAvg(KCLPlane Plane) => (Normals[Plane.NormalAIndex] + Normals[Plane.NormalBIndex] + Normals[Plane.NormalCIndex]) / 3;
 
 			public Triangle GetTriangle(KCLPlane Plane)
 			{
-				Vector3D A = Vertices[Plane.VertexIndex];
-				Vector3D CrossA = Normals[Plane.NormalAIndex].Cross(Normals[Plane.DirectionIndex]);
-				Vector3D CrossB = Normals[Plane.NormalBIndex].Cross(Normals[Plane.DirectionIndex]);
-				Vector3D B = A + CrossB * (Plane.Length / CrossB.Dot(Normals[Plane.NormalCIndex]));
-				Vector3D C = A + CrossA * (Plane.Length / CrossA.Dot(Normals[Plane.NormalCIndex]));
+				Vector3 A = Vertices[Plane.VertexIndex];
+				Vector3 CrossA = Normals[Plane.NormalAIndex].Cross(Normals[Plane.DirectionIndex]);
+				Vector3 CrossB = Normals[Plane.NormalBIndex].Cross(Normals[Plane.DirectionIndex]);
+				Vector3 B = A + CrossB * (Plane.Length / CrossB.Dot(Normals[Plane.NormalCIndex]));
+				Vector3 C = A + CrossA * (Plane.Length / CrossA.Dot(Normals[Plane.NormalCIndex]));
 				return new Triangle(A, B, C);
 			}
 
@@ -416,7 +417,7 @@ namespace MarioKart.MK7
 					Triangle t = GetTriangle(vv);
 					var mat = o.GetOrAddMaterial("COL_" + vv.CollisionType.ToString("X"));
 					var col = KCLColors.GetMaterialColor(vv.CollisionType);
-					mat.Colors = new OBJ.Vertex(new Vector3D(), new Vector3D(col.R / 255f, col.G / 255f, col.B / 255f));
+					mat.Colors = new OBJ.Vertex(new Vector3(), new Vector3(col.R / 255f, col.G / 255f, col.B / 255f));
 					o.Faces.Add(new OBJ.Face()
 					{
 						VA = new OBJ.Vertex(t.PointA, t.Normal),
@@ -428,11 +429,11 @@ namespace MarioKart.MK7
 				return o;
 			}
 
-			internal static KCLModel FromTriangles(List<Triangle> triangles, uint baseTriCount, Vector3D BoxMin, Vector3D QuarterSize)
+			internal static KCLModel FromTriangles(List<Triangle> triangles, uint baseTriCount, Vector3 BoxMin, Vector3 QuarterSize)
 			{
 				List<Triangle> modelTri = new List<Triangle>();
-				List<Vector3D> Vertices = new List<Vector3D>();
-				List<Vector3D> Normals = new List<Vector3D>();
+				List<Vector3> Vertices = new List<Vector3>();
+				List<Vector3> Normals = new List<Vector3>();
 				List<KCLPlane> Planes = new List<KCLPlane>();
 				
 				for (int i = 0; i < triangles.Count; i++)
@@ -447,12 +448,12 @@ namespace MarioKart.MK7
 					KCLModel.KCLPlane p = new KCLModel.KCLPlane();
 					p.CollisionType = triangles[i].Collision;
 
-					p.VertexIndex = AddIfNotContainsVector3D(tri.PointA, Vertices);
+					p.VertexIndex = AddIfNotContainsVector3(tri.PointA, Vertices);
 					var direction = (tri.PointB - tri.PointA).Cross(tri.PointC - tri.PointA).GetNormalize();
-					p.DirectionIndex = AddIfNotContainsVector3D(direction, Normals);
-					p.NormalAIndex = AddIfNotContainsVector3D(direction.Cross(tri.PointC - tri.PointA).GetNormalize(), Normals);
-					p.NormalBIndex = AddIfNotContainsVector3D((-(direction.Cross(tri.PointB - tri.PointA))).GetNormalize(), Normals);
-					p.NormalCIndex = AddIfNotContainsVector3D(direction.Cross(tri.PointB - tri.PointC).GetNormalize(), Normals);
+					p.DirectionIndex = AddIfNotContainsVector3(direction, Normals);
+					p.NormalAIndex = AddIfNotContainsVector3(direction.Cross(tri.PointC - tri.PointA).GetNormalize(), Normals);
+					p.NormalBIndex = AddIfNotContainsVector3((-(direction.Cross(tri.PointB - tri.PointA))).GetNormalize(), Normals);
+					p.NormalCIndex = AddIfNotContainsVector3(direction.Cross(tri.PointB - tri.PointC).GetNormalize(), Normals);
 					p.Length = (tri.PointB - tri.PointA).Dot(Normals[p.NormalCIndex]);
 
 					p.TriangleIndex = baseTriCount + (uint)Planes.Count;

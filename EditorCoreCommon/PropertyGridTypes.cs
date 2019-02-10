@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.ComponentModel;
 using System.Collections;
 using System.Linq;
+using OpenTK;
 
 namespace EditorCore
 {
@@ -20,7 +21,7 @@ namespace EditorCore
 					return Activator.CreateInstance(CustomClassConverter[_obj.GetType()]);
 				else if (_obj is IDictionary<string, dynamic>)
 				{
-					if (_obj.Keys.Count == 3 && _obj.ContainsKey("X") && _obj.ContainsKey("Y") && _obj.ContainsKey("Z")) return new Vector3DDictionaryConverter();
+					if (_obj.Keys.Count == 3 && _obj.ContainsKey("X") && _obj.ContainsKey("Y") && _obj.ContainsKey("Z")) return new Vector3DictionaryConverter();
 					return new DictionaryConverter();
 				}
 				else if (_obj is IList<dynamic>) return new ArrayNodeConverter();
@@ -46,7 +47,7 @@ namespace EditorCore
             }             
         }
 
-        public class Vector3DConverter : System.ComponentModel.TypeConverter
+        public class Vector3Converter : System.ComponentModel.TypeConverter
         {
 			public override bool GetPropertiesSupported(ITypeDescriptorContext context) => true;
 
@@ -65,20 +66,20 @@ namespace EditorCore
             public override object ConvertFrom(System.ComponentModel.ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
 			{
 				string[] tokens = ((string)value).Split(';');
-                return new System.Windows.Media.Media3D.Vector3D(
-					Double.Parse(tokens[0]),
-					Double.Parse(tokens[1]),
-					Double.Parse(tokens[2]));
+                return new Vector3(
+					float.Parse(tokens[0]),
+					float.Parse(tokens[1]),
+					float.Parse(tokens[2]));
 			}
 
             public override object ConvertTo(System.ComponentModel.ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
             {
-				var v = (System.Windows.Media.Media3D.Vector3D)value;
+				var v = (Vector3)value;
 				return $"{v.X};{v.Y};{v.Z}";
             }
         }
 
-        public class Vector3DDictionaryConverter : System.ComponentModel.TypeConverter
+        public class Vector3DictionaryConverter : System.ComponentModel.TypeConverter
         {
             public override bool GetPropertiesSupported(ITypeDescriptorContext context) => true;
 

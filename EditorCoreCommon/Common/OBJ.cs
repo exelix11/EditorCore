@@ -1,26 +1,26 @@
 ﻿using ExtensionMethods;
+using OpenTK;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Media.Media3D;
 
 namespace EditorCore.Common
 {
 	public class OBJ
 	{
 
-		static Vector3D Vec(string x, string y, string z) => new Vector3D(float.Parse(x), float.Parse(y), float.Parse(z));
+		static Vector3 Vec(string x, string y, string z) => new Vector3(float.Parse(x), float.Parse(y), float.Parse(z));
 		
 		public static OBJ Read(Stream mesh, Stream mtl)
 		{
 			var res = new OBJ();
 
-			List<Vector3D> v = new List<Vector3D>();
-			List<Vector3D> vn = new List<Vector3D>();
-			List<Vector3D> vt = new List<Vector3D>();
+			List<Vector3> v = new List<Vector3>();
+			List<Vector3> vn = new List<Vector3>();
+			List<Vector3> vt = new List<Vector3>();
 
 			Material usingMaterial = null;
 			using (var f = new StreamReader(mesh, Encoding.UTF8))
@@ -95,15 +95,15 @@ namespace EditorCore.Common
 								break;
 							case "Ka":
 								if (usingMaterial == null) continue;
-								usingMaterial.Colors.pos = new Vector3D(float.Parse(parts[1]),float.Parse(parts[2]),float.Parse(parts[3]));
+								usingMaterial.Colors.pos = new Vector3(float.Parse(parts[1]),float.Parse(parts[2]),float.Parse(parts[3]));
 								break;
 							case "Kd":
 								if (usingMaterial == null) continue;
-								usingMaterial.Colors.normal = new Vector3D(float.Parse(parts[1]), float.Parse(parts[2]), float.Parse(parts[3]));
+								usingMaterial.Colors.normal = new Vector3(float.Parse(parts[1]), float.Parse(parts[2]), float.Parse(parts[3]));
 								break;
 							case "Ks":
 								if (usingMaterial == null) continue;
-								usingMaterial.Colors.tex = new Vector3D(float.Parse(parts[1]), float.Parse(parts[2]), float.Parse(parts[3]));
+								usingMaterial.Colors.tex = new Vector3(float.Parse(parts[1]), float.Parse(parts[2]), float.Parse(parts[3]));
 								break;
 							case "map_Kd":
 								if (usingMaterial == null) continue;
@@ -121,22 +121,22 @@ namespace EditorCore.Common
 		{
 			public Vertex(float x, float y, float z, float nx , float ny, float nz , float? u = null, float? v = null, float? w = null)
 			{
-				pos = new Vector3D(x, y, z);
-				normal = new Vector3D(nx, ny, nz);
+				pos = new Vector3(x, y, z);
+				normal = new Vector3(nx, ny, nz);
 				if (u == null) tex = null;
-				else tex = new Vector3D(u.Value, v.Value, w.Value);
+				else tex = new Vector3(u.Value, v.Value, w.Value);
 			}
 
-			public Vertex(Vector3D v, Vector3D vn = new Vector3D(), Vector3D? vt = null)
+			public Vertex(Vector3 v, Vector3 vn = new Vector3(), Vector3? vt = null)
 			{
 				pos = v;
 				normal = vn;
 				tex = vt;
 			}
 
-			public Vector3D pos;
-			public Vector3D normal;
-			public Vector3D? tex;
+			public Vector3 pos;
+			public Vector3 normal;
+			public Vector3? tex;
 
 			public bool Equals(Vertex other)
 			{

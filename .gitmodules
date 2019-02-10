@@ -1,0 +1,3 @@
+[submodule "GL_EditorFramework"]
+	path = GL_EditorFramework
+	url = https://github.com/jupahe64/GL_EditorFramework.git

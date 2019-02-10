@@ -34,7 +34,12 @@
     <Reference Include="Octokit, Version=0.31.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Octokit.0.31.0\lib\net45\Octokit.dll</HintPath>
     </Reference>
-    <Reference Include="PresentationCore" />
+    <Reference Include="OpenTK, Version=3.0.1.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenTK.3.0.1\lib\net20\OpenTK.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenTK.GLControl, Version=3.0.1.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenTK.GLControl.3.0.1\lib\net20\OpenTK.GLControl.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
@@ -62,8 +67,14 @@
     <Compile Include="Forms\LoadingForm.Designer.cs">
       <DependentUpon>LoadingForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="GL\Mesh.cs" />
+    <Compile Include="GL\MeshLoader.cs" />
+    <Compile Include="GL\RenderSceneBase.cs" />
+    <Compile Include="GL\CubeMesh.cs" />
+    <Compile Include="GL\RenderScene.cs" />
     <Compile Include="Interfaces\EditorChild.cs" />
     <Compile Include="Interfaces\Extensions.cs" />
+    <Compile Include="Interfaces\GL.cs" />
     <Compile Include="Interfaces\IGameSpecificModule.cs" />
     <Compile Include="Interfaces\ILevel.cs" />
     <Compile Include="Interfaces\ILevelObj.cs" />
@@ -74,6 +85,7 @@
     <Compile Include="UpdateCheck.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="OpenTK.dll.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -83,6 +95,12 @@
     <EmbeddedResource Include="Forms\LoadingForm.resx">
       <DependentUpon>LoadingForm.cs</DependentUpon>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GL_EditorFramework\Gl_EditorFramework\Gl_EditorFramework.csproj">
+      <Project>{d593a72d-554d-40fb-9967-503cb15a744f}</Project>
+      <Name>Gl_EditorFramework</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

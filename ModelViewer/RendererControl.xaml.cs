@@ -21,9 +21,9 @@ namespace ModelViewer
 {
     public class DragArgs
 	{
-		public Vector3D DeltaPos;
-		public Vector3D position;
-        public Vector3D StartPos;
+		public Vector3 DeltaPos;
+		public Vector3 position;
+        public Vector3 StartPos;
 		public dynamic obj;
     }
 
@@ -35,7 +35,7 @@ namespace ModelViewer
         Dictionary<dynamic, ModelVisual3D> Models = new Dictionary<dynamic, ModelVisual3D>(); //Can't use LevelObj because this project is referenced into OdysseyEditor
 		Dictionary<dynamic, ModelVisual3D> Paths = new Dictionary<dynamic, ModelVisual3D>();
 		SortingVisual3D ModelViewer = new SortingVisual3D();
-        Vector3D CameraTarget = new Vector3D(0, 0, 0);
+        Vector3 CameraTarget = new Vector3(0, 0, 0);
 
         readonly Material defaultMaterial = new DiffuseMaterial(new SolidColorBrush(Color.FromArgb(255,120, 120, 120)));
 
@@ -155,7 +155,7 @@ namespace ModelViewer
 			l.Color = Colors.Black;
 		}
 
-		public void AddModel(string path, dynamic obj, Vector3D pos, Vector3D scale, Vector3D rot)
+		public void AddModel(string path, dynamic obj, Vector3 pos, Vector3 scale, Vector3 rot)
         {
             if (HasModel(obj)) return;
             Models.Add(obj,new ModelVisual3D());
@@ -167,14 +167,14 @@ namespace ModelViewer
                 ImportedModels.Add(path, Model);
             }
             else Model = ImportedModels[path];
-            Model.Transform = new RotateTransform3D(new AxisAngleRotation3D(new Vector3D(1, 0, 0), 90));
+            Model.Transform = new RotateTransform3D(new AxisAngleRotation3D(new Vector3(1, 0, 0), 90));
             Models[obj].Content = Model;
 
             Matrix3D m = Matrix3D.Identity;
             m.Scale(scale);
-            m.Rotate(new Quaternion(new Vector3D(1, 0, 0), rot.X));
-            m.Rotate(new Quaternion(new Vector3D(0, 0, 1), rot.Z));
-            m.Rotate(new Quaternion(new Vector3D(0, 1, 0), rot.Y));
+            m.Rotate(new Quaternion(new Vector3(1, 0, 0), rot.X));
+            m.Rotate(new Quaternion(new Vector3(0, 0, 1), rot.Z));
+            m.Rotate(new Quaternion(new Vector3(0, 1, 0), rot.Y));
             m.Translate(pos);
 
             Models[obj].Transform = new MatrixTransform3D(m);
@@ -202,7 +202,7 @@ namespace ModelViewer
             ModelView.UpdateLayout();
         }		
         
-        public void LookAt(Vector3D p)
+        public void LookAt(Vector3 p)
         {
             ModelView.Camera.LookAt(p.ToPoint3D(), 500, 1000);
             CameraTarget = p;
@@ -210,18 +210,18 @@ namespace ModelViewer
 
         public void SetCameraDirection(int x, int y, int z)
         {
-            ModelView.Camera.UpDirection = new Vector3D(x, y, z);
+            ModelView.Camera.UpDirection = new Vector3(x, y, z);
         }
 
-        public Vector3D Drag(DragArgs args, System.Windows.Input.MouseEventArgs e, double roundTo)
+        public Vector3 Drag(DragArgs args, System.Windows.Input.MouseEventArgs e, double roundTo)
         {
             Point p = e.GetPosition(ModelView);
             
-            Vector3D v = args.position;
+            Vector3 v = args.position;
             Point3D? pos = ModelView.Viewport.UnProject(p, new Point3D(v.X,v.Y,v.Z), ModelView.Camera.LookDirection);
             if (pos.HasValue)
             {
-                Vector3D vec = pos.Value.ToVector3D();
+                Vector3 vec = pos.Value.ToVector3();
                 if (roundTo != 0)
                 {
                     vec.X = Math.Round(vec.X / roundTo, 0) * roundTo;
@@ -240,33 +240,33 @@ namespace ModelViewer
                 }
             }
             lastMousePos = p;
-            return pos.Value.ToVector3D();
+            return pos.Value.ToVector3();
         }
 
-        public Vector3D DeltaDrag(DragArgs args, System.Windows.Input.MouseEventArgs e)
+        public Vector3 DeltaDrag(DragArgs args, System.Windows.Input.MouseEventArgs e)
         {
             Point p = e.GetPosition(ModelView);
-            Vector3D v = args.position;
+            Vector3 v = args.position;
             Point3D? lastPos = ModelView.Viewport.UnProject(lastMousePos, new Point3D(v.X, v.Y, v.Z), ModelView.Camera.LookDirection);
             Point3D? pos = ModelView.Viewport.UnProject(p, new Point3D(v.X, v.Y, v.Z), ModelView.Camera.LookDirection);
             if (pos.HasValue)
             {
-                Vector3D vec = pos.Value.ToVector3D() - lastPos.Value.ToVector3D();
+                Vector3 vec = pos.Value.ToVector3() - lastPos.Value.ToVector3();
                 
                 lastMousePos = p;
                 return vec;
             }
             lastMousePos = p;
-            return pos.Value.ToVector3D();
+            return pos.Value.ToVector3();
         }
 
-        public void ChangeTransform(dynamic obj, Vector3D pos, Vector3D scale, Vector3D Rot)
+        public void ChangeTransform(dynamic obj, Vector3 pos, Vector3 scale, Vector3 Rot)
         {
             if (!HasModel(obj)) return;
             Transform3DGroup t = new Transform3DGroup();
-            t.Children.Add(new RotateTransform3D(new AxisAngleRotation3D(new Vector3D(1, 0, 0), Rot.X)));
-            t.Children.Add(new RotateTransform3D(new AxisAngleRotation3D(new Vector3D(0, 1, 0), Rot.Y)));
-            t.Children.Add(new RotateTransform3D(new AxisAngleRotation3D(new Vector3D(0, 0, 1), Rot.Z)));
+            t.Children.Add(new RotateTransform3D(new AxisAngleRotation3D(new Vector3(1, 0, 0), Rot.X)));
+            t.Children.Add(new RotateTransform3D(new AxisAngleRotation3D(new Vector3(0, 1, 0), Rot.Y)));
+            t.Children.Add(new RotateTransform3D(new AxisAngleRotation3D(new Vector3(0, 0, 1), Rot.Z)));
             t.Children.Add(new ScaleTransform3D(scale));
             t.Children.Add(new TranslateTransform3D(pos));
             Models[obj].Transform = t;
@@ -286,7 +286,7 @@ namespace ModelViewer
                 ImportedModels.Add(path, Model);
             }
             else Model = ImportedModels[path];
-            Model.Transform = new RotateTransform3D(new AxisAngleRotation3D(new Vector3D(1, 0, 0), 90));
+            Model.Transform = new RotateTransform3D(new AxisAngleRotation3D(new Vector3(1, 0, 0), 90));
             Models[obj].Content = Model;
             ModelView.UpdateLayout();
         }
@@ -327,12 +327,12 @@ namespace ModelViewer
             return null;
         }
 
-        public Vector3D GetPositionInView()
+        public Vector3 GetPositionInView()
         {
 			var direction = ModelView.Camera.LookDirection;
 			direction.Normalize();
 			direction *= 150;
-			return ModelView.Camera.Position.ToVector3D() + new Vector3D((int)direction.X,(int)direction.Y,(int)direction.Z);
+			return ModelView.Camera.Position.ToVector3() + new Vector3((int)direction.X,(int)direction.Y,(int)direction.Z);
         }		
 
         public void UnloadLevel()
@@ -348,7 +348,7 @@ namespace ModelViewer
             ModelViewer.SortingFrequency = 0.5;
             ModelView.Children.Add(ModelViewer);
             ModelView.Camera.LookAt(new Point3D(0,0,0), 50, 1000);
-            CameraTarget = new Vector3D(0, 0, 0);
+            CameraTarget = new Vector3(0, 0, 0);
         }
 
         Dictionary<dynamic, ModelVisual3D> selectionBoxes = new Dictionary<dynamic, ModelVisual3D>();

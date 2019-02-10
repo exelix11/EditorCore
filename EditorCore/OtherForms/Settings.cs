@@ -1,5 +1,4 @@
-﻿using ModelViewer;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -13,7 +12,7 @@ namespace EditorCore
 {
     public partial class Settings : Form
     {
-		List<RendererControl> renderList = new List<RendererControl>();
+		//List<RendererControl> renderList = new List<RendererControl>();
 
 		public Settings()
 		{
@@ -21,8 +20,8 @@ namespace EditorCore
 
 			foreach (var f in Application.OpenForms)
 			{
-				if (f is EditorForm)
-					renderList.Add(((EditorForm)f).render);
+				//if (f is EditorForm)
+					//renderList.Add(((EditorForm)f).render);
 			}
 
 		}
@@ -62,17 +61,17 @@ namespace EditorCore
 			Properties.Settings.Default.CustomModels = chbCustomModels.Checked;
 			Properties.Settings.Default.Save();
 
-			foreach (var render in renderList)
-			{
-				render.CameraInertiaFactor = (double)CamInertiaUpDown.Value;
-				render.ShowFps = ChbFps.Checked;
-				render.ShowTriangleCount = ChbTriCount.Checked;
-				render.ShowDebugInfo = ChbDebugInfo.Checked;
-				render.CamMode = cbCameraMode.SelectedIndex == 0 ? HelixToolkit.Wpf.CameraMode.Inspect : HelixToolkit.Wpf.CameraMode.WalkAround;
-				render.ZoomSensitivity = (double)ZoomSenUpDown.Value;
-				render.RotationSensitivity = (double)RotSenUpDown.Value;
-				render.FarPlaneDistance = Properties.Settings.Default.FarPlaneDistance;
-			}
+			//foreach (var render in renderList)
+			//{
+			//	render.CameraInertiaFactor = (double)CamInertiaUpDown.Value;
+			//	render.ShowFps = ChbFps.Checked;
+			//	render.ShowTriangleCount = ChbTriCount.Checked;
+			//	render.ShowDebugInfo = ChbDebugInfo.Checked;
+			//	render.CamMode = cbCameraMode.SelectedIndex == 0 ? HelixToolkit.Wpf.CameraMode.Inspect : HelixToolkit.Wpf.CameraMode.WalkAround;
+			//	render.ZoomSensitivity = (double)ZoomSenUpDown.Value;
+			//	render.RotationSensitivity = (double)RotSenUpDown.Value;
+			//	render.FarPlaneDistance = Properties.Settings.Default.FarPlaneDistance;
+			//}
         }
     }
 }

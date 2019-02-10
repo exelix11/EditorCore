@@ -37,6 +37,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OdysseyExt", "..\GamePlugin
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EditorCoreCommon", "EditorCoreCommon\EditorCoreCommon.csproj", "{EE9882D0-F7A7-45E1-971A-1527B7E399F5}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D593A72D-554D-40FB-9967-503CB15A744F} = {D593A72D-554D-40FB-9967-503CB15A744F}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gl_EditorFramework", "GL_EditorFramework\Gl_EditorFramework\Gl_EditorFramework.csproj", "{D593A72D-554D-40FB-9967-503CB15A744F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -84,6 +89,10 @@ Global
 		{EE9882D0-F7A7-45E1-971A-1527B7E399F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EE9882D0-F7A7-45E1-971A-1527B7E399F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EE9882D0-F7A7-45E1-971A-1527B7E399F5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D593A72D-554D-40FB-9967-503CB15A744F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D593A72D-554D-40FB-9967-503CB15A744F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D593A72D-554D-40FB-9967-503CB15A744F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D593A72D-554D-40FB-9967-503CB15A744F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
