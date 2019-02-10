@@ -63,18 +63,12 @@ namespace EditorCore.Drawing
 			glDrawables.Insert(index, item);
 		}
 
-		public override void Draw(GL_ControlModern control)
+		public override void Draw(GL_ControlModern control, Pass pass)
 		{
 			for (int i = 0; i < glDrawables.Count; i++)
-				glDrawables[i].Draw(control);
+				glDrawables[i].Draw(control, pass);
 		}
-
-		public override void DrawPicking(GL_ControlModern control)
-		{
-			for (int i = 0; i < glDrawables.Count; i++)
-				glDrawables[i].DrawPicking(control);
-		}
-
+		
 		public override void Prepare(GL_ControlModern control)
 		{
 			GlControl = control;
@@ -144,7 +138,7 @@ namespace EditorCore.Drawing
 			throw new Exception("Legacy control unsupported");
 		}
 
-		public override void Draw(GL_ControlLegacy control)
+		public override void Draw(GL_ControlLegacy control, Pass pass)
 		{
 			throw new Exception("Legacy control unsupported");
 		}

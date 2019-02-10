@@ -111,8 +111,14 @@ namespace EditorCore.Drawing
 			});
 		}
 		
-		public void Draw(GL_ControlModern control)
+		public void Draw(GL_ControlModern control, Pass pass)
 		{
+			if (pass == Pass.PICKING)
+			{
+				DrawPicking(control);
+				return;
+			}
+
 			GL.LineWidth(2.0f);
 
 			control.CurrentShader = defaultShaderProgram;

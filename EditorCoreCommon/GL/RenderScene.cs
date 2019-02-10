@@ -37,7 +37,7 @@ namespace EditorCore.Drawing
 				if (Selected.Count == 0)
 				{
 					DoSelectObj = true;
-					return REPICK | FORCE_REPICK | NO_CAMERA_ACTION;
+					return REPICK | /*FORCE_REPICK |*/ NO_CAMERA_ACTION;
 				}
 				else
 				{
@@ -99,7 +99,7 @@ namespace EditorCore.Drawing
 			if (e.Button == MouseButtons.Left)
 			{
 				DoSelectObj = true;
-				return REPICK | FORCE_REPICK;
+				return REPICK;//| FORCE_REPICK;
 			}
 			return 0;
 		}

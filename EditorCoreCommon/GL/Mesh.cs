@@ -1,5 +1,6 @@
 ﻿using EditorCore.Interfaces;
 using GL_EditorFramework.GL_Core;
+using GL_EditorFramework.Interfaces;
 using OpenTK;
 using System;
 using System.Collections.Generic;
@@ -16,12 +17,7 @@ namespace EditorCore.Drawing
 		public virtual Vector3 ModelView_Scale { get; set; } = new Vector3(1,1,1);
 		public virtual bool Selected { get; set; } = false;
 
-		public virtual void Draw(GL_ControlModern control)
-		{
-			throw new NotImplementedException();
-		}
-
-		public virtual void DrawPicking(GL_ControlModern control)
+		public virtual void Draw(GL_ControlModern control, Pass pass)
 		{
 			throw new NotImplementedException();
 		}

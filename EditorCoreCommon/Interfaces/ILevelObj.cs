@@ -1,5 +1,6 @@
 ﻿using EditorCoreCommon.Interfaces.GL;
 using GL_EditorFramework.GL_Core;
+using GL_EditorFramework.Interfaces;
 using OpenTK;
 using System;
 using System.Collections.Generic;
@@ -49,7 +50,6 @@ namespace EditorCore.Interfaces
 		bool Selected { get; set; }
 
 		void Prepare(GL_ControlModern control);
-		void Draw(GL_ControlModern control);
-		void DrawPicking(GL_ControlModern control);
+		void Draw(GL_ControlModern control, Pass pass);
 	}
 }
