@@ -8,6 +8,11 @@ namespace ByamlExt.Byaml
 	/// </summary>
 	internal enum ByamlNodeType : byte
 	{
+        /// <summary>
+        /// Represents an empty type. Used to detect path nodes
+        /// </summary>
+        None,
+
 		/// <summary>
 		/// The node represents a <see cref="string"/> (internally referenced by index).
 		/// </summary>
