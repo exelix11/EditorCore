@@ -1,5 +1,4 @@
 ﻿using EditorCore.Interfaces;
-using EditorCoreCommon.Interfaces.GL;
 using GL_EditorFramework;
 using GL_EditorFramework.GL_Core;
 using GL_EditorFramework.Interfaces;
@@ -8,10 +7,6 @@ using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace EditorCore.Drawing
 {

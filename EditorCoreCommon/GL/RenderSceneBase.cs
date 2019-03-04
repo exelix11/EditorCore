@@ -72,7 +72,7 @@ namespace EditorCore.Drawing
 		public override void Prepare(GL_ControlModern control)
 		{
 			GlControl = control;
-			this.Add(new CubeMeshObjForTesting());
+			this.Add(new SimpleMeshForTesting(@"BlockQuestion.obj"));
 			this.Add(new CubeMeshObjForTesting() { ModelView_Pos = new Vector3(1, 1, 1), ModelView_Scale = new Vector3(1, 1, 1) });
 		}
 
