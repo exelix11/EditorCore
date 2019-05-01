@@ -58,7 +58,7 @@ namespace KCLExt
 			//	return;
 			//}
 			var f = MarioKart.MK7.KCL.FromOBJ(mod);
-			File.WriteAllBytes(opn.FileName + ".kcl", f.Write(Syroot.BinaryData.ByteOrder.LittleEndian));
+			File.WriteAllBytes(opn.FileName + ".kcl", f.Write(Syroot.BinaryData.ByteOrder.BigEndian));
 		}
 
 		private void KCLToObj(object sender, EventArgs e)

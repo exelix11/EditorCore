@@ -16,8 +16,8 @@ namespace MarioKart.MK7
 		KCLModel.KCLModelHeader GlobalHeader;
 		List<KCLModel> Models = new List<KCLModel>();
 
-		internal static readonly Vector3D MinOffset = new Vector3D(50, 80, 50);
-		internal static readonly Vector3D MaxOffset = new Vector3D(50, 50, 50);
+		internal static readonly Vector3D MinOffset = new Vector3D(60,60,60);
+		internal static readonly Vector3D MaxOffset = new Vector3D(60,60,60);
 
 		public KCL() { }
 
@@ -256,13 +256,15 @@ namespace MarioKart.MK7
 			res.GlobalHeader.ZShift = (uint)KCLOctree.next_exponent(size.Z);
 
 			var BoxSize = size / 2f;
+			var BoxPadding = BoxSize / 10;
+
 			uint baseTriCount = 0;
 			for (int k = 0; k < 2; k++)
 				for (int l = 0; l < 2; l++)
 					for (int m = 0; m < 2; m++)
 					{
-						var Boxmin = min + new Vector3D(BoxSize.X * m, BoxSize.Y * l, BoxSize.Z * k);
-						var mod = KCLModel.FromTriangles(Triangles, baseTriCount, Boxmin, BoxSize/2);
+						var Boxmin = min + new Vector3D(BoxSize.X * m, BoxSize.Y * l, BoxSize.Z * k) - BoxPadding / 2;
+						var mod = KCLModel.FromTriangles(Triangles, baseTriCount, Boxmin, BoxSize/2 + BoxPadding);
 						res.Models.Add(mod);
 						if (mod != null) baseTriCount += (uint)mod.Planes.Length;
 					}

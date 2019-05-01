@@ -66,7 +66,7 @@ namespace ByamlExt
 			ByamlViewer.OpenByml(file,filename);
 		
 		public void OpenFileEdit(string filename, Stream file, Stream saveStream)=>
-			ByamlViewer.OpenByml(file, filename, null, saveStream,true);
+			ByamlViewer.OpenByml(file, filename, saveStream, true);
 		
 	}
 
