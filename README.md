@@ -21,8 +21,9 @@ BfresLib,BnTxx,ByamlExt and SarcExt can be reused for other Switch games as they
   
 ## Screenshots
 
-![MK8Level](http://i66.tinypic.com/m8h2lc.jpg)
-![OdysseyLevel](http://i64.tinypic.com/24fy9a0.jpg)
+![MK8Level](.github/ScreenshotMK.png)
+
+![OdysseyLevel](.github/ScreenshotOdyssey.png)
 
 ## Controls
 There are two camera modes, choose the one you like from the settings.
